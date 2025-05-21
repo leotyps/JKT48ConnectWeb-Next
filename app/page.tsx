@@ -13,6 +13,7 @@ import { GithubIcon } from "@/components/icons";
 import JKT48News from "@/components/JKT48News";
 import JKT48Birthday from "@/components/JKT48Birthday";
 import JKT48TheaterCard from "@/components/JKT48TheaterCard";
+import JKT48Theater from "@/components/JKT48Theater";
 
 const sliderImages = [
   "https://res.cloudinary.com/dlx2zm7ha/image/upload/v1737093681/mb5qsuezkp9gbfvicvig.webp",
@@ -94,6 +95,7 @@ export default function Home() {
 
       <JKT48News />
       <JKT48Birthday />
+      <JKT48Theater />
     </section>
   );
 }
