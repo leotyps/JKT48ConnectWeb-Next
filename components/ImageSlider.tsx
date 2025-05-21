@@ -36,7 +36,9 @@ export default function ImageSlider() {
     animationId = requestAnimationFrame(animate);
     
     return () => {
-      cancelAnimationFrame(animationId);
+      if (animationId !== undefined) {
+        cancelAnimationFrame(animationId);
+      }
     };
   }, []);
   
