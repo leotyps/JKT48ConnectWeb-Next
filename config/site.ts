@@ -1,7 +1,7 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Next.js + HeroUI",
+  name: "JKT48Connect - Valzyy",
   description: "Make beautiful websites regardless of your design experience.",
   navItems: [
     {
@@ -60,10 +60,10 @@ export const siteConfig = {
     },
   ],
   links: {
-    github: "https://github.com/heroui-inc/heroui",
-    twitter: "https://twitter.com/hero_ui",
-    docs: "https://heroui.com",
-    discord: "https://discord.gg/9b6yyZKmH4",
+    github: "https://github.com/j-forces",
+    twitter: "https://twitter.com/valzyys",
+    docs: "https://docs.jkt48connect.my.id",
+    discord: "https://discord.gg/pFsSeYa9CN",
     sponsor: "https://patreon.com/jrgarciadev",
   },
 };
