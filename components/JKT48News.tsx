@@ -80,7 +80,7 @@ export default function JKT48News() {
                 height={40}
                 radius="sm"
                 src={`https://jkt48.com${item.label}`}
-                width={40}
+                width={55}
               />
               <div className="flex flex-col">
                 <p className="text-md">JKT48 News</p>
