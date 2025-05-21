@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { Image } from "@heroui/react";
 
 const images = [
-  "https://placehold.co/600x400/purple/white?text=JKT48+Image+1",
-  "https://placehold.co/600x400/indigo/white?text=JKT48+Image+2",
-  "https://placehold.co/600x400/violet/white?text=JKT48+Image+3",
-  "https://placehold.co/600x400/fuchsia/white?text=JKT48+Image+4",
-  "https://placehold.co/600x400/pink/white?text=JKT48+Image+5"
+  "https://res.cloudinary.com/dlx2zm7ha/image/upload/v1737093681/mb5qsuezkp9gbfvicvig.webp",
+  "https://jkt48.com/images/banner.fanclub2021-id.jpg",
+  "https://jkt48.com/images/banner.home.tokopedia.jpg",
+  "https://jkt48.com/images/banner.home.valkyrie48_2023.jpg?v=2",
+  "https://jkt48.com/images/banner.home.jkt48v.jpg"
 ];
 
 export default function ImageSlider() {
