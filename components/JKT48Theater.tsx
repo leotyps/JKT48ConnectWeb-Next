@@ -120,12 +120,11 @@ export default function JKT48TheaterShows() {
                 className="border-none h-64" 
                 radius="lg"
               >
-                <div className="absolute top-2 right-2 z-20">
+                <div className="absolute top-2 right-2 z-20 w-40 h-25">
                   <Badge 
                     color={showStatus.color as any} 
-                    variant="solid"
-                    className="px-4 py-2 text-sm font-bold backdrop-blur-md border border-white/30 shadow-md"
-                    size="lg"
+                    variant="flat"
+                    className="bg-opacity-60 backdrop-blur-md border border-white/20"
                   >
                     {showStatus.status}
                   </Badge>
