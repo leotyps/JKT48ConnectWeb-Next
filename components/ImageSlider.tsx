@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Image } from "@heroui/react";
 
 const images = [
@@ -12,45 +12,54 @@ const images = [
 ];
 
 export default function ImageSlider() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
+  const [position, setPosition] = useState(0);
+  const sliderRef = useRef(null);
+  
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 3000); // Change image every 3 seconds
-
-    return () => clearInterval(interval);
+    const speed = 1; // Adjust speed (pixels per frame)
+    let animationId;
+    
+    const animate = () => {
+      setPosition(prevPosition => {
+        const newPosition = prevPosition + speed;
+        
+        // Reset position when all images have passed
+        if (newPosition >= images.length * 100) {
+          return 0;
+        }
+        return newPosition;
+      });
+      
+      animationId = requestAnimationFrame(animate);
+    };
+    
+    animationId = requestAnimationFrame(animate);
+    
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
   }, []);
-
+  
   return (
-    <div className="w-full max-w-3xl overflow-hidden relative h-[400px]">
+    <div className="w-full max-w-xl overflow-hidden relative h-36">
       <div 
-        className="flex transition-transform duration-500 ease-in-out h-full"
-        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        ref={sliderRef}
+        className="flex h-full"
+        style={{ 
+          transform: `translateX(-${position % (images.length * 100) / images.length}%)`,
+          transition: position === 0 ? 'none' : 'transform 100ms linear'
+        }}
       >
-        {images.map((src, index) => (
+        {/* Duplicate images to create continuous effect */}
+        {[...images, ...images].map((src, index) => (
           <div key={index} className="min-w-full h-full flex-shrink-0">
             <Image
               isBlurred
-              alt={`Slide image ${index + 1}`}
+              alt={`Slide image ${index % images.length + 1}`}
               className="w-full h-full object-cover"
               src={src}
-              radius="sm"
             />
           </div>
-        ))}
-      </div>
-      
-      {/* Dots indicator */}
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-        {images.map((_, index) => (
-          <button
-            key={index}
-            className={`w-2 h-2 rounded-full ${
-              currentIndex === index ? "bg-white" : "bg-white/50"
-            }`}
-            onClick={() => setCurrentIndex(index)}
-          />
         ))}
       </div>
     </div>
