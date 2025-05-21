@@ -71,6 +71,7 @@ export default function JKT48News() {
 
   return (
     <div className="mt-8 w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+      <h2 className="text-2xl font-bold mb-4">Hot News</h2>
       {loading ? (
         renderSkeletons()
       ) : (
