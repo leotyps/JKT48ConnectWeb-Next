@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { Card, CardHeader, CardBody, CardFooter, Divider, Image, Link } from "@heroui/react";
+import { Card, CardHeader, CardBody, CardFooter, Divider, Image, Link, Skeleton } from "@heroui/react";
 
 interface NewsItem {
   id: string;
@@ -31,10 +31,46 @@ export default function JKT48News() {
     fetchNews();
   }, []);
 
+  const renderSkeletons = () => {
+    return Array(6).fill(0).map((_, index) => (
+      <Card key={`skeleton-${index}`} className="max-w-[400px] space-y-5 p-4">
+        <div className="flex gap-3">
+          <Skeleton className="rounded-lg">
+            <div className="h-10 w-10 rounded-lg bg-default-300" />
+          </Skeleton>
+          <div className="space-y-2 flex-1">
+            <Skeleton className="w-3/5 rounded-lg">
+              <div className="h-3 rounded-lg bg-default-200" />
+            </Skeleton>
+            <Skeleton className="w-2/5 rounded-lg">
+              <div className="h-3 rounded-lg bg-default-200" />
+            </Skeleton>
+          </div>
+        </div>
+        <Divider />
+        <div className="space-y-3">
+          <Skeleton className="w-4/5 rounded-lg">
+            <div className="h-3 rounded-lg bg-default-200" />
+          </Skeleton>
+          <Skeleton className="w-full rounded-lg">
+            <div className="h-3 rounded-lg bg-default-200" />
+          </Skeleton>
+          <Skeleton className="w-3/5 rounded-lg">
+            <div className="h-3 rounded-lg bg-default-200" />
+          </Skeleton>
+        </div>
+        <Divider />
+        <Skeleton className="w-2/5 rounded-lg">
+          <div className="h-3 rounded-lg bg-default-300" />
+        </Skeleton>
+      </Card>
+    ));
+  };
+
   return (
     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {loading ? (
-        <p>Loading JKT48 news...</p>
+        renderSkeletons()
       ) : (
         newsData.map((item) => (
           <Card key={item.id} className="max-w-[400px]">
