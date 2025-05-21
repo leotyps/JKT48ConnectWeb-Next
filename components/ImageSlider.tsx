@@ -6,6 +6,7 @@ import { Image } from "@heroui/react";
 const images = [
   "https://res.cloudinary.com/dlx2zm7ha/image/upload/v1737093681/mb5qsuezkp9gbfvicvig.webp",
   "https://jkt48.com/images/banner.fanclub2021-id.jpg",
+  "https://files.catbox.moe/8yo46k.jpg",
   "https://jkt48.com/images/banner.home.tokopedia.jpg",
   "https://jkt48.com/images/banner.home.valkyrie48_2023.jpg?v=2",
   "https://jkt48.com/images/banner.home.jkt48v.jpg"
