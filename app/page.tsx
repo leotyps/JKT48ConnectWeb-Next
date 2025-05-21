@@ -40,7 +40,7 @@ export default function Home() {
         <span className={title({ color: "violet" })}>JKT48&nbsp;</span>
         <br />
         <span className={title()}>
-          project.
+          project with easy API access and cool dev tools.
         </span>
         <div className={subtitle({ class: "mt-4" })}>
           Use JKT48Connect’s API and tools to build something fun.
