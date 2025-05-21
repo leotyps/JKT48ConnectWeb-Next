@@ -30,16 +30,16 @@ export default function JKT48TheaterShows() {
       try {
         const jkt48Api = require('@jkt48/core');
         const apiKey = 'JKTCONNECT';
-        const response = await jkt48Api.theater(apiKey);
+        const response: TheaterResponse = await jkt48Api.theater(apiKey);
         
         // Filter out past shows and sort by date (closest first)
         const currentDate = new Date();
-        const futureShows = response.theater.filter(show => {
+        const futureShows = response.theater.filter((show: TheaterShow) => {
           const showDate = new Date(show.date);
           return showDate >= currentDate;
         });
         
-        const sortedShows = [...futureShows].sort((a, b) => {
+        const sortedShows = [...futureShows].sort((a: TheaterShow, b: TheaterShow) => {
           const dateA = new Date(a.date).getTime();
           const dateB = new Date(b.date).getTime();
           return dateA - dateB;
