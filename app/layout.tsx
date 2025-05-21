@@ -48,15 +48,22 @@ export default function RootLayout({
               {children}
             </main>
             <footer className="w-full flex items-center justify-center py-3">
-              <Link
-                isExternal
-                className="flex items-center gap-1 text-current"
-                href="https://heroui.com?utm_source=next-app-template"
-                title="heroui.com homepage"
-              >
-                <span className="text-default-600">Powered by</span>
-                <p className="text-primary">HeroUI</p>
-              </Link>
+              <div className="flex flex-col items-center gap-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-default-600">JKT48Connect</span>
+                  <span className="text-primary font-semibold">©2025</span>
+                </div>
+                <div className="text-xs text-default-500">
+                  Created with 💖 by{" "}
+                  <Link 
+                    isExternal 
+                    className="text-primary hover:underline" 
+                    href="https://github.com/j-forces"
+                  >
+                    Valzyy
+                  </Link>
+                </div>
+              </div>
             </footer>
           </div>
         </Providers>
