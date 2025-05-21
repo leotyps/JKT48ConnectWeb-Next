@@ -32,8 +32,18 @@ export default function JKT48TheaterShows() {
         const apiKey = 'JKTCONNECT';
         const response = await jkt48Api.theater(apiKey);
         
-        // Sort theater shows by date (nearest first)
-        const sortedShows = [...response.theater].sort((a: TheaterShow, b: TheaterShow) => {
+        // Get current date at the start of the day (midnight)
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+        
+        // Filter shows that haven't happened yet
+        const upcomingShows = response.theater.filter((show: TheaterShow) => {
+          const showDate = new Date(show.date);
+          return showDate >= currentDate;
+        });
+        
+        // Sort upcoming shows by date (nearest first)
+        const sortedShows = [...upcomingShows].sort((a: TheaterShow, b: TheaterShow) => {
           const dateA = new Date(a.date).getTime();
           const dateB = new Date(b.date).getTime();
           return dateA - dateB;
@@ -109,7 +119,7 @@ export default function JKT48TheaterShows() {
       <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         {loading ? (
           renderSkeletons()
-        ) : (
+        ) : theaterData.length > 0 ? (
           theaterData.map((show) => {
             const showStatus = getShowStatus(show.date);
             
@@ -127,11 +137,11 @@ export default function JKT48TheaterShows() {
                 />
                 <CardFooter className="justify-between before:bg-black/60 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
                   <div className="flex flex-col">
-                    <p className="text-tiny font-bold">{show.title}</p>
-                    <p className="text-tiny">{formatShowDate(show.date)}</p>
+                    <p className="text-tiny font-bold text-white">{show.title}</p>
+                    <p className="text-tiny text-white/70">{formatShowDate(show.date)}</p>
                   </div>
                   <Button
-                    className="text-tiny"
+                    className="text-tiny text-white"
                     color="primary"
                     radius="lg"
                     size="sm"
@@ -146,6 +156,10 @@ export default function JKT48TheaterShows() {
               </Card>
             );
           })
+        ) : (
+          <div className="col-span-3 text-center py-8">
+            <p className="text-lg">No upcoming theater shows available at the moment</p>
+          </div>
         )}
       </div>
     </div>
