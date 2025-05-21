@@ -12,6 +12,7 @@ import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
 import JKT48News from "@/components/JKT48News";
 import JKT48Birthday from "@/components/JKT48Birthday";
+import JKT48TheaterCard from "@/components/JKT48TheaterCard";
 
 const sliderImages = [
   "https://res.cloudinary.com/dlx2zm7ha/image/upload/v1737093681/mb5qsuezkp9gbfvicvig.webp",
@@ -89,13 +90,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="mt-8">
-        <Snippet hideCopyButton hideSymbol variant="bordered">
-          <span>
-            Get started by editing <Code color="primary">app/page.tsx</Code>
-          </span>
-        </Snippet>
-      </div>
+      <JKT48TheaterCard />
 
       <JKT48News />
       <JKT48Birthday />
