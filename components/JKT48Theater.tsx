@@ -136,23 +136,23 @@ export default function JKT48TheaterShows() {
                   src={show.banner}
                 />
                 <CardFooter className="justify-between before:bg-black/60 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
-                  <div className="flex flex-col">
-                    <p className="text-tiny font-bold">{show.title}</p>
-                    <p className="text-tiny">{formatShowDate(show.date)}</p>
-                  </div>
-                  <Button
-                    className="text-tiny"
-                    color="primary"
-                    radius="lg"
-                    size="sm"
-                    variant="flat"
-                    as="a" 
-                    href={`https://jkt48.com/theater/schedule/id/${show.url}?lang=id`}
-                    target="_blank"
-                  >
-                    Details
-                  </Button>
-                </CardFooter>
+  <div className="flex flex-col">
+    <p className="text-base font-bold">{show.title}</p>
+    <p className="text-base">{formatShowDate(show.date)}</p>
+  </div>
+  <Button
+    className="text-base"
+    color="primary"
+    radius="lg"
+    size="sm"
+    variant="flat"
+    as="a" 
+    href={`https://jkt48.com/theater/schedule/id/${show.url}?lang=id`}
+    target="_blank"
+  >
+    Details
+  </Button>
+</CardFooter>
               </Card>
             );
           })
