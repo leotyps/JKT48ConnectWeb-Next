@@ -17,7 +17,7 @@ export default function ImageSlider() {
   
   useEffect(() => {
     const speed = 1; // Adjust speed (pixels per frame)
-    let animationId;
+    let animationId: number | undefined;
     
     const animate = () => {
       setPosition(prevPosition => {
