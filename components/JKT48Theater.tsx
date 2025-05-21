@@ -117,7 +117,7 @@ export default function JKT48TheaterShows() {
               <Card 
                 key={show.id} 
                 isFooterBlurred 
-                className="border-none h-64" 
+                className="relative border-none h-64" 
                 radius="lg"
               >
                 <div className="absolute top-2 right-2 z-20">
