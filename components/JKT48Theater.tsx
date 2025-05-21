@@ -31,7 +31,15 @@ export default function JKT48TheaterShows() {
         const jkt48Api = require('@jkt48/core');
         const apiKey = 'JKTCONNECT';
         const response = await jkt48Api.theater(apiKey);
-        setTheaterData(response.theater.slice(0, 5)); // Show up to 9 upcoming shows
+        
+        // Sort theater shows by date (nearest first)
+        const sortedShows = [...response.theater].sort((a: TheaterShow, b: TheaterShow) => {
+          const dateA = new Date(a.date).getTime();
+          const dateB = new Date(b.date).getTime();
+          return dateA - dateB;
+        });
+        
+        setTheaterData(sortedShows.slice(0, 5)); // Show up to 5 upcoming shows
       } catch (error) {
         console.error("Error fetching theater shows:", error);
       } finally {
@@ -112,7 +120,6 @@ export default function JKT48TheaterShows() {
                 className="border-none h-64" 
                 radius="lg"
               >
-                
                 <Image
                   alt={`${show.title} show banner`}
                   className="object-cover w-full h-full z-0"
