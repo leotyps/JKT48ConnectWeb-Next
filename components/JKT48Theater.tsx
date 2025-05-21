@@ -31,7 +31,7 @@ export default function JKT48TheaterShows() {
         const jkt48Api = require('@jkt48/core');
         const apiKey = 'JKTCONNECT';
         const response = await jkt48Api.theater(apiKey);
-        setTheaterData(response.theater.slice(0, 5)); // Show up to 5 upcoming shows
+        setTheaterData(response.theater.slice(0, 5)); // Show up to 9 upcoming shows
       } catch (error) {
         console.error("Error fetching theater shows:", error);
       } finally {
@@ -112,17 +112,13 @@ export default function JKT48TheaterShows() {
                 className="border-none h-64" 
                 radius="lg"
               >
+                
                 <Image
                   alt={`${show.title} show banner`}
                   className="object-cover w-full h-full z-0"
                   src={show.banner}
                 />
-                <CardFooter 
-                  className="justify-between overflow-hidden py-1 absolute rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10"
-                  style={{
-                    backgroundColor: "rgba(0, 0, 0, 0.6)"
-                  }}
-                >
+                <CardFooter className="justify-between before:bg-black/60 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
                   <div className="flex flex-col">
                     <p className="text-tiny font-bold">{show.title}</p>
                     <p className="text-tiny">{formatShowDate(show.date)}</p>
