@@ -32,11 +32,10 @@ export default function ImageSlider() {
           <div key={index} className="min-w-full h-full flex-shrink-0">
             <Image
               isBlurred
-              isZoomed
               alt={`Slide image ${index + 1}`}
               className="w-full h-full object-cover"
               src={src}
-              radius="lg"
+              radius="sm"
             />
           </div>
         ))}
