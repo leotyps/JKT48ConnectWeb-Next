@@ -20,7 +20,6 @@ export default function JKT48News() {
         const jkt48Api = require('@jkt48/core');
         const apiKey = 'JKTCONNECT';
         const news = await jkt48Api.news(apiKey);
-        // Limit to only 4 news items
         setNewsData(news.news.slice(0, 4));
       } catch (error) {
         console.error("Error fetching news:", error);
@@ -33,9 +32,8 @@ export default function JKT48News() {
   }, []);
 
   const renderSkeletons = () => {
-    // Only render 4 skeleton cards
     return Array(4).fill(0).map((_, index) => (
-      <Card key={`skeleton-${index}`} className="max-w-[400px] w-full h-[250px] flex flex-col">
+      <Card key={`skeleton-${index}`} className="w-full h-[250px] flex flex-col">
         <div className="p-4 flex gap-3">
           <Skeleton className="rounded-lg">
             <div className="h-12 w-12 rounded-lg bg-default-300" />
@@ -72,16 +70,16 @@ export default function JKT48News() {
   };
 
   return (
-    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="mt-8 w-full grid grid-cols-1 md:grid-cols-2 gap-4">
       {loading ? (
         renderSkeletons()
       ) : (
         newsData.map((item) => (
-          <Card key={item.id} className="max-w-[400px] w-full">
+          <Card key={item.id} className="w-full">
             <CardHeader className="flex gap-3">
               <Image
                 alt="JKT48 News Category"
-                height={27}
+                height={25}
                 radius="sm"
                 src={`https://jkt48.com${item.label}`}
                 width={55}
