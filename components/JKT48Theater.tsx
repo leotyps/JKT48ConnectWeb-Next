@@ -137,11 +137,11 @@ export default function JKT48TheaterShows() {
                 />
                 <CardFooter className="justify-between before:bg-black/60 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
                   <div className="flex flex-col">
-                    <p className="text-tiny font-bold text-white">{show.title}</p>
-                    <p className="text-tiny text-white/70">{formatShowDate(show.date)}</p>
+                    <p className="text-tiny font-bold">{show.title}</p>
+                    <p className="text-tiny">{formatShowDate(show.date)}</p>
                   </div>
                   <Button
-                    className="text-tiny text-white"
+                    className="text-tiny"
                     color="primary"
                     radius="lg"
                     size="sm"
