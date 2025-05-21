@@ -99,9 +99,9 @@ export default function JKT48TheaterShows() {
 
   const renderSkeletons = () => {
     return Array(6).fill(0).map((_, index) => (
-      <div key={`skeleton-${index}`} className="w-full">
-        <Skeleton className="rounded-lg">
-          <div className="h-64 rounded-lg bg-default-300" />
+      <div key={`skeleton-${index}`} className="w-full h-64">
+        <Skeleton className="rounded-lg h-full">
+          <div className="h-full w-full rounded-lg bg-default-300" />
         </Skeleton>
       </div>
     ));
@@ -124,8 +124,8 @@ export default function JKT48TheaterShows() {
                 className="border-none h-64 relative" 
                 radius="lg"
               >
-                {/* Status indicator as a ribbon instead of badge */}
-                <div className={`absolute top-0 right-0 z-20 ${showStatus.colorClass} text-white py-1 px-3 rounded-bl-lg text-sm font-medium shadow-md`}>
+                {/* Status indicator with blur effect */}
+                <div className={`absolute top-0 right-0 z-20 ${showStatus.colorClass} text-white py-1 px-3 rounded-bl-lg text-sm font-medium backdrop-blur-md bg-opacity-70`}>
                   {showStatus.status}
                 </div>
                 
