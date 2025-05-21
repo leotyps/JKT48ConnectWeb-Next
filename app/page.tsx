@@ -78,11 +78,9 @@ export default function Home() {
               }`}
             >
               <Image
-                isBlurred
                 alt={`Slide image ${index + 1}`}
                 className="w-full h-full object-contain"
                 src={src}
-                radius="none"
               />
             </div>
           ))}
