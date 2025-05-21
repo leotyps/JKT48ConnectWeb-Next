@@ -7,6 +7,7 @@ import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
 import JKT48News from "@/components/JKT48News";
+import ImageSlider from "@/components/ImageSlider";
 
 export default function Home() {
   return (
@@ -43,6 +44,11 @@ export default function Home() {
           <GithubIcon size={20} />
           GitHub
         </Link>
+      </div>
+
+      {/* Image Slider */}
+      <div className="w-full max-w-4xl mt-8">
+        <ImageSlider />
       </div>
 
       <div className="mt-8">
