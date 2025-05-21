@@ -121,13 +121,13 @@ export default function JKT48TheaterShows() {
                 radius="lg"
               >
                 <div className="absolute top-2 right-2 z-20">
-                  <Badge   
-  color={showStatus.color as any}   
-  variant="flat"  
-  className="bg-opacity-60 backdrop-blur-md border border-white/20 px-3 py-1 text-sm rounded-lg"
->  
-  {showStatus.status}  
-</Badge>
+                    <Badge
+    color={showStatus.color as any}
+    variant="flat"
+    className="absolute top-2 right-2 bg-opacity-60 backdrop-blur-md border border-white/20 text-white text-xs font-medium px-3 py-1 rounded-full shadow-sm"
+  >
+    {showStatus.status}
+  </Badge>
                 </div>
                 <Image
                   alt={`${show.title} show banner`}
