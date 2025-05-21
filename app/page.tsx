@@ -11,6 +11,7 @@ import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
 import JKT48News from "@/components/JKT48News";
+import JKT48Birthday from "@/components/JKT48Birthday";
 
 const sliderImages = [
   "https://res.cloudinary.com/dlx2zm7ha/image/upload/v1737093681/mb5qsuezkp9gbfvicvig.webp",
@@ -78,6 +79,7 @@ export default function Home() {
               }`}
             >
               <Image
+                
                 alt={`Slide image ${index + 1}`}
                 className="w-full h-full object-contain"
                 src={src}
@@ -96,6 +98,7 @@ export default function Home() {
       </div>
 
       <JKT48News />
+      <JKT48Birthday />
     </section>
   );
 }
