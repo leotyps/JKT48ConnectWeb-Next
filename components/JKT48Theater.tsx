@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { Card, CardFooter, Image, Button, Skeleton, Badge } from "@heroui/react";
+import { Card, CardFooter, Image, Button, Skeleton } from "@heroui/react";
 
 interface TheaterShow {
   id: string;
@@ -32,8 +32,14 @@ export default function JKT48TheaterShows() {
         const apiKey = 'JKTCONNECT';
         const response = await jkt48Api.theater(apiKey);
         
-        // Sort shows by date (closest first)
-        const sortedShows = [...response.theater].sort((a, b) => {
+        // Filter out past shows and sort by date (closest first)
+        const currentDate = new Date();
+        const futureShows = response.theater.filter(show => {
+          const showDate = new Date(show.date);
+          return showDate >= currentDate;
+        });
+        
+        const sortedShows = [...futureShows].sort((a, b) => {
           const dateA = new Date(a.date).getTime();
           const dateB = new Date(b.date).getTime();
           return dateA - dateB;
@@ -50,7 +56,7 @@ export default function JKT48TheaterShows() {
     fetchTheaterShows();
   }, []);
 
-  // Function to determine show status based on date
+  // Function to get show status label and color class
   const getShowStatus = (showDate: string) => {
     const now = new Date();
     const showDateTime = new Date(showDate);
@@ -64,20 +70,18 @@ export default function JKT48TheaterShows() {
       now.getMonth() === showDateTime.getMonth() &&
       now.getFullYear() === showDateTime.getFullYear();
     
-    if (diffTime < 0) {
-      return { status: "Completed", color: "default" };
-    } else if (isSameDay) {
+    if (isSameDay) {
       if (diffHours <= 3 && diffHours > 0) {
-        return { status: "Akan Berlangsung", color: "warning" };
+        return { status: "Akan Berlangsung", colorClass: "bg-yellow-500" };
       } else if (diffHours <= 0) {
-        return { status: "Berlangsung", color: "success" };
+        return { status: "Berlangsung", colorClass: "bg-green-500" };
       } else {
-        return { status: "Hari Ini", color: "primary" };
+        return { status: "Hari Ini", colorClass: "bg-blue-500" };
       }
     } else if (diffDays <= 1) {
-      return { status: "Besok", color: "secondary" };
+      return { status: "Besok", colorClass: "bg-purple-500" };
     } else {
-      return { status: "Upcoming", color: "default" };
+      return { status: "Upcoming", colorClass: "bg-gray-500" };
     }
   };
 
@@ -85,7 +89,7 @@ export default function JKT48TheaterShows() {
   const formatShowDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('id-ID', { 
-      weekday: 'long',
+      weekday: 'long', 
       day: 'numeric', 
       month: 'long',
       hour: '2-digit',
@@ -117,18 +121,14 @@ export default function JKT48TheaterShows() {
               <Card 
                 key={show.id} 
                 isFooterBlurred 
-                className="relative border-none h-64" 
+                className="border-none h-64 relative" 
                 radius="lg"
               >
-                <div className="absolute top-2 right-2 z-20">
-                    <Badge
-  color={showStatus.color as any}
-  variant="flat"
-  className="bg-opacity-60 backdrop-blur-md border border-white/20 text-white text-xs font-medium px-3 py-1 rounded-full shadow-sm"
->
-  {showStatus.status}
-</Badge>
+                {/* Status indicator as a ribbon instead of badge */}
+                <div className={`absolute top-0 right-0 z-20 ${showStatus.colorClass} text-white py-1 px-3 rounded-bl-lg text-sm font-medium shadow-md`}>
+                  {showStatus.status}
                 </div>
+                
                 <Image
                   alt={`${show.title} show banner`}
                   className="object-cover w-full h-full z-0"
