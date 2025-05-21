@@ -124,11 +124,11 @@ export default function JKT48TheaterShows() {
                   }}
                 >
                   <div className="flex flex-col">
-                    <p className="text-tiny text-white font-bold">{show.title}</p>
-                    <p className="text-tiny text-white/70">{formatShowDate(show.date)}</p>
+                    <p className="text-tiny font-bold">{show.title}</p>
+                    <p className="text-tiny">{formatShowDate(show.date)}</p>
                   </div>
                   <Button
-                    className="text-tiny text-white"
+                    className="text-tiny"
                     color="primary"
                     radius="lg"
                     size="sm"
