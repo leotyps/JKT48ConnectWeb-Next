@@ -117,13 +117,18 @@ export default function JKT48TheaterShows() {
                   className="object-cover w-full h-full z-0"
                   src={show.banner}
                 />
-                <CardFooter className="justify-between before:bg-black/60 dark:before:bg-white/20 border-white/20 dark:border-black/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
+                <CardFooter 
+                  className="justify-between overflow-hidden py-1 absolute rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10"
+                  style={{
+                    backgroundColor: "rgba(0, 0, 0, 0.6)"
+                  }}
+                >
                   <div className="flex flex-col">
-                    <p className="text-tiny text-foreground font-bold">{show.title}</p>
-                    <p className="text-tiny text-foreground/70">{formatShowDate(show.date)}</p>
+                    <p className="text-tiny text-white font-bold">{show.title}</p>
+                    <p className="text-tiny text-white/70">{formatShowDate(show.date)}</p>
                   </div>
                   <Button
-                    className="text-tiny bg-black/20 dark:bg-white/20"
+                    className="text-tiny text-white"
                     color="primary"
                     radius="lg"
                     size="sm"
