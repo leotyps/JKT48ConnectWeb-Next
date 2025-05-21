@@ -82,7 +82,7 @@ export default function Home() {
                 alt={`Slide image ${index + 1}`}
                 className="w-full h-full object-contain"
                 src={src}
-                width={240}
+                radius="none"
               />
             </div>
           ))}
