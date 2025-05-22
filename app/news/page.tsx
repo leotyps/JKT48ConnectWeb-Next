@@ -33,7 +33,6 @@ export default function JKT48News() {
 
   const renderSkeletons = () => {
     return Array(10).fill(0).map((_, index) => (
-     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <Card key={`skeleton-${index}`} className="w-full h-[250px] flex flex-col">
         <div className="p-4 flex gap-3">
           <Skeleton className="rounded-lg">
@@ -71,7 +70,8 @@ export default function JKT48News() {
   };
 
   return (
-    <div className="w-full">
+   <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
+      <div className="w-full">
       {/* Breadcrumbs */}
       <Breadcrumbs className="mb-6">
         <BreadcrumbItem href="/">Home</BreadcrumbItem>
