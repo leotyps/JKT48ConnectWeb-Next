@@ -52,7 +52,7 @@ export default function JKT48Schedule() {
           return dateA - dateB;
         });
         
-        setTheaterData(sortedShows.slice(0, 6)); // Show up to 6 upcoming shows
+        setTheaterData(sortedShows.slice(0, 8)); // Show up to 8 upcoming shows
         
         // Fetch events
         const events = await jkt48Api.events(apiKey);
@@ -70,7 +70,7 @@ export default function JKT48Schedule() {
           return dateA - dateB;
         });
         
-        setEventsData(sortedEvents.slice(0, 6)); // Show up to 6 upcoming events
+        setEventsData(sortedEvents.slice(0, 8)); // Show up to 8 upcoming events
         
       } catch (error) {
         console.error("Error fetching schedule data:", error);
@@ -95,7 +95,7 @@ export default function JKT48Schedule() {
   };
 
   const renderTheaterSkeletons = () => {
-    return Array(6).fill(0).map((_, index) => (
+    return Array(8).fill(0).map((_, index) => (
       <div key={`theater-skeleton-${index}`} className="w-full">
         <Skeleton className="rounded-lg">
           <div className="h-64 rounded-lg bg-default-300" />
@@ -105,7 +105,7 @@ export default function JKT48Schedule() {
   };
 
   const renderEventsSkeletons = () => {
-    return Array(6).fill(0).map((_, index) => (
+    return Array(8).fill(0).map((_, index) => (
      <Card key={`events-skeleton-${index}`} className="w-full h-[250px] flex flex-col">
         <div className="p-4 flex gap-3">
           <Skeleton className="rounded-lg">
@@ -143,121 +143,107 @@ export default function JKT48Schedule() {
   };
 
   return (
-    <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      {/* Container untuk breadcrumbs dengan padding */}
-      <div className="w-full max-w-7xl px-6">
-        <Breadcrumbs className="mb-6">
-          <BreadcrumbItem href="/">Home</BreadcrumbItem>
-          <BreadcrumbItem>Schedule</BreadcrumbItem>
-        </Breadcrumbs>
-      </div>
+    <div className="w-full">
+      {/* Breadcrumbs */}
+      <Breadcrumbs className="mb-8">
+        <BreadcrumbItem href="/">Home</BreadcrumbItem>
+        <BreadcrumbItem>Schedule</BreadcrumbItem>
+      </Breadcrumbs>
 
-      {/* Theater Shows Section - Full Width */}
-      <div className="w-full mb-12">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-2xl font-bold mb-6 text-left">Theater Shows</h2>
-        </div>
-        <div className="w-full px-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-              {loading ? (
-                renderTheaterSkeletons()
-              ) : theaterData.length > 0 ? (
-                theaterData.map((show) => (
-                  <Card 
-                    key={show.id} 
-                    isFooterBlurred 
-                    className="border-none h-64 w-full" 
+      {/* Theater Shows Section */}
+      <div className="mb-12">
+        <h2 className="text-3xl font-bold mb-8 text-left">Theater Shows</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+          {loading ? (
+            renderTheaterSkeletons()
+          ) : theaterData.length > 0 ? (
+            theaterData.map((show) => (
+              <Card 
+                key={show.id} 
+                isFooterBlurred 
+                className="border-none h-64 w-full" 
+                radius="lg"
+              >
+                <Image
+                  alt={`${show.title} show banner`}
+                  className="object-cover w-full h-full z-0"
+                  src={show.banner}
+                />
+                <CardFooter className="justify-between before:bg-black/60 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
+                  <div className="flex flex-col text-white">
+                    <p className="text-sm font-bold">{show.title}</p>
+                    <p className="text-xs">{formatShowDate(show.date)}</p>
+                  </div>
+                  <Button
+                    className="text-xs"
+                    color="primary"
                     radius="lg"
+                    size="sm"
+                    variant="flat"
+                    as="a" 
+                    href={`https://jkt48.com/theater/schedule/id/${show.url}?lang=id`}
+                    target="_blank"
                   >
-                    <Image
-                      alt={`${show.title} show banner`}
-                      className="object-cover w-full h-full z-0"
-                      src={show.banner}
-                    />
-                    <CardFooter className="justify-between before:bg-black/60 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
-                      <div className="flex flex-col text-white">
-                        <p className="text-sm font-bold">{show.title}</p>
-                        <p className="text-xs">{formatShowDate(show.date)}</p>
-                      </div>
-                      <Button
-                        className="text-xs"
-                        color="primary"
-                        radius="lg"
-                        size="sm"
-                        variant="flat"
-                        as="a" 
-                        href={`https://jkt48.com/theater/schedule/id/${show.url}?lang=id`}
-                        target="_blank"
-                      >
-                        Details
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))
-              ) : (
-                <div className="col-span-full text-center py-8">
-                  <p className="text-lg">No upcoming theater shows available</p>
-                </div>
-              )}
+                    Details
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-8">
+              <p className="text-lg">No upcoming theater shows available</p>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Events Section - Full Width */}
-      <div className="w-full">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-2xl font-bold mb-6 text-left">Other Events</h2>
-        </div>
-        <div className="w-full px-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 w-full">
-              {loading ? (
-                renderEventsSkeletons()
-              ) : eventsData.length > 0 ? (
-                eventsData.map((event) => (
-                  <Card key={event.id} className="w-full">
-                    <CardHeader className="flex gap-3">
-                      <Image
-                        alt="JKT48 Event"
-                        height={40}
-                        radius="sm"
-                        src={event.label}
-                        width={40}
-                      />
-                      <div className="flex flex-col">
-                        <p className="text-md font-semibold">Event</p>
-                        <p className="text-small text-default-500">
-                          {formatShowDate(event.date)}
-                        </p>
-                      </div>
-                    </CardHeader>
-                    <Divider />
-                    <CardBody>
-                      <p className="font-medium">{event.title}</p>
-                    </CardBody>
-                    <Divider />
-                    <CardFooter>
-                      <Link 
-                        isExternal 
-                        showAnchorIcon 
-                        href={event.url}
-                      >
-                        View Details
-                      </Link>
-                    </CardFooter>
-                  </Card>
-                ))
-              ) : (
-                <div className="col-span-full text-center py-8">
-                  <p className="text-lg">No upcoming events available</p>
-                </div>
-              )}
+      {/* Events Section */}
+      <div>
+        <h2 className="text-3xl font-bold mb-8 text-left">Other Events</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
+          {loading ? (
+            renderEventsSkeletons()
+          ) : eventsData.length > 0 ? (
+            eventsData.map((event) => (
+              <Card key={event.id} className="w-full">
+                <CardHeader className="flex gap-3">
+                  <Image
+                    alt="JKT48 Event"
+                    height={40}
+                    radius="sm"
+                    src={event.label}
+                    width={40}
+                  />
+                  <div className="flex flex-col">
+                    <p className="text-md font-semibold">Event</p>
+                    <p className="text-small text-default-500">
+                      {formatShowDate(event.date)}
+                    </p>
+                  </div>
+                </CardHeader>
+                <Divider />
+                <CardBody>
+                  <p className="font-medium">{event.title}</p>
+                </CardBody>
+                <Divider />
+                <CardFooter>
+                  <Link 
+                    isExternal 
+                    showAnchorIcon 
+                    href={event.url}
+                  >
+                    View Details
+                  </Link>
+                </CardFooter>
+              </Card>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-8">
+              <p className="text-lg">No upcoming events available</p>
             </div>
-          </div>
+          )}
         </div>
       </div>
-    </section>
+    </div>
   );
 }
