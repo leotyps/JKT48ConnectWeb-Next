@@ -143,109 +143,121 @@ export default function JKT48Schedule() {
   };
 
   return (
-  <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-    <div className="w-full max-w-none px-4 py-6">
-      {/* Breadcrumbs */}
-      <Breadcrumbs className="mb-6">
-        <BreadcrumbItem href="/">Home</BreadcrumbItem>
-        <BreadcrumbItem>Schedule</BreadcrumbItem>
-      </Breadcrumbs>
+    <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
+      {/* Container untuk breadcrumbs dengan padding */}
+      <div className="w-full max-w-7xl px-6">
+        <Breadcrumbs className="mb-6">
+          <BreadcrumbItem href="/">Home</BreadcrumbItem>
+          <BreadcrumbItem>Schedule</BreadcrumbItem>
+        </Breadcrumbs>
+      </div>
 
-      {/* Theater Shows Section */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold mb-6 text-left">Theater Shows</h2>
-        <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {loading ? (
-            renderTheaterSkeletons()
-          ) : theaterData.length > 0 ? (
-            theaterData.map((show) => (
-              <Card 
-                key={show.id} 
-                isFooterBlurred 
-                className="border-none h-64 w-full" 
-                radius="lg"
-              >
-                <Image
-                  alt={`${show.title} show banner`}
-                  className="object-cover w-full h-full z-0"
-                  src={show.banner}
-                />
-                <CardFooter className="justify-between before:bg-black/60 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
-                  <div className="flex flex-col text-white">
-                    <p className="text-sm font-bold">{show.title}</p>
-                    <p className="text-xs">{formatShowDate(show.date)}</p>
-                  </div>
-                  <Button
-                    className="text-xs"
-                    color="primary"
+      {/* Theater Shows Section - Full Width */}
+      <div className="w-full mb-12">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-2xl font-bold mb-6 text-left">Theater Shows</h2>
+        </div>
+        <div className="w-full px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+              {loading ? (
+                renderTheaterSkeletons()
+              ) : theaterData.length > 0 ? (
+                theaterData.map((show) => (
+                  <Card 
+                    key={show.id} 
+                    isFooterBlurred 
+                    className="border-none h-64 w-full" 
                     radius="lg"
-                    size="sm"
-                    variant="flat"
-                    as="a" 
-                    href={`https://jkt48.com/theater/schedule/id/${show.url}?lang=id`}
-                    target="_blank"
                   >
-                    Details
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-8">
-              <p className="text-lg">No upcoming theater shows available</p>
+                    <Image
+                      alt={`${show.title} show banner`}
+                      className="object-cover w-full h-full z-0"
+                      src={show.banner}
+                    />
+                    <CardFooter className="justify-between before:bg-black/60 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
+                      <div className="flex flex-col text-white">
+                        <p className="text-sm font-bold">{show.title}</p>
+                        <p className="text-xs">{formatShowDate(show.date)}</p>
+                      </div>
+                      <Button
+                        className="text-xs"
+                        color="primary"
+                        radius="lg"
+                        size="sm"
+                        variant="flat"
+                        as="a" 
+                        href={`https://jkt48.com/theater/schedule/id/${show.url}?lang=id`}
+                        target="_blank"
+                      >
+                        Details
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-lg">No upcoming theater shows available</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Events Section */}
-      <div>
-        <h2 className="text-2xl font-bold mb-6 text-left">Other Events</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
-          {loading ? (
-            renderEventsSkeletons()
-          ) : eventsData.length > 0 ? (
-            eventsData.map((event) => (
-              <Card key={event.id} className="w-full">
-                <CardHeader className="flex gap-3">
-                  <Image
-                    alt="JKT48 Event"
-                    height={40}
-                    radius="sm"
-                    src={event.label}
-                    width={40}
-                  />
-                  <div className="flex flex-col">
-                    <p className="text-md font-semibold">Event</p>
-                    <p className="text-small text-default-500">
-                      {formatShowDate(event.date)}
-                    </p>
-                  </div>
-                </CardHeader>
-                <Divider />
-                <CardBody>
-                  <p className="font-medium">{event.title}</p>
-                </CardBody>
-                <Divider />
-                <CardFooter>
-                  <Link 
-                    isExternal 
-                    showAnchorIcon 
-                    href={event.url}
-                  >
-                    View Details
-                  </Link>
-                </CardFooter>
-              </Card>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-8">
-              <p className="text-lg">No upcoming events available</p>
+      {/* Events Section - Full Width */}
+      <div className="w-full">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-2xl font-bold mb-6 text-left">Other Events</h2>
+        </div>
+        <div className="w-full px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 w-full">
+              {loading ? (
+                renderEventsSkeletons()
+              ) : eventsData.length > 0 ? (
+                eventsData.map((event) => (
+                  <Card key={event.id} className="w-full">
+                    <CardHeader className="flex gap-3">
+                      <Image
+                        alt="JKT48 Event"
+                        height={40}
+                        radius="sm"
+                        src={event.label}
+                        width={40}
+                      />
+                      <div className="flex flex-col">
+                        <p className="text-md font-semibold">Event</p>
+                        <p className="text-small text-default-500">
+                          {formatShowDate(event.date)}
+                        </p>
+                      </div>
+                    </CardHeader>
+                    <Divider />
+                    <CardBody>
+                      <p className="font-medium">{event.title}</p>
+                    </CardBody>
+                    <Divider />
+                    <CardFooter>
+                      <Link 
+                        isExternal 
+                        showAnchorIcon 
+                        href={event.url}
+                      >
+                        View Details
+                      </Link>
+                    </CardFooter>
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-lg">No upcoming events available</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
   );
 }
