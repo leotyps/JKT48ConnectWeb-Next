@@ -4,7 +4,7 @@ export default function PricingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="pt-16 flex-grow">
+    <main className="flex-grow">
        {children}
     </main>
   );
