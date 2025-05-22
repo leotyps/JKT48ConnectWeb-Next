@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { Card, CardHeader, CardBody, CardFooter, Divider, Image, Link, Skeleton, Breadcrumbs, BreadcrumbItem } from "@heroui/react";
+import { Card, CardHeader, CardBody, CardFooter, Divider, Image, Link, Skeleton, Breadcrumbs, BreadcrumbItem, Button } from "@heroui/react";
 
 interface TheaterShow {
   id: string;
@@ -96,39 +96,11 @@ export default function JKT48Schedule() {
 
   const renderTheaterSkeletons = () => {
     return Array(6).fill(0).map((_, index) => (
-      <Card key={`theater-skeleton-${index}`} className="w-full h-[250px] flex flex-col">
-        <div className="p-4 flex gap-3">
-          <Skeleton className="rounded-lg">
-            <div className="h-12 w-12 rounded-lg bg-default-300" />
-          </Skeleton>
-          <div className="space-y-2 flex-1">
-            <Skeleton className="w-3/5 rounded-lg">
-              <div className="h-4 rounded-lg bg-default-200" />
-            </Skeleton>
-            <Skeleton className="w-2/5 rounded-lg">
-              <div className="h-3 rounded-lg bg-default-200" />
-            </Skeleton>
-          </div>
-        </div>
-        <Divider />
-        <div className="p-4 flex-grow space-y-3">
-          <Skeleton className="w-4/5 rounded-lg">
-            <div className="h-4 rounded-lg bg-default-200" />
-          </Skeleton>
-          <Skeleton className="w-full rounded-lg">
-            <div className="h-4 rounded-lg bg-default-200" />
-          </Skeleton>
-          <Skeleton className="w-3/5 rounded-lg">
-            <div className="h-4 rounded-lg bg-default-200" />
-          </Skeleton>
-        </div>
-        <Divider />
-        <div className="p-4">
-          <Skeleton className="w-2/5 rounded-lg">
-            <div className="h-4 rounded-lg bg-default-300" />
-          </Skeleton>
-        </div>
-      </Card>
+      <div key={`theater-skeleton-${index}`} className="w-full">
+        <Skeleton className="rounded-lg">
+          <div className="h-64 rounded-lg bg-default-300" />
+        </Skeleton>
+      </div>
     ));
   };
 
@@ -171,7 +143,7 @@ export default function JKT48Schedule() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
+    <div className="w-full max-w-none px-4 py-6">
       {/* Breadcrumbs */}
       <Breadcrumbs className="mb-6">
         <BreadcrumbItem href="/">Home</BreadcrumbItem>
@@ -181,48 +153,44 @@ export default function JKT48Schedule() {
       {/* Theater Shows Section */}
       <div className="mb-12">
         <h2 className="text-2xl font-bold mb-6 text-left">Theater Shows</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {loading ? (
             renderTheaterSkeletons()
           ) : theaterData.length > 0 ? (
             theaterData.map((show) => (
-              <Card key={show.id} className="w-full">
-                <CardHeader className="flex gap-3">
-                  <Image
-                    alt="JKT48 Theater"
-                    height={40}
-                    radius="sm"
-                    src={show.poster || "https://jkt48.com/images/icon.cat1.png"}
-                    width={40}
-                  />
-                  <div className="flex flex-col">
-                    <p className="text-md font-semibold">Theater Show</p>
-                    <p className="text-small text-default-500">
-                      {formatShowDate(show.date)}
-                    </p>
+              <Card 
+                key={show.id} 
+                isFooterBlurred 
+                className="border-none h-64 w-full" 
+                radius="lg"
+              >
+                <Image
+                  alt={`${show.title} show banner`}
+                  className="object-cover w-full h-full z-0"
+                  src={show.banner}
+                />
+                <CardFooter className="justify-between before:bg-black/60 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
+                  <div className="flex flex-col text-white">
+                    <p className="text-sm font-bold">{show.title}</p>
+                    <p className="text-xs">{formatShowDate(show.date)}</p>
                   </div>
-                </CardHeader>
-                <Divider />
-                <CardBody>
-                  <p className="font-medium">{show.title}</p>
-                  <p className="text-small text-default-500 mt-2">
-                    Members: {show.member_count}
-                  </p>
-                </CardBody>
-                <Divider />
-                <CardFooter>
-                  <Link 
-                    isExternal 
-                    showAnchorIcon 
+                  <Button
+                    className="text-xs"
+                    color="primary"
+                    radius="lg"
+                    size="sm"
+                    variant="flat"
+                    as="a" 
                     href={`https://jkt48.com/theater/schedule/id/${show.url}?lang=id`}
+                    target="_blank"
                   >
-                    View Details
-                  </Link>
+                    Details
+                  </Button>
                 </CardFooter>
               </Card>
             ))
           ) : (
-            <div className="col-span-2 text-center py-8">
+            <div className="col-span-full text-center py-8">
               <p className="text-lg">No upcoming theater shows available</p>
             </div>
           )}
@@ -232,7 +200,7 @@ export default function JKT48Schedule() {
       {/* Events Section */}
       <div>
         <h2 className="text-2xl font-bold mb-6 text-left">Other Events</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
           {loading ? (
             renderEventsSkeletons()
           ) : eventsData.length > 0 ? (
@@ -270,7 +238,7 @@ export default function JKT48Schedule() {
               </Card>
             ))
           ) : (
-            <div className="col-span-2 text-center py-8">
+            <div className="col-span-full text-center py-8">
               <p className="text-lg">No upcoming events available</p>
             </div>
           )}
