@@ -70,51 +70,51 @@ export default function JKT48News() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
-      {/* Breadcrumbs - Aligned to left */}
+    <div className="w-full">
+      {/* Breadcrumbs */}
       <Breadcrumbs className="mb-6">
         <BreadcrumbItem href="/">Home</BreadcrumbItem>
         <BreadcrumbItem>News</BreadcrumbItem>
       </Breadcrumbs>
 
-      {/* Title - Aligned to left */}
-      <h2 className="text-2xl font-bold mb-6 text-left">Hot News</h2>
-
       {/* News Content */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-        {loading ? (
-          renderSkeletons()
-        ) : (
-          newsData.map((item) => (
-            <Card key={item.id} className="w-full">
-              <CardHeader className="flex gap-3">
-                <Image
-                  alt="JKT48 News Category"
-                  height={25}
-                  radius="sm"
-                  src={`https://jkt48.com${item.label}`}
-                  width={55}
-                />
-                <div className="flex flex-col">
-                  <p className="text-md">JKT48 News</p>
-                  <p className="text-small text-default-500">
-                    {new Date(item.date).toLocaleDateString()}
-                  </p>
-                </div>
-              </CardHeader>
-              <Divider />
-              <CardBody>
-                <p>{item.title}</p>
-              </CardBody>
-              <Divider />
-              <CardFooter>
-                <Link isExternal showAnchorIcon href={`https://jkt48.com/news/detail/id/${item.id}?lang=id`}>
-                  Read full news
-                </Link>
-              </CardFooter>
-            </Card>
-          ))
-        )}
+      <div className="mt-8 w-full">
+        <h2 className="text-2xl font-bold mb-4">Hot News</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {loading ? (
+            renderSkeletons()
+          ) : (
+            newsData.map((item) => (
+              <Card key={item.id} className="w-full">
+                <CardHeader className="flex gap-3">
+                  <Image
+                    alt="JKT48 News Category"
+                    height={25}
+                    radius="sm"
+                    src={`https://jkt48.com${item.label}`}
+                    width={55}
+                  />
+                  <div className="flex flex-col">
+                    <p className="text-md">JKT48 News</p>
+                    <p className="text-small text-default-500">
+                      {new Date(item.date).toLocaleDateString()}
+                    </p>
+                  </div>
+                </CardHeader>
+                <Divider />
+                <CardBody>
+                  <p>{item.title}</p>
+                </CardBody>
+                <Divider />
+                <CardFooter>
+                  <Link isExternal showAnchorIcon href={`https://jkt48.com/news/detail/id/${item.id}?lang=id`}>
+                    Read full news
+                  </Link>
+                </CardFooter>
+              </Card>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
