@@ -209,10 +209,10 @@ export default function JKT48Schedule() {
                 <CardHeader className="flex gap-3">
                   <Image
                     alt="JKT48 Event"
-                    height={40}
+                    height={25}
                     radius="sm"
                     src={event.label}
-                    width={40}
+                    width={55}
                   />
                   <div className="flex flex-col">
                     <p className="text-md font-semibold">Event</p>
