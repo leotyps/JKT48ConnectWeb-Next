@@ -33,58 +33,65 @@ export default function JKT48News() {
 
   const renderSkeletons = () => {
     return Array(10).fill(0).map((_, index) => (
-      <Card key={`skeleton-${index}`} className="w-full h-[250px] flex flex-col">
-        <div className="p-4 flex gap-3">
-          <Skeleton className="rounded-lg">
-            <div className="h-12 w-12 rounded-lg bg-default-300" />
-          </Skeleton>
-          <div className="space-y-2 flex-1">
+      <div key={`skeleton-wrapper-${index}`} className="w-full">
+        <Card className="w-full h-[250px] flex flex-col">
+          <div className="p-4 flex gap-3">
+            <Skeleton className="rounded-lg">
+              <div className="h-12 w-12 rounded-lg bg-default-300" />
+            </Skeleton>
+            <div className="space-y-2 flex-1">
+              <Skeleton className="w-3/5 rounded-lg">
+                <div className="h-4 rounded-lg bg-default-200" />
+              </Skeleton>
+              <Skeleton className="w-2/5 rounded-lg">
+                <div className="h-3 rounded-lg bg-default-200" />
+              </Skeleton>
+            </div>
+          </div>
+          <Divider />
+          <div className="p-4 flex-grow space-y-3">
+            <Skeleton className="w-4/5 rounded-lg">
+              <div className="h-4 rounded-lg bg-default-200" />
+            </Skeleton>
+            <Skeleton className="w-full rounded-lg">
+              <div className="h-4 rounded-lg bg-default-200" />
+            </Skeleton>
             <Skeleton className="w-3/5 rounded-lg">
               <div className="h-4 rounded-lg bg-default-200" />
             </Skeleton>
+          </div>
+          <Divider />
+          <div className="p-4">
             <Skeleton className="w-2/5 rounded-lg">
-              <div className="h-3 rounded-lg bg-default-200" />
+              <div className="h-4 rounded-lg bg-default-300" />
             </Skeleton>
           </div>
-        </div>
-        <Divider />
-        <div className="p-4 flex-grow space-y-3">
-          <Skeleton className="w-4/5 rounded-lg">
-            <div className="h-4 rounded-lg bg-default-200" />
-          </Skeleton>
-          <Skeleton className="w-full rounded-lg">
-            <div className="h-4 rounded-lg bg-default-200" />
-          </Skeleton>
-          <Skeleton className="w-3/5 rounded-lg">
-            <div className="h-4 rounded-lg bg-default-200" />
-          </Skeleton>
-        </div>
-        <Divider />
-        <div className="p-4">
-          <Skeleton className="w-2/5 rounded-lg">
-            <div className="h-4 rounded-lg bg-default-300" />
-          </Skeleton>
-        </div>
-      </Card>
+        </Card>
+      </div>
     ));
   };
 
   return (
-    <div className="w-full">
-      {/* Breadcrumbs */}
-      <Breadcrumbs className="mb-6">
-        <BreadcrumbItem href="/">Home</BreadcrumbItem>
-        <BreadcrumbItem>News</BreadcrumbItem>
-      </Breadcrumbs>
+    <div className="w-full max-w-none">
+      {/* Breadcrumbs - Outside of loading state */}
+      <div className="w-full px-4 md:px-6 lg:px-8">
+        <Breadcrumbs className="mb-6">
+          <BreadcrumbItem href="/">Home</BreadcrumbItem>
+          <BreadcrumbItem>News</BreadcrumbItem>
+        </Breadcrumbs>
+      </div>
 
       {/* News Content */}
-      <div className="mt-8 w-full">
+      <div className="w-full px-4 md:px-6 lg:px-8">
         <h2 className="text-2xl font-bold mb-4">Hot News</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {loading ? (
-            renderSkeletons()
-          ) : (
-            newsData.map((item) => (
+        
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            {renderSkeletons()}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            {newsData.map((item) => (
               <Card key={item.id} className="w-full">
                 <CardHeader className="flex gap-3">
                   <Image
@@ -112,9 +119,9 @@ export default function JKT48News() {
                   </Link>
                 </CardFooter>
               </Card>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
