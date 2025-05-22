@@ -106,7 +106,6 @@ export default function JKT48Schedule() {
 
   const renderEventsSkeletons = () => {
     return Array(6).fill(0).map((_, index) => (
-   <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
      <Card key={`events-skeleton-${index}`} className="w-full h-[250px] flex flex-col">
         <div className="p-4 flex gap-3">
           <Skeleton className="rounded-lg">
@@ -144,6 +143,7 @@ export default function JKT48Schedule() {
   };
 
   return (
+  <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
     <div className="w-full max-w-none px-4 py-6">
       {/* Breadcrumbs */}
       <Breadcrumbs className="mb-6">
