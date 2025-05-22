@@ -1,3 +1,6 @@
+"use client"
+
+
 import {
   Navbar as HeroUINavbar,
   NavbarContent,
