@@ -1,7 +1,8 @@
+
 "use client"
 
 import { useState, useEffect } from "react";
-import { Card, CardHeader, CardBody, CardFooter, Divider, Image, Link, Skeleton, Breadcrumbs, BreadcrumbItem } from "@heroui/react";
+import { Card, CardHeader, CardBody, CardFooter, Divider, Image, Link, Skeleton } from "@heroui/react";
 
 interface NewsItem {
   id: string;
@@ -10,7 +11,7 @@ interface NewsItem {
   label: string;
 }
 
-export default function JKT48News() {
+export default function News() {
   const [newsData, setNewsData] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -70,6 +71,54 @@ export default function JKT48News() {
   };
 
   return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+      {loading ? (
+        renderSkeletons()
+      ) : (
+        newsData.map((item) => (
+          <Card key={item.id} className="w-full">
+            <CardHeader className="flex gap-3">
+              <Image
+                alt="JKT48 News Category"
+                height={25}
+                radius="sm"
+                src={`https://jkt48.com${item.label}`}
+                width={55}
+              />
+              <div className="flex flex-col">
+                <p className="text-md">JKT48 News</p>
+                <p className="text-small text-default-500">
+                  {new Date(item.date).toLocaleDateString()}
+                </p>
+              </div>
+            </CardHeader>
+            <Divider />
+            <CardBody>
+              <p>{item.title}</p>
+            </CardBody>
+            <Divider />
+            <CardFooter>
+              <Link isExternal showAnchorIcon href={`https://jkt48.com/news/detail/id/${item.id}?lang=id`}>
+                Read full news
+              </Link>
+            </CardFooter>
+          </Card>
+        ))
+      )}
+    </div>
+  );
+}
+```
+
+**Halaman utama (JKT48News.tsx)**
+```tsx
+"use client"
+
+import { Breadcrumbs, BreadcrumbItem } from "@heroui/react";
+import News from "@/components/news";
+
+export default function JKT48News() {
+  return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
       {/* Breadcrumbs - Aligned to left */}
       <Breadcrumbs className="mb-6">
@@ -77,45 +126,8 @@ export default function JKT48News() {
         <BreadcrumbItem>News</BreadcrumbItem>
       </Breadcrumbs>
 
-      {/* Title - Aligned to left */}
-      <h2 className="text-2xl font-bold mb-6 text-left">Hot News</h2>
-
-      {/* News Content */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-        {loading ? (
-          renderSkeletons()
-        ) : (
-          newsData.map((item) => (
-            <Card key={item.id} className="w-full">
-              <CardHeader className="flex gap-3">
-                <Image
-                  alt="JKT48 News Category"
-                  height={25}
-                  radius="sm"
-                  src={`https://jkt48.com${item.label}`}
-                  width={55}
-                />
-                <div className="flex flex-col">
-                  <p className="text-md">JKT48 News</p>
-                  <p className="text-small text-default-500">
-                    {new Date(item.date).toLocaleDateString()}
-                  </p>
-                </div>
-              </CardHeader>
-              <Divider />
-              <CardBody>
-                <p>{item.title}</p>
-              </CardBody>
-              <Divider />
-              <CardFooter>
-                <Link isExternal showAnchorIcon href={`https://jkt48.com/news/detail/id/${item.id}?lang=id`}>
-                  Read full news
-                </Link>
-              </CardFooter>
-            </Card>
-          ))
-        )}
-      </div>
+      {/* News Component */}
+      <News />
     </div>
   );
 }
