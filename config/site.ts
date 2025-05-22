@@ -27,37 +27,21 @@ export const siteConfig = {
   ],
   navMenuItems: [
     {
-      label: "Profile",
-      href: "/profile",
+      label: "News",
+      href: "/news",
     },
     {
-      label: "Dashboard",
-      href: "/dashboard",
+      label: "Schedule",
+      href: "/schedule",
     },
     {
-      label: "Projects",
-      href: "/projects",
+      label: "Member",
+      href: "/member",
     },
     {
-      label: "Team",
-      href: "/team",
-    },
-    {
-      label: "Calendar",
-      href: "/calendar",
-    },
-    {
-      label: "Settings",
-      href: "/settings",
-    },
-    {
-      label: "Help & Feedback",
-      href: "/help-feedback",
-    },
-    {
-      label: "Logout",
-      href: "/logout",
-    },
+      label: "Stream",
+      href: "/stream",
+    }, 
   ],
   links: {
     github: "https://github.com/j-forces",
