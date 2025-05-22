@@ -118,21 +118,19 @@ export const Navbar = () => {
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {siteConfig.navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
-              <NextLink
-                className={clsx(
-                  linkStyles({ 
-                    color: index === 2
-                      ? "primary"
-                      : index === siteConfig.navMenuItems.length - 1
-                        ? "danger"
-                        : "foreground"
-                  }),
-                  "w-full"
-                )}
+              <Link
+                color={
+                  index === 2
+                    ? "primary"
+                    : index === siteConfig.navMenuItems.length - 1
+                      ? "danger"
+                      : "foreground"
+                }
                 href={item.href}
+                size="lg"
               >
                 {item.label}
-              </NextLink>
+              </Link>
             </NavbarMenuItem>
           ))}
         </div>
