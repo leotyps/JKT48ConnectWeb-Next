@@ -46,7 +46,7 @@ export default function JKT48Members() {
         // Filter and limit the data to prevent overwhelming the UI
         const activeMembersOnly = membersList
           .filter((member: Member) => member && !member.is_graduate)
-          .slice(0, 50); // Limit to first 50 active members
+          .slice(0, 57); // Limit to first 50 active members
         
         setMembersData(activeMembersOnly);
         setFilteredMembers(activeMembersOnly);
