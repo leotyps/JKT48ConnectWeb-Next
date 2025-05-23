@@ -34,9 +34,20 @@ export default function JKT48Members() {
         const jkt48Api = require('@jkt48/core');
         const apiKey = 'JKTCONNECT';
         const members = await jkt48Api.members(apiKey);
-        setMembersData(members);
+        
+        // Handle both array and object responses
+        const membersList = Array.isArray(members) ? members : (members.members || []);
+        
+        // Filter and limit the data to prevent overwhelming the UI
+        const activeMembersOnly = membersList
+          .filter(member => member && !member.is_graduate)
+          .slice(0, 60); // Limit to first 50 active members
+        
+        setMembersData(activeMembersOnly);
       } catch (error) {
         console.error("Error fetching members:", error);
+        // Set empty array on error to prevent crashes
+        setMembersData([]);
       } finally {
         setLoading(false);
       }
@@ -46,8 +57,10 @@ export default function JKT48Members() {
   }, []);
 
   const getMemberCategory = (member: Member) => {
-    const generation = member.generation;
-    const name = member.name.toLowerCase();
+    if (!member || !member.generation) return 'Member Inti';
+    
+    const generation = member.generation.toLowerCase();
+    const name = member.name ? member.name.toLowerCase() : '';
     
     // Fritzy and Lana are core members despite being gen12/gen13
     if (name.includes('fritzy') || name.includes('lana')) {
