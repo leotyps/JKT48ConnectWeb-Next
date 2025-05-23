@@ -104,7 +104,7 @@ export default function JKT48Members() {
     const generations = Array.from(generationSet)
       .filter(gen => gen)
       .sort();
-    return generations;
+    return [{ key: "all", label: "All Generations" }, ...generations.map(gen => ({ key: gen, label: gen.toUpperCase() }))];
   };
 
   // Get unique initials for filter
@@ -113,7 +113,7 @@ export default function JKT48Members() {
     const initials = Array.from(initialSet)
       .filter(initial => initial)
       .sort();
-    return initials;
+    return [{ key: "all", label: "All Initials" }, ...initials.map(initial => ({ key: initial, label: initial }))];
   };
 
   // Clear all filters
@@ -171,10 +171,6 @@ export default function JKT48Members() {
     console.log("Member pressed:", member.name);
   };
 
-  // Prepare generations and initials for Select components
-  const generations = getGenerations();
-  const initials = getInitials();
-
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <div className="w-full">
@@ -218,13 +214,13 @@ export default function JKT48Members() {
                     const value = Array.from(keys)[0] as string;
                     setSelectedGeneration(value || "all");
                   }}
+                  items={getGenerations()}
                 >
-                  <SelectItem key="all">All Generations</SelectItem>
-                  {generations.map((gen) => (
-                    <SelectItem key={gen} value={gen}>
-                      {gen.toUpperCase()}
+                  {(item) => (
+                    <SelectItem key={item.key}>
+                      {item.label}
                     </SelectItem>
-                  ))}
+                  )}
                 </Select>
                 
                 <Select
@@ -235,13 +231,13 @@ export default function JKT48Members() {
                     const value = Array.from(keys)[0] as string;
                     setSelectedInitial(value || "all");
                   }}
+                  items={getInitials()}
                 >
-                  <SelectItem key="all">All Initials</SelectItem>
-                  {initials.map((initial) => (
-                    <SelectItem key={initial} value={initial}>
-                      {initial}
+                  {(item) => (
+                    <SelectItem key={item.key}>
+                      {item.label}
                     </SelectItem>
-                  ))}
+                  )}
                 </Select>
                 
                 {(searchQuery || selectedGeneration !== "all" || selectedInitial !== "all") && (
