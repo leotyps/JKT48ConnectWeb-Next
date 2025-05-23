@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react";
@@ -170,6 +171,10 @@ export default function JKT48Members() {
     console.log("Member pressed:", member.name);
   };
 
+  // Prepare generations and initials for Select components
+  const generations = getGenerations();
+  const initials = getInitials();
+
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <div className="w-full">
@@ -215,8 +220,8 @@ export default function JKT48Members() {
                   }}
                 >
                   <SelectItem key="all">All Generations</SelectItem>
-                  {getGenerations().map((gen) => (
-                    <SelectItem key={gen}>
+                  {generations.map((gen) => (
+                    <SelectItem key={gen} value={gen}>
                       {gen.toUpperCase()}
                     </SelectItem>
                   ))}
@@ -232,8 +237,8 @@ export default function JKT48Members() {
                   }}
                 >
                   <SelectItem key="all">All Initials</SelectItem>
-                  {getInitials().map((initial) => (
-                    <SelectItem key={initial}>
+                  {initials.map((initial) => (
+                    <SelectItem key={initial} value={initial}>
                       {initial}
                     </SelectItem>
                   ))}
