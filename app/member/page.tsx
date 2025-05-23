@@ -99,7 +99,8 @@ export default function JKT48Members() {
 
   // Get unique generations for filter
   const getGenerations = () => {
-    const generations = [...new Set(membersData.map(member => member.generation))]
+    const generationSet = new Set(membersData.map(member => member.generation));
+    const generations = Array.from(generationSet)
       .filter(gen => gen)
       .sort();
     return generations;
@@ -107,7 +108,8 @@ export default function JKT48Members() {
 
   // Get unique initials for filter
   const getInitials = () => {
-    const initials = [...new Set(membersData.map(member => member.name?.charAt(0).toUpperCase()))]
+    const initialSet = new Set(membersData.map(member => member.name?.charAt(0).toUpperCase()));
+    const initials = Array.from(initialSet)
       .filter(initial => initial)
       .sort();
     return initials;
