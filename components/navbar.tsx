@@ -31,7 +31,7 @@ import {
 } from "@/components/icons";
 
 // WhatsApp Icon Component
-const WhatsAppIcon = ({ className }) => (
+const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg
     className={className}
     width="24"
