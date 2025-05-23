@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { Card, CardBody, CardFooter, Image, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, Link } from "@heroui/react";
+import { Card, CardBody, CardFooter, Image, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, Link, Input, Select, SelectItem, Button } from "@heroui/react";
+import { Search, X } from "lucide-react";
 
 interface Social {
   title: string;
@@ -26,7 +27,11 @@ interface Member {
 
 export default function JKT48Members() {
   const [membersData, setMembersData] = useState<Member[]>([]);
+  const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedGeneration, setSelectedGeneration] = useState<string>("all");
+  const [selectedInitial, setSelectedInitial] = useState<string>("all");
 
   useEffect(() => {
     async function fetchMembers() {
@@ -44,10 +49,12 @@ export default function JKT48Members() {
           .slice(0, 50); // Limit to first 50 active members
         
         setMembersData(activeMembersOnly);
+        setFilteredMembers(activeMembersOnly);
       } catch (error) {
         console.error("Error fetching members:", error);
         // Set empty array on error to prevent crashes
         setMembersData([]);
+        setFilteredMembers([]);
       } finally {
         setLoading(false);
       }
@@ -55,6 +62,64 @@ export default function JKT48Members() {
 
     fetchMembers();
   }, []);
+
+  // Filter and search effect
+  useEffect(() => {
+    let filtered = [...membersData];
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      filtered = filtered.filter((member: Member) => {
+        const name = member.name?.toLowerCase() || '';
+        const nicknames = member.nicknames?.join(' ').toLowerCase() || '';
+        const generation = member.generation?.toLowerCase() || '';
+        const query = searchQuery.toLowerCase();
+        
+        return name.includes(query) || 
+               nicknames.includes(query) || 
+               generation.includes(query);
+      });
+    }
+
+    // Filter by generation
+    if (selectedGeneration !== "all") {
+      filtered = filtered.filter((member: Member) => 
+        member.generation?.toLowerCase().includes(selectedGeneration.toLowerCase())
+      );
+    }
+
+    // Filter by initial letter
+    if (selectedInitial !== "all") {
+      filtered = filtered.filter((member: Member) => 
+        member.name?.charAt(0).toLowerCase() === selectedInitial.toLowerCase()
+      );
+    }
+
+    setFilteredMembers(filtered);
+  }, [membersData, searchQuery, selectedGeneration, selectedInitial]);
+
+  // Get unique generations for filter
+  const getGenerations = () => {
+    const generations = [...new Set(membersData.map(member => member.generation))]
+      .filter(gen => gen)
+      .sort();
+    return generations;
+  };
+
+  // Get unique initials for filter
+  const getInitials = () => {
+    const initials = [...new Set(membersData.map(member => member.name?.charAt(0).toUpperCase()))]
+      .filter(initial => initial)
+      .sort();
+    return initials;
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedGeneration("all");
+    setSelectedInitial("all");
+  };
 
   const getMemberCategory = (member: Member) => {
     if (!member || !member.generation) return 'Member Inti';
@@ -115,16 +180,93 @@ export default function JKT48Members() {
 
         {/* Members Content */}
         <div className="mt-8 w-full">
-          <h2 className="text-2xl font-bold mb-4">JKT48 Members</h2>
+          <div className="flex flex-col gap-4 mb-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">JKT48 Members</h2>
+              <div className="text-sm text-default-500">
+                {loading ? 'Loading...' : `${filteredMembers.length} of ${membersData.length} members`}
+              </div>
+            </div>
+            
+            {/* Search and Filter Controls */}
+            <div className="flex flex-col md:flex-row gap-3">
+              <Input
+                isClearable
+                placeholder="Search by name, nickname, or generation..."
+                startContent={<Search className="w-4 h-4" />}
+                value={searchQuery}
+                onValueChange={setSearchQuery}
+                className="flex-1"
+              />
+              
+              <div className="flex gap-2">
+                <Select
+                  placeholder="All Generations"
+                  className="min-w-[150px]"
+                  selectedKeys={selectedGeneration !== "all" ? [selectedGeneration] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
+                    setSelectedGeneration(value || "all");
+                  }}
+                >
+                  <SelectItem key="all" value="all">All Generations</SelectItem>
+                  {getGenerations().map((gen) => (
+                    <SelectItem key={gen} value={gen}>
+                      {gen.toUpperCase()}
+                    </SelectItem>
+                  ))}
+                </Select>
+                
+                <Select
+                  placeholder="All Initials"
+                  className="min-w-[120px]"
+                  selectedKeys={selectedInitial !== "all" ? [selectedInitial] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys)[0] as string;
+                    setSelectedInitial(value || "all");
+                  }}
+                >
+                  <SelectItem key="all" value="all">All Initials</SelectItem>
+                  {getInitials().map((initial) => (
+                    <SelectItem key={initial} value={initial}>
+                      {initial}
+                    </SelectItem>
+                  ))}
+                </Select>
+                
+                {(searchQuery || selectedGeneration !== "all" || selectedInitial !== "all") && (
+                  <Button
+                    isIconOnly
+                    variant="flat"
+                    onPress={clearFilters}
+                    aria-label="Clear filters"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
           <div className="gap-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {loading ? (
               renderSkeletons()
-            ) : membersData.length === 0 ? (
+            ) : filteredMembers.length === 0 ? (
               <div className="col-span-full text-center py-8">
-                <p className="text-default-500">No members data available</p>
+                <p className="text-default-500">
+                  {membersData.length === 0 ? "No members data available" : "No members found matching your search criteria"}
+                </p>
+                {(searchQuery || selectedGeneration !== "all" || selectedInitial !== "all") && (
+                  <Button
+                    variant="flat"
+                    onPress={clearFilters}
+                    className="mt-2"
+                  >
+                    Clear Filters
+                  </Button>
+                )}
               </div>
             ) : (
-              membersData.map((member: Member) => {
+              filteredMembers.map((member: Member) => {
                 if (!member || !member._id) return null;
                 
                 const category = getMemberCategory(member);
