@@ -214,9 +214,9 @@ export default function JKT48Members() {
                     setSelectedGeneration(value || "all");
                   }}
                 >
-                  <SelectItem key="all" value="all">All Generations</SelectItem>
+                  <SelectItem key="all">All Generations</SelectItem>
                   {getGenerations().map((gen) => (
-                    <SelectItem key={gen} value={gen}>
+                    <SelectItem key={gen}>
                       {gen.toUpperCase()}
                     </SelectItem>
                   ))}
@@ -231,9 +231,9 @@ export default function JKT48Members() {
                     setSelectedInitial(value || "all");
                   }}
                 >
-                  <SelectItem key="all" value="all">All Initials</SelectItem>
+                  <SelectItem key="all">All Initials</SelectItem>
                   {getInitials().map((initial) => (
-                    <SelectItem key={initial} value={initial}>
+                    <SelectItem key={initial}>
                       {initial}
                     </SelectItem>
                   ))}
