@@ -13,15 +13,15 @@ interface Member {
   name: string;
   nicknames: string[];
   img: string;
-  img_alt: string;
+  img_alt?: string;
   url: string;
   group: string;
   socials: Social[];
-  room_id: number;
+  room_id?: number;
   sr_exists: boolean;
   is_graduate: boolean;
   generation: string;
-  idn_username: string;
+  idn_username?: string;
 }
 
 export default function JKT48Members() {
@@ -36,12 +36,12 @@ export default function JKT48Members() {
         const members = await jkt48Api.members(apiKey);
         
         // Handle both array and object responses
-        const membersList = Array.isArray(members) ? members : (members.members || []);
+        const membersList: Member[] = Array.isArray(members) ? members : (members.members || []);
         
         // Filter and limit the data to prevent overwhelming the UI
         const activeMembersOnly = membersList
-          .filter(member => member && !member.is_graduate)
-          .slice(0, 60); // Limit to first 50 active members
+          .filter((member: Member) => member && !member.is_graduate)
+          .slice(0, 50); // Limit to first 50 active members
         
         setMembersData(activeMembersOnly);
       } catch (error) {
@@ -119,56 +119,65 @@ export default function JKT48Members() {
           <div className="gap-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {loading ? (
               renderSkeletons()
+            ) : membersData.length === 0 ? (
+              <div className="col-span-full text-center py-8">
+                <p className="text-default-500">No members data available</p>
+              </div>
             ) : (
-              membersData
-                .filter(member => !member.is_graduate) // Only show active members
-                .map((member) => {
-                  const category = getMemberCategory(member);
-                  return (
-                    <Card 
-                      key={member._id} 
-                      isPressable 
-                      shadow="sm" 
-                      onPress={() => handleMemberPress(member)}
-                      className="relative"
-                    >
-                      <CardBody className="overflow-visible p-0">
-                        <Image
-                          alt={member.name}
-                          className="w-full object-cover h-[140px]"
-                          radius="lg"
-                          shadow="sm"
-                          src={member.img_alt || member.img}
-                          width="100%"
-                        />
-                        <Chip
-                          size="sm"
-                          color={getCategoryColor(category)}
-                          className="absolute top-2 right-2 z-10"
-                        >
-                          {category}
-                        </Chip>
-                      </CardBody>
-                      <CardFooter className="text-small flex-col items-start gap-1 p-3">
-                        <b className="text-left line-clamp-1">{member.name}</b>
-                        <div className="flex justify-between items-center w-full">
-                          <p className="text-default-500 text-xs">
-                            {member.nicknames.length > 0 ? member.nicknames[0] : ''}
-                          </p>
-                          {member.sr_exists && (
-                            <Link
-                              isExternal
-                              href={`https://www.showroom-live.com/room/profile?room_id=${member.room_id}`}
-                              className="text-xs"
-                            >
-                              SR
-                            </Link>
-                          )}
-                        </div>
-                      </CardFooter>
-                    </Card>
-                  );
-                })
+              membersData.map((member: Member) => {
+                if (!member || !member._id) return null;
+                
+                const category = getMemberCategory(member);
+                const memberName = member.name || 'Unknown';
+                const memberImage = member.img_alt || member.img || '';
+                const memberNickname = member.nicknames && member.nicknames.length > 0 ? member.nicknames[0] : '';
+                
+                return (
+                  <Card 
+                    key={member._id} 
+                    isPressable 
+                    shadow="sm" 
+                    onPress={() => handleMemberPress(member)}
+                    className="relative"
+                  >
+                    <CardBody className="overflow-visible p-0">
+                      <Image
+                        alt={memberName}
+                        className="w-full object-cover h-[140px]"
+                        radius="lg"
+                        shadow="sm"
+                        src={memberImage}
+                        width="100%"
+                        fallbackSrc="https://via.placeholder.com/200x140?text=JKT48"
+                      />
+                      <Chip
+                        size="sm"
+                        color={getCategoryColor(category)}
+                        className="absolute top-2 right-2 z-10"
+                      >
+                        {category}
+                      </Chip>
+                    </CardBody>
+                    <CardFooter className="text-small flex-col items-start gap-1 p-3">
+                      <b className="text-left line-clamp-1">{memberName}</b>
+                      <div className="flex justify-between items-center w-full">
+                        <p className="text-default-500 text-xs">
+                          {memberNickname}
+                        </p>
+                        {member.sr_exists && member.room_id && (
+                          <Link
+                            isExternal
+                            href={`https://www.showroom-live.com/room/profile?room_id=${member.room_id}`}
+                            className="text-xs"
+                          >
+                            SR
+                          </Link>
+                        )}
+                      </div>
+                    </CardFooter>
+                  </Card>
+                );
+              })
             )}
           </div>
         </div>
