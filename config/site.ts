@@ -13,19 +13,31 @@ export const siteConfig = {
       href: "/docs",
     },
     {
-      label: "Pricing",
-      href: "/pricing",
+      label: "News",
+      href: "/news",
     },
     {
-      label: "Blog",
-      href: "/blog",
+      label: "Schedule",
+      href: "/schedule",
     },
     {
-      label: "About",
-      href: "/about",
+      label: "Member",
+      href: "/member",
+    },
+    {
+      label: "Stream",
+      href: "/stream",
+    },
+    {
+      label: "Replay",
+      href: "/replay",
     },
   ],
   navMenuItems: [
+    {
+      label: "Home",
+      href: "/Home",
+    },
     {
       label: "News",
       href: "/news",
@@ -41,7 +53,11 @@ export const siteConfig = {
     {
       label: "Stream",
       href: "/stream",
-    }, 
+    },
+    {
+      label: "Replay",
+      href: "/replay",
+    },
   ],
   links: {
     github: "https://github.com/j-forces",
