@@ -61,7 +61,7 @@ export const siteConfig = {
   ],
   links: {
     github: "https://github.com/j-forces",
-    twitter: "https://twitter.com/valzyys",
+    twitter: "https://whatsapp.com/channel/0029Vb3D8q00Qeabko4izt2N",
     docs: "https://docs.jkt48connect.my.id",
     discord: "https://discord.gg/pFsSeYa9CN",
     sponsor: "https://patreon.com/jrgarciadev",
