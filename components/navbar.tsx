@@ -1,5 +1,5 @@
-"use client"
 
+"use client"
 
 import {
   Navbar as HeroUINavbar,
@@ -135,13 +135,7 @@ export const Navbar = () => {
             <NavbarMenuItem key={`${item}-${index}`}>
               <NextLink
                 className={clsx(
-                  linkStyles({ 
-                    color: index === 2
-                      ? "primary"
-                      : index === siteConfig.navMenuItems.length - 1
-                        ? "danger"
-                        : "foreground"
-                  }),
+                  linkStyles({ color: "foreground" }),
                   "w-full"
                 )}
                 href={item.href}
