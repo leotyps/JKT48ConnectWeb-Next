@@ -2,7 +2,7 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "JKT48Connect - Valzyy",
-  description: "Make beautiful websites regardless of your design experience.",
+  description: "JKT48Connect adalah platform terbaik untuk melihat jadwal live JKT48, event, theater, news, lineup, dan showroom terbaru. Dapatkan update real-time tentang aktivitas member JKT48 hanya di sini!.",
   navItems: [
     {
       label: "Home",
