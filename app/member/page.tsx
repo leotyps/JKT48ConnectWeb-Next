@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardBody, CardFooter, Image, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, Link, Input, Select, SelectItem, Button } from "@heroui/react";
-import { Search, X } from "lucide-react";
 
 interface Social {
   title: string;
@@ -193,7 +192,11 @@ export default function JKT48Members() {
               <Input
                 isClearable
                 placeholder="Search by name, nickname, or generation..."
-                startContent={<Search className="w-4 h-4" />}
+                startContent={
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                }
                 value={searchQuery}
                 onValueChange={setSearchQuery}
                 className="flex-1"
@@ -241,7 +244,9 @@ export default function JKT48Members() {
                     onPress={clearFilters}
                     aria-label="Clear filters"
                   >
-                    <X className="w-4 h-4" />
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </Button>
                 )}
               </div>
