@@ -55,12 +55,15 @@ export default function JKT48LivePlayer() {
   const [loading, setLoading] = useState(true);
   const [memberName, setMemberName] = useState<string>("");
   const [chatConnected, setChatConnected] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<string>('Disconnected');
   const [error, setError] = useState<string>("");
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
   const showroomIntervalRef = useRef<NodeJS.Timeout>();
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Get member name from URL query parameter
   useEffect(() => {
@@ -90,8 +93,9 @@ export default function JKT48LivePlayer() {
         if (memberLive) {
           setLiveData(memberLive);
           
-          // Start chat stream based on type
+          // Start chat stream based on type immediately without waiting
           if (memberLive.type === 'idn') {
+            // Start IDN chat stream immediately in background
             startIdnSSEStream(memberLive.url_key, memberLive.slug);
           } else if (memberLive.type === 'showroom') {
             startShowroomSSEStream(memberLive.room_id);
@@ -117,15 +121,27 @@ export default function JKT48LivePlayer() {
       if (showroomIntervalRef.current) {
         clearInterval(showroomIntervalRef.current);
       }
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
   }, [memberName]);
 
-  // Start IDN SSE stream using external API
+  // Start IDN SSE stream with immediate connection and background loading
   const startIdnSSEStream = (urlKey: string, slug: string) => {
+    // Show loading state but don't block UI
+    setChatLoading(true);
+    setConnectionStatus('Connecting...');
+    
     try {
       // Close existing connection if any
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
+      }
+
+      // Clear any pending reconnection
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
       }
 
       // Create SSE connection to external API
@@ -134,34 +150,57 @@ export default function JKT48LivePlayer() {
       
       eventSourceRef.current = eventSource;
 
+      // Set connection timeout - if no data received in 30 seconds, show as connected anyway
+      const connectionTimeout = setTimeout(() => {
+        if (!chatConnected) {
+          setConnectionStatus('Waiting for messages...');
+          setChatLoading(false);
+        }
+      }, 120000);
+
       eventSource.onopen = () => {
         console.log('IDN SSE connection opened');
+        setConnectionStatus('Connected');
+        setChatLoading(false);
         setChatConnected(true);
+        clearTimeout(connectionTimeout);
       };
 
       eventSource.onmessage = (event) => {
+        // Clear loading state as soon as we receive any message
+        setChatLoading(false);
+        setConnectionStatus('Live');
+        setChatConnected(true);
+        clearTimeout(connectionTimeout);
+
         try {
-          // Parse the incoming data - assuming it comes as JSON
+          // Parse the incoming data
           const data = JSON.parse(event.data);
           
           if (data.type === 'chat' && data.message) {
             setChatMessages(prev => {
               const newMessages = [...prev, data];
-              // Keep only last 50 messages for performance
               return newMessages.slice(-50);
             });
             scrollToBottom();
           } else if (data.type === 'connection') {
             console.log('IDN Connection status:', data.status);
-            setChatConnected(data.status === 'connected' || data.status === 'reused');
+            if (data.status === 'connected' || data.status === 'reused') {
+              setConnectionStatus('Connected');
+              setChatConnected(true);
+            }
+          } else if (data.type === 'auth') {
+            setConnectionStatus('Authenticated');
+          } else if (data.type === 'channel') {
+            setConnectionStatus('Joined channel');
           } else if (data.type === 'error') {
             console.error('IDN Chat error:', data.message);
+            setConnectionStatus('Error: ' + data.message);
             setChatConnected(false);
           }
         } catch (error) {
           // Handle case where data might be raw text instead of JSON
           try {
-            // Try to parse as chat message directly
             const lines = event.data.split('\n').filter((line: string) => line.trim());
             for (const line of lines) {
               try {
@@ -185,52 +224,78 @@ export default function JKT48LivePlayer() {
 
       eventSource.onerror = (error) => {
         console.error('IDN SSE connection error:', error);
+        clearTimeout(connectionTimeout);
         setChatConnected(false);
+        setChatLoading(false);
+        setConnectionStatus('Connection error');
         
-        // Try to reconnect after 5 seconds
-        setTimeout(() => {
+        // Try to reconnect after 10 seconds
+        reconnectTimeoutRef.current = setTimeout(() => {
           if (!eventSourceRef.current || eventSourceRef.current.readyState === EventSource.CLOSED) {
             console.log('Attempting to reconnect IDN SSE...');
+            setConnectionStatus('Reconnecting...');
             startIdnSSEStream(urlKey, slug);
           }
-        }, 5000);
+        }, 10000);
       };
 
     } catch (error) {
       console.error("Error starting IDN SSE stream:", error);
       setChatConnected(false);
+      setChatLoading(false);
+      setConnectionStatus('Failed to connect');
     }
   };
 
-  // Start Showroom SSE stream using external API
+  // Start Showroom SSE stream
   const startShowroomSSEStream = (roomId: number) => {
+    setChatLoading(true);
+    setConnectionStatus('Connecting...');
+    
     try {
-      // Close existing connection if any
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
       }
 
-      // Create SSE connection to external API for Showroom
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+
       const sseUrl = `https://v2.jkt48connect.my.id/api/jkt48/chat-stream-sr?room_id=${roomId}&apikey=JKTCONNECT`;
       const eventSource = new EventSource(sseUrl);
       
       eventSourceRef.current = eventSource;
 
+      const connectionTimeout = setTimeout(() => {
+        if (!chatConnected) {
+          setConnectionStatus('Waiting for comments...');
+          setChatLoading(false);
+        }
+      }, 15000);
+
       eventSource.onopen = () => {
         console.log('Showroom SSE connection opened');
+        setConnectionStatus('Connected');
+        setChatLoading(false);
         setChatConnected(true);
+        clearTimeout(connectionTimeout);
       };
 
       eventSource.onmessage = (event) => {
+        setChatLoading(false);
+        setConnectionStatus('Live');
+        setChatConnected(true);
+        clearTimeout(connectionTimeout);
+
         try {
           const data = JSON.parse(event.data);
           
-          // Handle Showroom comment structure
           if (data.comment_log && Array.isArray(data.comment_log)) {
-            setShowroomComments(data.comment_log.slice(-50)); // Keep last 50 comments
+            setShowroomComments(data.comment_log.slice(-50));
             scrollToBottom();
           } else if (data.type === 'error') {
             console.error('Showroom Chat error:', data.message);
+            setConnectionStatus('Error: ' + data.message);
             setChatConnected(false);
           }
         } catch (error) {
@@ -240,20 +305,25 @@ export default function JKT48LivePlayer() {
 
       eventSource.onerror = (error) => {
         console.error('Showroom SSE connection error:', error);
+        clearTimeout(connectionTimeout);
         setChatConnected(false);
+        setChatLoading(false);
+        setConnectionStatus('Connection error');
         
-        // Try to reconnect after 5 seconds
-        setTimeout(() => {
+        reconnectTimeoutRef.current = setTimeout(() => {
           if (!eventSourceRef.current || eventSourceRef.current.readyState === EventSource.CLOSED) {
             console.log('Attempting to reconnect Showroom SSE...');
+            setConnectionStatus('Reconnecting...');
             startShowroomSSEStream(roomId);
           }
-        }, 5000);
+        }, 10000);
       };
 
     } catch (error) {
       console.error("Error starting Showroom SSE stream:", error);
       setChatConnected(false);
+      setChatLoading(false);
+      setConnectionStatus('Failed to connect');
     }
   };
 
@@ -434,9 +504,12 @@ export default function JKT48LivePlayer() {
                 <div className="flex justify-between items-center w-full">
                   <h3 className="text-lg font-semibold">Live Chat</h3>
                   <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${chatConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                    <div className={`w-2 h-2 rounded-full ${
+                      chatConnected ? 'bg-green-500 animate-pulse' : 
+                      chatLoading ? 'bg-yellow-500 animate-pulse' : 'bg-red-500'
+                    }`} />
                     <span className="text-tiny text-default-500">
-                      {chatConnected ? 'Connected' : 'Disconnected'}
+                      {connectionStatus}
                     </span>
                   </div>
                 </div>
@@ -447,7 +520,13 @@ export default function JKT48LivePlayer() {
                   className="flex-1 h-full"
                 >
                   <div className="flex flex-col gap-2">
-                    {liveData.type === 'idn' ? (
+                    {chatLoading ? (
+                      <div className="text-center text-default-500 py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                        <p>Connecting to chat...</p>
+                        <p className="text-tiny">Please wait while we establish connection</p>
+                      </div>
+                    ) : liveData.type === 'idn' ? (
                       // IDN Chat Messages
                       chatMessages.length === 0 ? (
                         <div className="text-center text-default-500 py-8">
