@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useRef } from "react";
@@ -58,7 +59,8 @@ export default function JKT48LivePlayer() {
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const chatIntervalRef = useRef<NodeJS.Timeout>();
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const showroomIntervalRef = useRef<NodeJS.Timeout>();
 
   // Get member name from URL query parameter
   useEffect(() => {
@@ -90,9 +92,9 @@ export default function JKT48LivePlayer() {
           
           // Start chat stream based on type
           if (memberLive.type === 'idn') {
-            startIdnChatStream(memberLive.url_key, memberLive.slug);
+            startIdnSSEStream(memberLive.url_key, memberLive.slug);
           } else if (memberLive.type === 'showroom') {
-            startShowroomChatStream(memberLive.room_id);
+            startShowroomSSEStream(memberLive.room_id);
           }
         } else {
           setError(`Live stream for ${memberName} not found or not currently streaming.`);
@@ -108,83 +110,150 @@ export default function JKT48LivePlayer() {
     fetchLiveData();
 
     return () => {
-      if (chatIntervalRef.current) {
-        clearInterval(chatIntervalRef.current);
+      // Cleanup connections
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+      if (showroomIntervalRef.current) {
+        clearInterval(showroomIntervalRef.current);
       }
     };
   }, [memberName]);
 
-  // Start IDN chat stream
-  const startIdnChatStream = async (username: string, slug: string) => {
+  // Start IDN SSE stream using external API
+  const startIdnSSEStream = (urlKey: string, slug: string) => {
     try {
-      const jkt48Api = require('@jkt48/core');
-      const apiKey = 'JKTCONNECT';
+      // Close existing connection if any
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+
+      // Create SSE connection to external API
+      const sseUrl = `https://v2.jkt48connect.my.id/api/jkt48/chat-stream?username=${encodeURIComponent(urlKey)}&slug=${encodeURIComponent(slug)}&apikey=JKTCONNECT`;
+      const eventSource = new EventSource(sseUrl);
       
-      // Simulate WebSocket connection by polling
-      const pollChat = async () => {
+      eventSourceRef.current = eventSource;
+
+      eventSource.onopen = () => {
+        console.log('IDN SSE connection opened');
+        setChatConnected(true);
+      };
+
+      eventSource.onmessage = (event) => {
         try {
-          const chatStream = await jkt48Api.chatStream(username, slug, apiKey);
+          // Parse the incoming data - assuming it comes as JSON
+          const data = JSON.parse(event.data);
           
-          // Handle different response types
-          if (typeof chatStream === 'string') {
-            const lines = chatStream.split('\n').filter(line => line.trim());
+          if (data.type === 'chat' && data.message) {
+            setChatMessages(prev => {
+              const newMessages = [...prev, data];
+              // Keep only last 50 messages for performance
+              return newMessages.slice(-50);
+            });
+            scrollToBottom();
+          } else if (data.type === 'connection') {
+            console.log('IDN Connection status:', data.status);
+            setChatConnected(data.status === 'connected' || data.status === 'reused');
+          } else if (data.type === 'error') {
+            console.error('IDN Chat error:', data.message);
+            setChatConnected(false);
+          }
+        } catch (error) {
+          // Handle case where data might be raw text instead of JSON
+          try {
+            // Try to parse as chat message directly
+            const lines = event.data.split('\n').filter((line: string) => line.trim());
             for (const line of lines) {
               try {
-                const data = JSON.parse(line);
-                if (data.type === 'chat' && data.message) {
-                  setChatMessages(prev => [...prev.slice(-49), data]); // Keep last 50 messages
+                const chatData = JSON.parse(line);
+                if (chatData.type === 'chat' && chatData.message) {
+                  setChatMessages(prev => {
+                    const newMessages = [...prev, chatData];
+                    return newMessages.slice(-50);
+                  });
                   scrollToBottom();
                 }
               } catch (e) {
                 // Skip invalid JSON lines
               }
             }
+          } catch (parseError) {
+            console.error('Error parsing IDN SSE data:', parseError);
           }
-          
-          setChatConnected(true);
-        } catch (error) {
-          console.error("Error polling chat:", error);
-          setChatConnected(false);
         }
       };
 
-      // Poll every 2 seconds
-      chatIntervalRef.current = setInterval(pollChat, 2000);
-      pollChat(); // Initial call
-      
+      eventSource.onerror = (error) => {
+        console.error('IDN SSE connection error:', error);
+        setChatConnected(false);
+        
+        // Try to reconnect after 5 seconds
+        setTimeout(() => {
+          if (!eventSourceRef.current || eventSourceRef.current.readyState === EventSource.CLOSED) {
+            console.log('Attempting to reconnect IDN SSE...');
+            startIdnSSEStream(urlKey, slug);
+          }
+        }, 5000);
+      };
+
     } catch (error) {
-      console.error("Error starting IDN chat stream:", error);
+      console.error("Error starting IDN SSE stream:", error);
+      setChatConnected(false);
     }
   };
 
-  // Start Showroom chat stream
-  const startShowroomChatStream = async (roomId: number) => {
+  // Start Showroom SSE stream using external API
+  const startShowroomSSEStream = (roomId: number) => {
     try {
-      const jkt48Api = require('@jkt48/core');
-      const apiKey = 'JKTCONNECT';
+      // Close existing connection if any
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+
+      // Create SSE connection to external API for Showroom
+      const sseUrl = `https://v2.jkt48connect.my.id/api/jkt48/chat-stream-sr?room_id=${roomId}&apikey=JKTCONNECT`;
+      const eventSource = new EventSource(sseUrl);
       
-      const pollChat = async () => {
+      eventSourceRef.current = eventSource;
+
+      eventSource.onopen = () => {
+        console.log('Showroom SSE connection opened');
+        setChatConnected(true);
+      };
+
+      eventSource.onmessage = (event) => {
         try {
-          const chatStreamSR = await jkt48Api.chatStreamSR(roomId, apiKey);
+          const data = JSON.parse(event.data);
           
-          if (chatStreamSR && chatStreamSR.comment_log) {
-            setShowroomComments(chatStreamSR.comment_log.slice(-50)); // Keep last 50 comments
+          // Handle Showroom comment structure
+          if (data.comment_log && Array.isArray(data.comment_log)) {
+            setShowroomComments(data.comment_log.slice(-50)); // Keep last 50 comments
             scrollToBottom();
+          } else if (data.type === 'error') {
+            console.error('Showroom Chat error:', data.message);
+            setChatConnected(false);
           }
-          
-          setChatConnected(true);
         } catch (error) {
-          console.error("Error polling Showroom chat:", error);
-          setChatConnected(false);
+          console.error('Error parsing Showroom SSE data:', error);
         }
       };
 
-      // Poll every 3 seconds for Showroom
-      chatIntervalRef.current = setInterval(pollChat, 3000);
-      pollChat(); // Initial call
-      
+      eventSource.onerror = (error) => {
+        console.error('Showroom SSE connection error:', error);
+        setChatConnected(false);
+        
+        // Try to reconnect after 5 seconds
+        setTimeout(() => {
+          if (!eventSourceRef.current || eventSourceRef.current.readyState === EventSource.CLOSED) {
+            console.log('Attempting to reconnect Showroom SSE...');
+            startShowroomSSEStream(roomId);
+          }
+        }, 5000);
+      };
+
     } catch (error) {
-      console.error("Error starting Showroom chat stream:", error);
+      console.error("Error starting Showroom SSE stream:", error);
+      setChatConnected(false);
     }
   };
 
@@ -365,7 +434,7 @@ export default function JKT48LivePlayer() {
                 <div className="flex justify-between items-center w-full">
                   <h3 className="text-lg font-semibold">Live Chat</h3>
                   <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${chatConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+                    <div className={`w-2 h-2 rounded-full ${chatConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
                     <span className="text-tiny text-default-500">
                       {chatConnected ? 'Connected' : 'Disconnected'}
                     </span>
