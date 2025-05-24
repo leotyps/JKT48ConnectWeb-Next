@@ -110,7 +110,13 @@ export default function JKT48LivePlayer() {
           
           // Start chat stream based on type
           if (memberLive.type === 'idn') {
-            connectIdnWebSocket(memberLive.url_key, memberLive.slug);
+            // Check if slug exists before connecting
+            if (memberLive.slug) {
+              connectIdnWebSocket(memberLive.url_key, memberLive.slug);
+            } else {
+              console.error('IDN stream missing slug parameter');
+              setError('IDN stream configuration is incomplete (missing slug).');
+            }
           } else if (memberLive.type === 'showroom') {
             startShowroomPolling(memberLive.room_id);
           }
@@ -325,7 +331,7 @@ export default function JKT48LivePlayer() {
 
   // Manual reconnect function
   const handleReconnect = () => {
-    if (liveData?.type === 'idn') {
+    if (liveData?.type === 'idn' && liveData.slug) {
       connectIdnWebSocket(liveData.url_key, liveData.slug);
     }
   };
@@ -565,7 +571,7 @@ export default function JKT48LivePlayer() {
                         {chatConnected ? 'Connected' : 'Disconnected'}
                       </span>
                     </div>
-                    {!chatConnected && liveData.type === 'idn' && (
+                    {!chatConnected && liveData.type === 'idn' && liveData.slug && (
                       <Button
                         size="sm"
                         color="primary"
