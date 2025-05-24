@@ -55,13 +55,11 @@ export default function JKT48LivePlayer() {
   const [loading, setLoading] = useState(true);
   const [memberName, setMemberName] = useState<string>("");
   const [chatConnected, setChatConnected] = useState(false);
-  const [chatLoading, setChatLoading] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<string>('Disconnected');
   const [error, setError] = useState<string>("");
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const eventSourceRef = useRef<EventSource | null>(null);
+  const webSocketRef = useRef<WebSocket | null>(null);
   const showroomIntervalRef = useRef<NodeJS.Timeout>();
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -93,12 +91,11 @@ export default function JKT48LivePlayer() {
         if (memberLive) {
           setLiveData(memberLive);
           
-          // Start chat stream based on type immediately without waiting
+          // Start chat stream based on type
           if (memberLive.type === 'idn') {
-            // Start IDN chat stream immediately in background
-            startIdnSSEStream(memberLive.url_key, memberLive.slug);
+            connectIdnWebSocket(memberLive.url_key, memberLive.slug);
           } else if (memberLive.type === 'showroom') {
-            startShowroomSSEStream(memberLive.room_id);
+            startShowroomPolling(memberLive.room_id);
           }
         } else {
           setError(`Live stream for ${memberName} not found or not currently streaming.`);
@@ -115,8 +112,8 @@ export default function JKT48LivePlayer() {
 
     return () => {
       // Cleanup connections
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
+      if (webSocketRef.current) {
+        webSocketRef.current.close();
       }
       if (showroomIntervalRef.current) {
         clearInterval(showroomIntervalRef.current);
@@ -127,203 +124,155 @@ export default function JKT48LivePlayer() {
     };
   }, [memberName]);
 
-  // Start IDN SSE stream with immediate connection and background loading
-  const startIdnSSEStream = (urlKey: string, slug: string) => {
-    // Show loading state but don't block UI
-    setChatLoading(true);
-    setConnectionStatus('Connecting...');
-    
+  // Get channel ID for IDN chat
+  const getChannelId = async (username: string, slug: string): Promise<string> => {
     try {
-      // Close existing connection if any
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
+      const response = await fetch(
+        `https://fskhri.online/api/chat-proxy?username=${username}&slug=${slug}`
+      );
+      const data = await response.json();
+      if (!data.channelId) {
+        throw new Error('Chat ID not found in response');
       }
-
-      // Clear any pending reconnection
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-
-      // Create SSE connection to external API
-      const sseUrl = `https://v2.jkt48connect.my.id/api/jkt48/chat-stream?username=${encodeURIComponent(urlKey)}&slug=${encodeURIComponent(slug)}&apikey=JKTCONNECT`;
-      const eventSource = new EventSource(sseUrl);
-      
-      eventSourceRef.current = eventSource;
-
-      // Set connection timeout - if no data received in 30 seconds, show as connected anyway
-      const connectionTimeout = setTimeout(() => {
-        if (!chatConnected) {
-          setConnectionStatus('Waiting for messages...');
-          setChatLoading(false);
-        }
-      }, 120000);
-
-      eventSource.onopen = () => {
-        console.log('IDN SSE connection opened');
-        setConnectionStatus('Connected');
-        setChatLoading(false);
-        setChatConnected(true);
-        clearTimeout(connectionTimeout);
-      };
-
-      eventSource.onmessage = (event) => {
-        // Clear loading state as soon as we receive any message
-        setChatLoading(false);
-        setConnectionStatus('Live');
-        setChatConnected(true);
-        clearTimeout(connectionTimeout);
-
-        try {
-          // Parse the incoming data
-          const data = JSON.parse(event.data);
-          
-          if (data.type === 'chat' && data.message) {
-            setChatMessages(prev => {
-              const newMessages = [...prev, data];
-              return newMessages.slice(-50);
-            });
-            scrollToBottom();
-          } else if (data.type === 'connection') {
-            console.log('IDN Connection status:', data.status);
-            if (data.status === 'connected' || data.status === 'reused') {
-              setConnectionStatus('Connected');
-              setChatConnected(true);
-            }
-          } else if (data.type === 'auth') {
-            setConnectionStatus('Authenticated');
-          } else if (data.type === 'channel') {
-            setConnectionStatus('Joined channel');
-          } else if (data.type === 'error') {
-            console.error('IDN Chat error:', data.message);
-            setConnectionStatus('Error: ' + data.message);
-            setChatConnected(false);
-          }
-        } catch (error) {
-          // Handle case where data might be raw text instead of JSON
-          try {
-            const lines = event.data.split('\n').filter((line: string) => line.trim());
-            for (const line of lines) {
-              try {
-                const chatData = JSON.parse(line);
-                if (chatData.type === 'chat' && chatData.message) {
-                  setChatMessages(prev => {
-                    const newMessages = [...prev, chatData];
-                    return newMessages.slice(-50);
-                  });
-                  scrollToBottom();
-                }
-              } catch (e) {
-                // Skip invalid JSON lines
-              }
-            }
-          } catch (parseError) {
-            console.error('Error parsing IDN SSE data:', parseError);
-          }
-        }
-      };
-
-      eventSource.onerror = (error) => {
-        console.error('IDN SSE connection error:', error);
-        clearTimeout(connectionTimeout);
-        setChatConnected(false);
-        setChatLoading(false);
-        setConnectionStatus('Connection error');
-        
-        // Try to reconnect after 10 seconds
-        reconnectTimeoutRef.current = setTimeout(() => {
-          if (!eventSourceRef.current || eventSourceRef.current.readyState === EventSource.CLOSED) {
-            console.log('Attempting to reconnect IDN SSE...');
-            setConnectionStatus('Reconnecting...');
-            startIdnSSEStream(urlKey, slug);
-          }
-        }, 10000);
-      };
-
+      return data.channelId;
     } catch (error) {
-      console.error("Error starting IDN SSE stream:", error);
-      setChatConnected(false);
-      setChatLoading(false);
-      setConnectionStatus('Failed to connect');
+      console.error('Failed to get channel ID:', error);
+      throw error;
     }
   };
 
-  // Start Showroom SSE stream
-  const startShowroomSSEStream = (roomId: number) => {
-    setChatLoading(true);
-    setConnectionStatus('Connecting...');
-    
+  // Connect to IDN WebSocket
+  const connectIdnWebSocket = async (username: string, slug: string) => {
     try {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
+      // Close existing connection if any
+      if (webSocketRef.current) {
+        webSocketRef.current.close();
       }
 
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-
-      const sseUrl = `https://v2.jkt48connect.my.id/api/jkt48/chat-stream-sr?room_id=${roomId}&apikey=JKTCONNECT`;
-      const eventSource = new EventSource(sseUrl);
+      const channelId = await getChannelId(username, slug);
+      const ws = new WebSocket('wss://chat.idn.app');
+      webSocketRef.current = ws;
       
-      eventSourceRef.current = eventSource;
-
-      const connectionTimeout = setTimeout(() => {
-        if (!chatConnected) {
-          setConnectionStatus('Waiting for comments...');
-          setChatLoading(false);
-        }
-      }, 15000);
-
-      eventSource.onopen = () => {
-        console.log('Showroom SSE connection opened');
-        setConnectionStatus('Connected');
-        setChatLoading(false);
+      const nickname = 'user_' + Math.random().toString(36).substring(2, 8);
+      let isAuthenticated = false;
+      let hasJoinedChannel = false;
+      
+      ws.onopen = () => {
+        console.log('WebSocket connected');
         setChatConnected(true);
-        clearTimeout(connectionTimeout);
+        ws.send('NICK ' + nickname);
+        ws.send('USER websocket 0 * :WebSocket User');
       };
-
-      eventSource.onmessage = (event) => {
-        setChatLoading(false);
-        setConnectionStatus('Live');
-        setChatConnected(true);
-        clearTimeout(connectionTimeout);
-
-        try {
-          const data = JSON.parse(event.data);
-          
-          if (data.comment_log && Array.isArray(data.comment_log)) {
-            setShowroomComments(data.comment_log.slice(-50));
-            scrollToBottom();
-          } else if (data.type === 'error') {
-            console.error('Showroom Chat error:', data.message);
-            setConnectionStatus('Error: ' + data.message);
-            setChatConnected(false);
-          }
-        } catch (error) {
-          console.error('Error parsing Showroom SSE data:', error);
-        }
-      };
-
-      eventSource.onerror = (error) => {
-        console.error('Showroom SSE connection error:', error);
-        clearTimeout(connectionTimeout);
-        setChatConnected(false);
-        setChatLoading(false);
-        setConnectionStatus('Connection error');
+      
+      ws.onmessage = (event) => {
+        const message = event.data;
         
-        reconnectTimeoutRef.current = setTimeout(() => {
-          if (!eventSourceRef.current || eventSourceRef.current.readyState === EventSource.CLOSED) {
-            console.log('Attempting to reconnect Showroom SSE...');
-            setConnectionStatus('Reconnecting...');
-            startShowroomSSEStream(roomId);
+        if (message.startsWith('PING')) {
+          ws.send('PONG' + message.substring(4));
+          return;
+        }
+        
+        if (message.includes('001') && !isAuthenticated) {
+          isAuthenticated = true;
+          ws.send('JOIN #' + channelId);
+          console.log('Authenticated and joining channel:', channelId);
+          return;
+        }
+        
+        if (message.includes('JOIN') && !hasJoinedChannel) {
+          hasJoinedChannel = true;
+          console.log('Successfully joined channel');
+          return;
+        }
+        
+        if (message.includes('PRIVMSG')) {
+          const messageMatch = message.match(/PRIVMSG #[^ ]+ :(.*)/);
+          if (messageMatch) {
+            try {
+              const chatData = JSON.parse(messageMatch[1]);
+              if (chatData?.chat) {
+                const chatMessage: ChatMessage = {
+                  type: 'chat',
+                  user: chatData.user,
+                  message: chatData.chat.message,
+                  timestamp: chatData.timestamp || Date.now()
+                };
+                
+                setChatMessages(prev => {
+                  const newMessages = [...prev, chatMessage];
+                  // Keep only last 50 messages for performance
+                  return newMessages.slice(-50);
+                });
+                scrollToBottom();
+              }
+            } catch (parseError) {
+              console.error('Failed to parse message:', parseError);
+            }
           }
-        }, 10000);
+        }
+      };
+      
+      ws.onclose = (event) => {
+        console.log('WebSocket disconnected:', event.code, event.reason);
+        setChatConnected(false);
+        webSocketRef.current = null;
+        
+        // Reconnect after 5 seconds if not manually closed
+        if (event.code !== 1000) {
+          reconnectTimeoutRef.current = setTimeout(() => {
+            console.log('Attempting to reconnect...');
+            connectIdnWebSocket(username, slug);
+          }, 5000);
+        }
+      };
+      
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setChatConnected(false);
+      };
+      
+    } catch (error) {
+      console.error('Failed to set up WebSocket:', error);
+      setChatConnected(false);
+      
+      // Retry connection after 5 seconds
+      reconnectTimeoutRef.current = setTimeout(() => {
+        connectIdnWebSocket(username, slug);
+      }, 5000);
+    }
+  };
+
+  // Start Showroom polling (keep as is since Showroom doesn't have WebSocket)
+  const startShowroomPolling = async (roomId: number) => {
+    try {
+      const pollComments = async () => {
+        try {
+          const response = await fetch(`/api/jkt48/chat-stream-sr?room_id=${roomId}&apikey=JKTCONNECT`);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          if (data && data.comment_log) {
+            setShowroomComments(data.comment_log.slice(-50)); // Keep last 50 comments
+            scrollToBottom();
+          }
+          
+          setChatConnected(true);
+        } catch (error) {
+          console.error("Error polling Showroom comments:", error);
+          setChatConnected(false);
+        }
       };
 
+      // Poll every 3 seconds for Showroom
+      showroomIntervalRef.current = setInterval(pollComments, 3000);
+      pollComments(); // Initial call
+      
     } catch (error) {
-      console.error("Error starting Showroom SSE stream:", error);
-      setChatConnected(false);
-      setChatLoading(false);
-      setConnectionStatus('Failed to connect');
+      console.error("Error starting Showroom polling:", error);
     }
   };
 
@@ -355,6 +304,13 @@ export default function JKT48LivePlayer() {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  // Manual reconnect function
+  const handleReconnect = () => {
+    if (liveData?.type === 'idn') {
+      connectIdnWebSocket(liveData.url_key, liveData.slug);
+    }
   };
 
   if (loading) {
@@ -504,13 +460,20 @@ export default function JKT48LivePlayer() {
                 <div className="flex justify-between items-center w-full">
                   <h3 className="text-lg font-semibold">Live Chat</h3>
                   <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${
-                      chatConnected ? 'bg-green-500 animate-pulse' : 
-                      chatLoading ? 'bg-yellow-500 animate-pulse' : 'bg-red-500'
-                    }`} />
+                    <div className={`w-2 h-2 rounded-full ${chatConnected ? 'bg-green-500' : 'bg-red-500'}`} />
                     <span className="text-tiny text-default-500">
-                      {connectionStatus}
+                      {chatConnected ? 'Connected' : 'Disconnected'}
                     </span>
+                    {!chatConnected && liveData.type === 'idn' && (
+                      <Button
+                        size="sm"
+                        color="primary"
+                        variant="light"
+                        onClick={handleReconnect}
+                      >
+                        Reconnect
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -520,18 +483,14 @@ export default function JKT48LivePlayer() {
                   className="flex-1 h-full"
                 >
                   <div className="flex flex-col gap-2">
-                    {chatLoading ? (
-                      <div className="text-center text-default-500 py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                        <p>Connecting to chat...</p>
-                        <p className="text-tiny">Please wait while we establish connection</p>
-                      </div>
-                    ) : liveData.type === 'idn' ? (
+                    {liveData.type === 'idn' ? (
                       // IDN Chat Messages
                       chatMessages.length === 0 ? (
                         <div className="text-center text-default-500 py-8">
                           <p>No messages yet...</p>
-                          <p className="text-tiny">Waiting for chat messages</p>
+                          <p className="text-tiny">
+                            {chatConnected ? 'Waiting for chat messages' : 'Connecting to chat...'}
+                          </p>
                         </div>
                       ) : (
                         chatMessages.map((msg, index) => (
