@@ -60,14 +60,13 @@ export default function JKT48LivePlayer() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const chatIntervalRef = useRef<NodeJS.Timeout>();
 
-  // Get member name from URL path
+  // Get member name from URL query parameter
   useEffect(() => {
-    const path = window.location.pathname;
-    const pathParts = path.split('/');
-    const nameFromPath = pathParts[pathParts.length - 1];
+    const urlParams = new URLSearchParams(window.location.search);
+    const nameFromQuery = urlParams.get('name');
     
-    if (nameFromPath && nameFromPath !== 'live') {
-      setMemberName(nameFromPath.toLowerCase());
+    if (nameFromQuery) {
+      setMemberName(nameFromQuery.toLowerCase());
     }
   }, []);
 
@@ -226,7 +225,7 @@ export default function JKT48LivePlayer() {
           <Breadcrumbs className="mb-6">
             <BreadcrumbItem href="/">Home</BreadcrumbItem>
             <BreadcrumbItem href="/live">Live</BreadcrumbItem>
-            <BreadcrumbItem>{memberName}</BreadcrumbItem>
+            <BreadcrumbItem>{memberName || 'Loading...'}</BreadcrumbItem>
           </Breadcrumbs>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -261,7 +260,7 @@ export default function JKT48LivePlayer() {
           <Breadcrumbs className="mb-6">
             <BreadcrumbItem href="/">Home</BreadcrumbItem>
             <BreadcrumbItem href="/live">Live</BreadcrumbItem>
-            <BreadcrumbItem>{memberName}</BreadcrumbItem>
+            <BreadcrumbItem>{memberName || 'Unknown'}</BreadcrumbItem>
           </Breadcrumbs>
           
           <Card className="max-w-md mx-auto">
@@ -269,7 +268,7 @@ export default function JKT48LivePlayer() {
               <div className="text-6xl mb-4">😔</div>
               <h3 className="text-xl font-semibold mb-2">Stream Not Available</h3>
               <p className="text-default-500 mb-4">
-                {error || `${memberName} is not currently streaming.`}
+                {error || `${memberName || 'Member'} is not currently streaming.`}
               </p>
               <Button 
                 color="primary" 
