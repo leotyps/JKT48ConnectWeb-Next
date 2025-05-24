@@ -1,8 +1,7 @@
-
 "use client"
 
 import { useState, useEffect, useRef } from "react";
-import { Card, CardBody, CardHeader, Avatar, Button, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, ScrollShadow } from "@heroui/react";
+import { Card, CardBody, CardHeader, Avatar, Button, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, ScrollShadow, Divider } from "@heroui/react";
 
 interface LiveData {
   name: string;
@@ -56,6 +55,7 @@ export default function JKT48LivePlayer() {
   const [memberName, setMemberName] = useState<string>("");
   const [chatConnected, setChatConnected] = useState(false);
   const [error, setError] = useState<string>("");
+  const [videoAspectRatio, setVideoAspectRatio] = useState<'landscape' | 'portrait' | 'square'>('landscape');
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -72,6 +72,22 @@ export default function JKT48LivePlayer() {
       setMemberName(nameFromQuery.toLowerCase());
     }
   }, []);
+
+  // Detect video aspect ratio
+  const handleVideoLoad = () => {
+    if (videoRef.current) {
+      const video = videoRef.current;
+      const aspectRatio = video.videoWidth / video.videoHeight;
+      
+      if (aspectRatio > 1.2) {
+        setVideoAspectRatio('landscape');
+      } else if (aspectRatio < 0.8) {
+        setVideoAspectRatio('portrait');
+      } else {
+        setVideoAspectRatio('square');
+      }
+    }
+  };
 
   // Fetch live data
   useEffect(() => {
@@ -247,7 +263,7 @@ export default function JKT48LivePlayer() {
     try {
       const pollComments = async () => {
         try {
-          const response = await fetch(`/api/jkt48/chat-stream-sr?room_id=${roomId}&apikey=JKTCONNECT`);
+          const response = await fetch(`https://v2.jkt48connect.my.id/api/jkt48/chat-stream-sr?room_id=${roomId}&apikey=JKTCONNECT`);
           
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -313,61 +329,101 @@ export default function JKT48LivePlayer() {
     }
   };
 
+  // Get video container styles based on aspect ratio
+  const getVideoContainerStyle = () => {
+    switch (videoAspectRatio) {
+      case 'portrait':
+        return { paddingBottom: '177.78%' }; // 9:16 ratio
+      case 'square':
+        return { paddingBottom: '100%' }; // 1:1 ratio
+      default:
+        return { paddingBottom: '56.25%' }; // 16:9 ratio
+    }
+  };
+
   if (loading) {
     return (
-      <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-        <div className="w-full max-w-7xl mx-auto px-4">
+      <div className="min-h-screen bg-gradient-to-br from-background to-default-50">
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
           <Breadcrumbs className="mb-6">
             <BreadcrumbItem href="/">Home</BreadcrumbItem>
             <BreadcrumbItem href="/live">Live</BreadcrumbItem>
             <BreadcrumbItem>{memberName || 'Loading...'}</BreadcrumbItem>
           </Breadcrumbs>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Skeleton className="rounded-lg">
-                <div className="w-full h-[400px] md:h-[500px] rounded-lg bg-default-300" />
-              </Skeleton>
-              <div className="mt-4">
-                <Skeleton className="w-3/4 rounded-lg">
-                  <div className="h-8 rounded-lg bg-default-300" />
-                </Skeleton>
-                <Skeleton className="w-1/2 rounded-lg mt-2">
-                  <div className="h-4 rounded-lg bg-default-300" />
-                </Skeleton>
-              </div>
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            <div className="xl:col-span-3">
+              <Card className="shadow-lg">
+                <CardBody className="p-0">
+                  <Skeleton className="rounded-lg">
+                    <div className="w-full h-[300px] md:h-[400px] lg:h-[500px] rounded-lg bg-default-300" />
+                  </Skeleton>
+                </CardBody>
+              </Card>
+              
+              <Card className="mt-4 shadow-lg">
+                <CardBody>
+                  <div className="flex items-start gap-4">
+                    <Skeleton className="rounded-full">
+                      <div className="w-16 h-16 rounded-full bg-default-300" />
+                    </Skeleton>
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="w-3/4 rounded-lg">
+                        <div className="h-8 rounded-lg bg-default-300" />
+                      </Skeleton>
+                      <Skeleton className="w-1/2 rounded-lg">
+                        <div className="h-4 rounded-lg bg-default-300" />
+                      </Skeleton>
+                      <Skeleton className="w-2/3 rounded-lg">
+                        <div className="h-4 rounded-lg bg-default-300" />
+                      </Skeleton>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
             </div>
-            <div className="lg:col-span-1">
-              <Skeleton className="rounded-lg">
-                <div className="w-full h-[400px] md:h-[500px] rounded-lg bg-default-300" />
-              </Skeleton>
+            
+            <div className="xl:col-span-1">
+              <Card className="h-[600px] shadow-lg">
+                <CardHeader>
+                  <Skeleton className="w-24 rounded-lg">
+                    <div className="h-6 rounded-lg bg-default-300" />
+                  </Skeleton>
+                </CardHeader>
+                <CardBody>
+                  <Skeleton className="w-full h-full rounded-lg">
+                    <div className="w-full h-full rounded-lg bg-default-300" />
+                  </Skeleton>
+                </CardBody>
+              </Card>
             </div>
           </div>
         </div>
-      </section>
+      </div>
     );
   }
 
   if (error || !liveData) {
     return (
-      <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-        <div className="w-full max-w-7xl mx-auto px-4">
+      <div className="min-h-screen bg-gradient-to-br from-background to-default-50 flex items-center justify-center">
+        <div className="container mx-auto px-4 max-w-7xl">
           <Breadcrumbs className="mb-6">
             <BreadcrumbItem href="/">Home</BreadcrumbItem>
             <BreadcrumbItem href="/live">Live</BreadcrumbItem>
             <BreadcrumbItem>{memberName || 'Unknown'}</BreadcrumbItem>
           </Breadcrumbs>
           
-          <Card className="max-w-md mx-auto">
-            <CardBody className="text-center py-8">
-              <div className="text-6xl mb-4">😔</div>
-              <h3 className="text-xl font-semibold mb-2">Stream Not Available</h3>
-              <p className="text-default-500 mb-4">
+          <Card className="max-w-md mx-auto shadow-xl border-0">
+            <CardBody className="text-center py-12">
+              <div className="text-8xl mb-6 opacity-50">😔</div>
+              <h3 className="text-2xl font-bold mb-3 text-foreground">Stream Not Available</h3>
+              <p className="text-default-500 mb-6 leading-relaxed">
                 {error || `${memberName || 'Member'} is not currently streaming.`}
               </p>
               <Button 
                 color="primary" 
-                variant="flat"
+                size="lg"
+                className="font-semibold"
                 onClick={() => window.history.back()}
               >
                 Go Back
@@ -375,32 +431,39 @@ export default function JKT48LivePlayer() {
             </CardBody>
           </Card>
         </div>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <div className="w-full max-w-7xl mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-background to-default-50">
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
         <Breadcrumbs className="mb-6">
           <BreadcrumbItem href="/">Home</BreadcrumbItem>
           <BreadcrumbItem href="/live">Live</BreadcrumbItem>
-          <BreadcrumbItem>{liveData.name}</BreadcrumbItem>
+          <BreadcrumbItem className="font-semibold">{liveData.name}</BreadcrumbItem>
         </Breadcrumbs>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Video Player */}
-          <div className="lg:col-span-2">
-            <Card className="overflow-hidden">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+          {/* Video Player Section */}
+          <div className="xl:col-span-3 space-y-4">
+            {/* Video Player */}
+            <Card className="overflow-hidden shadow-lg border-0">
               <CardBody className="p-0">
-                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                <div className="relative w-full bg-black flex items-center justify-center" 
+                     style={getVideoContainerStyle()}>
                   <video
                     ref={videoRef}
-                    className="absolute top-0 left-0 w-full h-full object-cover"
+                    className={`absolute top-0 left-0 w-full h-full ${
+                      videoAspectRatio === 'portrait' 
+                        ? 'object-contain' 
+                        : 'object-cover'
+                    }`}
                     controls
                     autoPlay
                     muted
                     poster={liveData.img}
+                    onLoadedMetadata={handleVideoLoad}
                   >
                     {liveData.streaming_url_list.map((stream, index) => (
                       <source
@@ -415,38 +478,71 @@ export default function JKT48LivePlayer() {
               </CardBody>
             </Card>
 
-            {/* Live Info */}
-            <Card className="mt-4">
-              <CardBody>
-                <div className="flex items-start gap-4">
+            {/* Stream Information */}
+            <Card className="shadow-lg border-0">
+              <CardBody className="p-6">
+                <div className="flex items-start gap-6">
                   <Avatar
                     src={liveData.img_alt || liveData.img}
                     size="lg"
                     name={liveData.name}
+                    className="ring-4 ring-primary/20"
                   />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h1 className="text-2xl font-bold">{liveData.name}</h1>
+                  <div className="flex-1 space-y-3">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+                        {liveData.name}
+                      </h1>
                       <Chip
                         color="danger"
-                        variant="flat"
-                        size="sm"
+                        variant="shadow"
+                        size="md"
                         startContent={
-                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                          <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
                         }
+                        className="font-semibold"
                       >
                         LIVE
                       </Chip>
-                      <Chip color="primary" variant="flat" size="sm">
+                      <Chip 
+                        color="primary" 
+                        variant="flat" 
+                        size="md"
+                        className="font-medium"
+                      >
                         {liveData.type.toUpperCase()}
                       </Chip>
                     </div>
-                    <p className="text-default-500 text-sm">
-                      Started at {formatStartedTime(liveData.started_at)}
-                    </p>
-                    <p className="text-default-500 text-sm">
-                      Stream Key: {liveData.url_key}
-                    </p>
+                    
+                    <div className="space-y-2 text-default-600">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">Started:</span>
+                        <span>{formatStartedTime(liveData.started_at)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">Stream Key:</span>
+                        <code className="bg-default-100 px-2 py-1 rounded text-sm">
+                          {liveData.url_key}
+                        </code>
+                      </div>
+                      {liveData.streaming_url_list.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Quality:</span>
+                          <div className="flex gap-2">
+                            {liveData.streaming_url_list.map((stream, index) => (
+                              <Chip
+                                key={index}
+                                size="sm"
+                                variant="flat"
+                                color="secondary"
+                              >
+                                {stream.label || `${stream.quality}p`}
+                              </Chip>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardBody>
@@ -454,70 +550,81 @@ export default function JKT48LivePlayer() {
           </div>
 
           {/* Chat Section */}
-          <div className="lg:col-span-1">
-            <Card className="h-[400px] md:h-[500px]">
-              <CardHeader className="pb-2">
+          <div className="xl:col-span-1">
+            <Card className="h-[600px] shadow-lg border-0">
+              <CardHeader className="pb-3 px-6 pt-6">
                 <div className="flex justify-between items-center w-full">
-                  <h3 className="text-lg font-semibold">Live Chat</h3>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${chatConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className="text-tiny text-default-500">
-                      {chatConnected ? 'Connected' : 'Disconnected'}
-                    </span>
+                  <h3 className="text-xl font-bold text-foreground">Live Chat</h3>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2.5 h-2.5 rounded-full ${
+                        chatConnected ? 'bg-success animate-pulse' : 'bg-danger'
+                      }`} />
+                      <span className="text-sm font-medium text-default-600">
+                        {chatConnected ? 'Connected' : 'Disconnected'}
+                      </span>
+                    </div>
                     {!chatConnected && liveData.type === 'idn' && (
                       <Button
                         size="sm"
                         color="primary"
                         variant="light"
                         onClick={handleReconnect}
+                        className="text-xs"
                       >
                         Reconnect
                       </Button>
                     )}
                   </div>
                 </div>
+                <Divider className="mt-3" />
               </CardHeader>
-              <CardBody className="pt-0">
+              
+              <CardBody className="pt-0 px-6 pb-6">
                 <ScrollShadow 
                   ref={chatContainerRef}
                   className="flex-1 h-full"
+                  hideScrollBar
                 >
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-3">
                     {liveData.type === 'idn' ? (
                       // IDN Chat Messages
                       chatMessages.length === 0 ? (
-                        <div className="text-center text-default-500 py-8">
-                          <p>No messages yet...</p>
-                          <p className="text-tiny">
-                            {chatConnected ? 'Waiting for chat messages' : 'Connecting to chat...'}
+                        <div className="text-center text-default-500 py-12 space-y-2">
+                          <div className="text-4xl opacity-50">💬</div>
+                          <p className="font-medium">No messages yet</p>
+                          <p className="text-sm">
+                            {chatConnected ? 'Waiting for chat messages...' : 'Connecting to chat...'}
                           </p>
                         </div>
                       ) : (
                         chatMessages.map((msg, index) => (
-                          <div key={`${msg.timestamp}-${index}`} className="flex gap-2 p-2 hover:bg-default-50 rounded-lg">
+                          <div key={`${msg.timestamp}-${index}`} 
+                               className="flex gap-3 p-3 hover:bg-default-50 rounded-xl transition-colors">
                             <Avatar
                               src={msg.user?.avatar_url}
                               size="sm"
                               name={msg.user?.name}
+                              className="flex-shrink-0"
                             />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <p className="text-sm font-medium truncate">
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-semibold truncate text-foreground">
                                   {msg.user?.name}
                                 </p>
                                 <Chip
                                   size="sm"
                                   variant="flat"
                                   color="primary"
-                                  className="text-tiny"
+                                  className="text-xs font-medium"
                                 >
                                   L{msg.user?.level_tier}
                                 </Chip>
                               </div>
-                              <p className="text-sm text-wrap break-words">
+                              <p className="text-sm text-foreground leading-relaxed break-words">
                                 {msg.message}
                               </p>
-                              <p className="text-tiny text-default-400">
+                              <p className="text-xs text-default-400">
                                 {msg.timestamp ? formatTime(msg.timestamp) : ''}
                               </p>
                             </div>
@@ -527,28 +634,29 @@ export default function JKT48LivePlayer() {
                     ) : (
                       // Showroom Comments
                       showroomComments.length === 0 ? (
-                        <div className="text-center text-default-500 py-8">
-                          <p>No comments yet...</p>
-                          <p className="text-tiny">Waiting for comments</p>
+                        <div className="text-center text-default-500 py-12 space-y-2">
+                          <div className="text-4xl opacity-50">💬</div>
+                          <p className="font-medium">No comments yet</p>
+                          <p className="text-sm">Waiting for comments...</p>
                         </div>
                       ) : (
                         showroomComments.map((comment, index) => (
-                          <div key={`${comment.created_at}-${index}`} className="flex gap-2 p-2 hover:bg-default-50 rounded-lg">
+                          <div key={`${comment.created_at}-${index}`} 
+                               className="flex gap-3 p-3 hover:bg-default-50 rounded-xl transition-colors">
                             <Avatar
                               src={comment.avatar_url}
                               size="sm"
                               name={comment.name}
+                              className="flex-shrink-0"
                             />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <p className="text-sm font-medium truncate">
-                                  {comment.name}
-                                </p>
-                              </div>
-                              <p className="text-sm text-wrap break-words">
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <p className="text-sm font-semibold truncate text-foreground">
+                                {comment.name}
+                              </p>
+                              <p className="text-sm text-foreground leading-relaxed break-words">
                                 {comment.comment}
                               </p>
-                              <p className="text-tiny text-default-400">
+                              <p className="text-xs text-default-400">
                                 {formatTime(comment.created_at * 1000)}
                               </p>
                             </div>
@@ -563,6 +671,6 @@ export default function JKT48LivePlayer() {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
