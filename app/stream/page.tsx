@@ -225,7 +225,7 @@ export default function JKT48LiveStreams() {
                   <Image
                     alt={`${stream.name} live stream`}
                     className="object-cover w-full h-60 z-0"
-                    src={stream.img_alt || stream.img}
+                    src={stream.img}
                   />
                   <div className="absolute top-2 left-2 z-10">
                     <Chip 
