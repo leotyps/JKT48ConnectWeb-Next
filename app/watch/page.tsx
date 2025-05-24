@@ -8,11 +8,11 @@ interface LiveData {
   img: string;
   img_alt: string;
   url_key: string;
-  slug?: string;
+  slug: string;
   room_id: number;
   is_graduate: boolean;
   is_group: boolean;
-  chat_room_id?: string;
+  chat_room_id: string;
   started_at: string;
   streaming_url_list: Array<{
     label: string;
@@ -20,7 +20,6 @@ interface LiveData {
     url: string;
   }>;
   type: string;
-  is_premium?: boolean;
 }
 
 interface ChatMessage {
@@ -110,13 +109,7 @@ export default function JKT48LivePlayer() {
           
           // Start chat stream based on type
           if (memberLive.type === 'idn') {
-            // Check if slug exists before connecting
-            if (memberLive.slug) {
-              connectIdnWebSocket(memberLive.url_key, memberLive.slug);
-            } else {
-              console.error('IDN stream missing slug parameter');
-              setError('IDN stream configuration is incomplete (missing slug).');
-            }
+            connectIdnWebSocket(memberLive.url_key, memberLive.slug);
           } else if (memberLive.type === 'showroom') {
             startShowroomPolling(memberLive.room_id);
           }
@@ -270,7 +263,7 @@ export default function JKT48LivePlayer() {
     try {
       const pollComments = async () => {
         try {
-          const response = await fetch(`/api/jkt48/chat-stream-sr?room_id=${roomId}&apikey=JKTCONNECT`);
+          const response = await fetch(`https://v2.jkt48connect.my.id/api/jkt48/chat-stream-sr?room_id=${roomId}&apikey=JKTCONNECT`);
           
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -331,7 +324,7 @@ export default function JKT48LivePlayer() {
 
   // Manual reconnect function
   const handleReconnect = () => {
-    if (liveData?.type === 'idn' && liveData.slug) {
+    if (liveData?.type === 'idn') {
       connectIdnWebSocket(liveData.url_key, liveData.slug);
     }
   };
@@ -350,7 +343,7 @@ export default function JKT48LivePlayer() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-default-50">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           <Breadcrumbs className="mb-6">
             <BreadcrumbItem href="/">Home</BreadcrumbItem>
@@ -412,7 +405,7 @@ export default function JKT48LivePlayer() {
 
   if (error || !liveData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-default-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="container mx-auto px-4 max-w-7xl">
           <Breadcrumbs className="mb-6">
             <BreadcrumbItem href="/">Home</BreadcrumbItem>
@@ -443,7 +436,7 @@ export default function JKT48LivePlayer() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-default-50">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <Breadcrumbs className="mb-6">
           <BreadcrumbItem href="/">Home</BreadcrumbItem>
@@ -571,7 +564,7 @@ export default function JKT48LivePlayer() {
                         {chatConnected ? 'Connected' : 'Disconnected'}
                       </span>
                     </div>
-                    {!chatConnected && liveData.type === 'idn' && liveData.slug && (
+                    {!chatConnected && liveData.type === 'idn' && (
                       <Button
                         size="sm"
                         color="primary"
