@@ -347,7 +347,7 @@ export default function JKT48LivePlayer() {
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           <Breadcrumbs className="mb-6">
             <BreadcrumbItem href="/">Home</BreadcrumbItem>
-            <BreadcrumbItem href="/live">Live</BreadcrumbItem>
+            <BreadcrumbItem href="/stream">Stream</BreadcrumbItem>
             <BreadcrumbItem>{memberName || 'Loading...'}</BreadcrumbItem>
           </Breadcrumbs>
           
