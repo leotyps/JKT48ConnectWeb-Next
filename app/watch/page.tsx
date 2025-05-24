@@ -8,11 +8,11 @@ interface LiveData {
   img: string;
   img_alt: string;
   url_key: string;
-  slug: string;
+  slug?: string;
   room_id: number;
   is_graduate: boolean;
   is_group: boolean;
-  chat_room_id: string;
+  chat_room_id?: string;
   started_at: string;
   streaming_url_list: Array<{
     label: string;
@@ -20,6 +20,7 @@ interface LiveData {
     url: string;
   }>;
   type: string;
+  is_premium?: boolean;
 }
 
 interface ChatMessage {
@@ -263,7 +264,7 @@ export default function JKT48LivePlayer() {
     try {
       const pollComments = async () => {
         try {
-          const response = await fetch(`https://v2.jkt48connect.my.id/api/jkt48/chat-stream-sr?room_id=${roomId}&apikey=JKTCONNECT`);
+          const response = await fetch(`/api/jkt48/chat-stream-sr?room_id=${roomId}&apikey=JKTCONNECT`);
           
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
