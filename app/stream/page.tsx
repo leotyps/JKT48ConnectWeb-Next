@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { Card, CardHeader, CardBody, CardFooter, Divider, Image, Link, Skeleton, Breadcrumbs, BreadcrumbItem, Button, Chip } from "@heroui/react";
+import { Card, CardHeader, CardBody, CardFooter, Divider, Image, Link, Skeleton, Breadcrumbs, BreadcrumbItem, Button, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Avatar, Progress, Tabs, Tab } from "@heroui/react";
 
 interface LiveStream {
   name: string;
@@ -61,10 +61,103 @@ interface RecentLive {
   total_gift: string;
 }
 
+interface RecentLiveDetail {
+  author: string;
+  data_id: string;
+  live_id: string;
+  room_id: number;
+  room_info: {
+    name: string;
+    nickname: string;
+    fullname: string;
+    img: string;
+    img_alt: string;
+    url: string;
+    is_graduate: boolean;
+    is_group: boolean;
+    banner: string;
+    jikosokai: string;
+    generation: string;
+    group: string;
+  };
+  total_gifts: number;
+  gift_rate: number;
+  created_at: string;
+  idn?: {
+    id: string;
+    username: string;
+    slug: string;
+    title: string;
+    image: string;
+  };
+  live_info: {
+    duration: number;
+    gift: {
+      log: Array<{
+        gifts: Array<{
+          id: string;
+          num: number;
+          date: string;
+        }>;
+        total: number;
+        user_id: string;
+      }>;
+      next_page: boolean;
+      list: Array<{
+        name: string;
+        point: number;
+        id: string;
+        free: boolean;
+        img: string;
+        user_count: number;
+        num: number;
+      }>;
+    };
+    viewers: {
+      num: number;
+      active: number;
+      is_excitement: boolean;
+    };
+    comments: {
+      num: number;
+      users: number;
+    };
+    screenshot: {
+      folder: string;
+      format: string;
+      list: number[];
+    };
+    date: {
+      start: string;
+      end: string;
+    };
+    stage_list?: Array<{
+      date: string;
+      list: number[];
+    }>;
+  };
+  users?: Array<{
+    id: string;
+    name: string;
+    avatar_url: string;
+    comments: number;
+  }>;
+  fans?: Array<{
+    id: number;
+    name: string;
+    avatar_id: number;
+    fans_point: number;
+  }>;
+  type: "showroom" | "idn";
+}
+
 export default function JKT48LiveStreams() {
   const [liveData, setLiveData] = useState<LiveStream[]>([]);
   const [recentData, setRecentData] = useState<RecentLive[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedLive, setSelectedLive] = useState<RecentLiveDetail | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
   useEffect(() => {
     async function fetchLiveData() {
@@ -93,6 +186,26 @@ export default function JKT48LiveStreams() {
     const interval = setInterval(fetchLiveData, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const fetchLiveDetail = async (dataId: string) => {
+    setModalLoading(true);
+    try {
+      const jkt48Api = require('@jkt48/core');
+      const apiKey = 'JKTCONNECT';
+      
+      const recentDetail = await jkt48Api.recentDetail(dataId, apiKey);
+      setSelectedLive(recentDetail);
+    } catch (error) {
+      console.error("Error fetching live detail:", error);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleRecentLiveClick = async (recent: RecentLive) => {
+    onOpen();
+    await fetchLiveDetail(recent.data_id);
+  };
 
   // Format date to show relative time or specific time
   const formatDate = (dateString: string) => {
@@ -209,6 +322,170 @@ export default function JKT48LiveStreams() {
     return `https://www.showroom-live.com/r/${recent.member.url}`;
   };
 
+  const renderModalContent = () => {
+    if (modalLoading) {
+      return (
+        <div className="space-y-4">
+          <Skeleton className="h-4 w-3/4 rounded-lg" />
+          <Skeleton className="h-4 w-1/2 rounded-lg" />
+          <Skeleton className="h-32 w-full rounded-lg" />
+          <div className="grid grid-cols-2 gap-4">
+            <Skeleton className="h-20 rounded-lg" />
+            <Skeleton className="h-20 rounded-lg" />
+          </div>
+        </div>
+      );
+    }
+
+    if (!selectedLive) {
+      return <div className="text-center">Failed to load live stream details</div>;
+    }
+
+    return (
+      <div className="space-y-4">
+        {/* Member Info */}
+        <div className="flex gap-4 items-center">
+          <Image
+            src={selectedLive.room_info.img_alt || selectedLive.room_info.img}
+            alt={selectedLive.room_info.nickname}
+            className="w-16 h-16 object-cover"
+            radius="lg"
+          />
+          <div className="flex-1">
+            <h3 className="text-lg font-bold">{selectedLive.room_info.fullname}</h3>
+            <p className="text-sm text-default-500">{selectedLive.room_info.nickname}</p>
+            <div className="flex gap-2 mt-1">
+              <Chip size="sm" color="primary" variant="flat">
+                {selectedLive.room_info.generation}
+              </Chip>
+              <Chip size="sm" color="secondary" variant="flat">
+                {selectedLive.type.toUpperCase()}
+              </Chip>
+            </div>
+          </div>
+        </div>
+
+        {/* Stream Title for IDN */}
+        {selectedLive.idn?.title && (
+          <div>
+            <h4 className="font-semibold mb-2">Stream Title:</h4>
+            <p className="text-sm bg-default-100 p-3 rounded-lg">{selectedLive.idn.title}</p>
+          </div>
+        )}
+
+        {/* Stream Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-blue-50 p-3 rounded-lg text-center">
+            <p className="text-2xl font-bold text-blue-600">{formatViewers(selectedLive.live_info.viewers.num)}</p>
+            <p className="text-xs text-blue-600">Total Viewers</p>
+          </div>
+          <div className="bg-green-50 p-3 rounded-lg text-center">
+            <p className="text-2xl font-bold text-green-600">{formatViewers(selectedLive.live_info.viewers.active)}</p>
+            <p className="text-xs text-green-600">Active Viewers</p>
+          </div>
+          <div className="bg-purple-50 p-3 rounded-lg text-center">
+            <p className="text-2xl font-bold text-purple-600">{selectedLive.live_info.comments.num}</p>
+            <p className="text-xs text-purple-600">Comments</p>
+          </div>
+          <div className="bg-orange-50 p-3 rounded-lg text-center">
+            <p className="text-2xl font-bold text-orange-600">{formatDuration(selectedLive.live_info.duration)}</p>
+            <p className="text-xs text-orange-600">Duration</p>
+          </div>
+        </div>
+
+        {/* Tabs for different sections */}
+        <Tabs aria-label="Live stream details" className="w-full">
+          <Tab key="gifts" title={`Gifts (${selectedLive.live_info.gift.list.length})`}>
+            <div className="space-y-3 max-h-60 overflow-y-auto">
+              {selectedLive.live_info.gift.list.map((gift, index) => (
+                <div key={gift.id} className="flex items-center gap-3 p-2 bg-default-50 rounded-lg">
+                  <Image
+                    src={gift.img}
+                    alt={gift.name}
+                    className="w-8 h-8 object-cover"
+                    radius="sm"
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{gift.name}</p>
+                    <p className="text-xs text-default-500">{gift.point} points</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-sm">×{gift.num}</p>
+                    <p className="text-xs text-default-500">{gift.user_count} users</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Tab>
+          
+          <Tab key="users" title={`Top ${selectedLive.type === 'showroom' ? 'Fans' : 'Users'} (${selectedLive.type === 'showroom' ? (selectedLive.fans?.length || 0) : (selectedLive.users?.length || 0)})`}>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {selectedLive.type === 'showroom' ? (
+                selectedLive.fans?.slice(0, 10).map((fan, index) => (
+                  <div key={fan.id} className="flex items-center gap-3 p-2 bg-default-50 rounded-lg">
+                    <Avatar
+                      name={fan.name}
+                      size="sm"
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{fan.name}</p>
+                      <p className="text-xs text-default-500">{fan.fans_point} fans points</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                selectedLive.users?.slice(0, 10).map((user, index) => (
+                  <div key={user.id} className="flex items-center gap-3 p-2 bg-default-50 rounded-lg">
+                    <Avatar
+                      src={user.avatar_url}
+                      name={user.name}
+                      size="sm"
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{user.name}</p>
+                      <p className="text-xs text-default-500">{user.comments} comments</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </Tab>
+
+          <Tab key="info" title="Stream Info">
+            <div className="space-y-3">
+              <div>
+                <p className="font-medium text-sm mb-1">Stream Time:</p>
+                <p className="text-sm text-default-600">
+                  {new Date(selectedLive.live_info.date.start).toLocaleString('id-ID')} - {new Date(selectedLive.live_info.date.end).toLocaleString('id-ID')}
+                </p>
+              </div>
+              
+              {selectedLive.room_info.jikosokai && (
+                <div>
+                  <p className="font-medium text-sm mb-1">About:</p>
+                  <p className="text-sm text-default-600 bg-default-50 p-3 rounded-lg">
+                    {selectedLive.room_info.jikosokai}
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="font-medium">Total Gifts:</p>
+                  <p className="text-success-600 font-bold">{selectedLive.total_gifts}</p>
+                </div>
+                <div>
+                  <p className="font-medium">Gift Rate:</p>
+                  <p className="text-warning-600 font-bold">{selectedLive.gift_rate}</p>
+                </div>
+              </div>
+            </div>
+          </Tab>
+        </Tabs>
+      </div>
+    );
+  };
+
   return (
     <div className="w-full">
       {/* Breadcrumbs */}
@@ -305,7 +582,12 @@ export default function JKT48LiveStreams() {
             renderRecentSkeletons()
           ) : recentData.length > 0 ? (
             recentData.map((recent) => (
-              <Card key={recent._id} className="w-full">
+              <Card 
+                key={recent._id} 
+                className="w-full cursor-pointer hover:shadow-lg transition-shadow"
+                isPressable
+                onPress={() => handleRecentLiveClick(recent)}
+              >
                 <CardHeader className="flex gap-3">
                   <Image
                     alt={recent.member.nickname}
@@ -349,14 +631,25 @@ export default function JKT48LiveStreams() {
                 </CardBody>
                 <Divider />
                 <CardFooter className="py-2">
-                  <Link 
-                    isExternal 
-                    showAnchorIcon 
-                    href={getRecentStreamUrl(recent)}
-                    size="sm"
-                  >
-                    View Profile
-                  </Link>
+                  <div className="flex justify-between w-full items-center">
+                    <Link 
+                      isExternal 
+                      showAnchorIcon 
+                      href={getRecentStreamUrl(recent)}
+                      size="sm"
+                      onPress={(e) => e.stopPropagation()}
+                    >
+                      View Profile
+                    </Link>
+                    <Button 
+                      size="sm" 
+                      variant="flat" 
+                      color="primary"
+                      onPress={() => handleRecentLiveClick(recent)}
+                    >
+                      Details
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             ))
@@ -367,6 +660,48 @@ export default function JKT48LiveStreams() {
           )}
         </div>
       </div>
+
+      {/* Detail Modal */}
+      <Modal 
+        isOpen={isOpen} 
+        onOpenChange={onOpenChange}
+        scrollBehavior="inside"
+        size="3xl"
+        className="max-h-[90vh]"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                <h2 className="text-xl font-bold">Live Stream Details</h2>
+                {selectedLive && (
+                  <p className="text-sm text-default-500 font-normal">
+                    {selectedLive.room_info.fullname} • {selectedLive.type.toUpperCase()}
+                  </p>
+                )}
+              </ModalHeader>
+              <ModalBody>
+                {renderModalContent()}
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                {selectedLive?.idn?.slug && (
+                  <Button 
+                    color="primary" 
+                    as="a"
+                    href={`https://www.idn.app/live/${selectedLive.idn.slug}`}
+                    target="_blank"
+                  >
+                    View on IDN
+                  </Button>
+                )}
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
