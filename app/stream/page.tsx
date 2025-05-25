@@ -197,9 +197,8 @@ export default function JKT48LiveStreams() {
   };
 
   const getLiveStreamUrl = (stream: LiveStream) => {
-    // Extract member name and encode it for URL
-    const memberName = stream.name.split('/')[0].trim();
-    const encodedName = encodeURIComponent(memberName);
+    // Use the full name and encode it for URL
+    const encodedName = encodeURIComponent(stream.name);
     return `https://www.jkt48connect.my.id/watch?name=${encodedName}`;
   };
 
@@ -268,7 +267,7 @@ export default function JKT48LiveStreams() {
                 <CardFooter className="justify-between before:bg-black/60 border-white/20 border-1 overflow-hidden py-2 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
                   <div className="flex flex-col flex-1 mr-2">
                     <p className="text-sm font-bold text-white truncate">
-                      {stream.name.split('/')[0].trim()}
+                      {stream.name}
                     </p>
                     <p className="text-xs text-white/80">
                       Started {formatDate(stream.started_at)}
