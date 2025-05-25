@@ -73,21 +73,44 @@ export default function JKT48LivePlayer() {
     }
   }, []);
 
-  // Detect video aspect ratio
+  // Get the appropriate image URL based on stream type
+  const getStreamImage = (liveData: LiveData) => {
+    return liveData.type === 'idn' ? liveData.img_alt : liveData.img;
+  };
+
+  // Get the appropriate aspect ratio based on stream type
+  const getStreamAspectRatio = (liveData: LiveData) => {
+    return liveData.type === 'idn' ? 'square' : 'landscape';
+  };
+
+  // Detect video aspect ratio or use default based on stream type
   const handleVideoLoad = () => {
-    if (videoRef.current) {
+    if (videoRef.current && liveData) {
       const video = videoRef.current;
       const aspectRatio = video.videoWidth / video.videoHeight;
       
-      if (aspectRatio > 1.2) {
-        setVideoAspectRatio('landscape');
-      } else if (aspectRatio < 0.8) {
-        setVideoAspectRatio('portrait');
+      // If video dimensions are available, use them
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        if (aspectRatio > 1.2) {
+          setVideoAspectRatio('landscape');
+        } else if (aspectRatio < 0.8) {
+          setVideoAspectRatio('portrait');
+        } else {
+          setVideoAspectRatio('square');
+        }
       } else {
-        setVideoAspectRatio('square');
+        // Fallback to default based on stream type
+        setVideoAspectRatio(getStreamAspectRatio(liveData) as 'landscape' | 'portrait' | 'square');
       }
     }
   };
+
+  // Set initial aspect ratio based on stream type
+  useEffect(() => {
+    if (liveData) {
+      setVideoAspectRatio(getStreamAspectRatio(liveData) as 'landscape' | 'portrait' | 'square');
+    }
+  }, [liveData]);
 
   // Fetch live data
   useEffect(() => {
@@ -435,6 +458,8 @@ export default function JKT48LivePlayer() {
     );
   }
 
+  const streamImage = getStreamImage(liveData);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -455,14 +480,14 @@ export default function JKT48LivePlayer() {
                   <video
                     ref={videoRef}
                     className={`absolute top-0 left-0 w-full h-full ${
-                      videoAspectRatio === 'portrait' 
+                      videoAspectRatio === 'portrait' || videoAspectRatio === 'square'
                         ? 'object-contain' 
                         : 'object-cover'
                     }`}
                     controls
                     autoPlay
                     muted
-                    poster={liveData.img}
+                    poster={streamImage}
                     onLoadedMetadata={handleVideoLoad}
                   >
                     {liveData.streaming_url_list.map((stream, index) => (
@@ -483,7 +508,7 @@ export default function JKT48LivePlayer() {
               <CardBody className="p-6">
                 <div className="flex items-start gap-6">
                   <Avatar
-                    src={liveData.img_alt || liveData.img}
+                    src={streamImage}
                     size="lg"
                     name={liveData.name}
                     className="ring-4 ring-primary/20"
