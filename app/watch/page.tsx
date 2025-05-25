@@ -75,7 +75,7 @@ export default function JKT48LivePlayer() {
 
   // Get the appropriate image URL based on stream type
   const getStreamImage = (liveData: LiveData) => {
-    return liveData.type === 'idn' ? liveData.img_alt : liveData.img;
+    return liveData.type === 'idn' ? liveData.img : liveData.img;
   };
 
   // Get the appropriate aspect ratio based on stream type
