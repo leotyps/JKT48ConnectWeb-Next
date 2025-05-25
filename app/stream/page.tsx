@@ -637,7 +637,6 @@ export default function JKT48LiveStreams() {
                       showAnchorIcon 
                       href={getRecentStreamUrl(recent)}
                       size="sm"
-                      onPress={(e) => e.stopPropagation()}
                     >
                       View Profile
                     </Link>
