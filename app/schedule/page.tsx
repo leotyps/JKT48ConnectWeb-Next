@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { Card, CardHeader, CardBody, CardFooter, Divider, Image, Link, Skeleton, Breadcrumbs, BreadcrumbItem, Button } from "@heroui/react";
+import { Card, CardHeader, CardBody, CardFooter, Divider, Image, Link, Skeleton, Breadcrumbs, BreadcrumbItem, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip, Avatar } from "@heroui/react";
 
 interface TheaterShow {
   id: string;
@@ -21,10 +21,63 @@ interface EventItem {
   url: string;
 }
 
+interface TheaterMember {
+  id: string;
+  name: string;
+  img: string;
+  url_key: string;
+}
+
+interface TheaterSetlist {
+  _id: string;
+  id: string;
+  description: string;
+  poster: string;
+  title: string;
+  title_alt: string;
+  banner: string;
+}
+
+interface TheaterTeam {
+  id: string;
+  img: string;
+}
+
+interface TheaterDetailShow {
+  id: string;
+  title: string;
+  url: string;
+  setlist: TheaterSetlist;
+  members: TheaterMember[];
+  seitansai: any[];
+  graduation: any[];
+  date: string;
+  team: TheaterTeam;
+  idnTheater: {
+    image: string;
+    price: number;
+    slug: string;
+    start_at: number;
+    title: string;
+    username: string;
+    uuid: string;
+  };
+}
+
+interface TheaterDetail {
+  author: string;
+  shows: TheaterDetailShow[];
+  date: string;
+}
+
 export default function JKT48Schedule() {
   const [theaterData, setTheaterData] = useState<TheaterShow[]>([]);
   const [eventsData, setEventsData] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTheaterId, setSelectedTheaterId] = useState<string>("");
+  const [theaterDetail, setTheaterDetail] = useState<TheaterDetail | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
   useEffect(() => {
     async function fetchScheduleData() {
@@ -81,6 +134,23 @@ export default function JKT48Schedule() {
 
     fetchScheduleData();
   }, []);
+
+  const handleTheaterClick = async (theaterId: string) => {
+    setSelectedTheaterId(theaterId);
+    setLoadingDetail(true);
+    onOpen();
+    
+    try {
+      const jkt48Api = require('@jkt48/core');
+      const apiKey = 'JKTCONNECT';
+      const detail = await jkt48Api.theaterDetail(theaterId, apiKey);
+      setTheaterDetail(detail);
+    } catch (error) {
+      console.error("Error fetching theater detail:", error);
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
 
   // Format date to show day and time
   const formatShowDate = (dateString: string) => {
@@ -142,6 +212,29 @@ export default function JKT48Schedule() {
     ));
   };
 
+  const renderModalDetailSkeleton = () => (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <Skeleton className="w-full rounded-lg">
+          <div className="h-48 rounded-lg bg-default-200" />
+        </Skeleton>
+        <Skeleton className="w-3/4 rounded-lg">
+          <div className="h-6 rounded-lg bg-default-200" />
+        </Skeleton>
+        <Skeleton className="w-full rounded-lg">
+          <div className="h-20 rounded-lg bg-default-200" />
+        </Skeleton>
+      </div>
+      <div className="flex gap-2">
+        {Array(3).fill(0).map((_, i) => (
+          <Skeleton key={i} className="rounded-full">
+            <div className="h-12 w-12 rounded-full bg-default-200" />
+          </Skeleton>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <div className="w-full">
       {/* Breadcrumbs */}
@@ -161,8 +254,10 @@ export default function JKT48Schedule() {
               <Card 
                 key={show.id} 
                 isFooterBlurred 
-                className="border-none h-64 w-full" 
+                className="border-none h-64 w-full cursor-pointer hover:scale-105 transition-transform" 
                 radius="lg"
+                isPressable
+                onPress={() => handleTheaterClick(show.id)}
               >
                 <Image
                   alt={`${show.title} show banner`}
@@ -183,6 +278,7 @@ export default function JKT48Schedule() {
                     as="a" 
                     href={`https://jkt48.com/theater/schedule/id/${show.url}?lang=id`}
                     target="_blank"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     Details
                   </Button>
@@ -244,6 +340,160 @@ export default function JKT48Schedule() {
           )}
         </div>
       </div>
+
+      {/* Theater Detail Modal */}
+      <Modal 
+        isOpen={isOpen} 
+        onOpenChange={onOpenChange}
+        size="5xl"
+        scrollBehavior="inside"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                {loadingDetail ? (
+                  <Skeleton className="w-3/4 rounded-lg">
+                    <div className="h-6 rounded-lg bg-default-200" />
+                  </Skeleton>
+                ) : (
+                  theaterDetail?.shows?.[0]?.title || "Theater Details"
+                )}
+              </ModalHeader>
+              <ModalBody>
+                {loadingDetail ? (
+                  renderModalDetailSkeleton()
+                ) : theaterDetail?.shows?.[0] ? (
+                  <div className="space-y-6">
+                    {/* Setlist Banner */}
+                    <div className="relative">
+                      <Image
+                        alt={theaterDetail.shows[0].setlist.title}
+                        className="w-full h-64 object-cover rounded-lg"
+                        src={theaterDetail.shows[0].setlist.banner}
+                      />
+                      <div className="absolute top-4 right-4">
+                        <Chip
+                          startContent={
+                            <Image
+                              alt="Team"
+                              className="w-5 h-5"
+                              src={`https://jkt48.com${theaterDetail.shows[0].team.img}`}
+                            />
+                          }
+                          variant="solid"
+                          color="primary"
+                        >
+                          {theaterDetail.shows[0].team.id.toUpperCase()}
+                        </Chip>
+                      </div>
+                    </div>
+
+                    {/* Show Information */}
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-2xl font-bold mb-2">{theaterDetail.shows[0].setlist.title}</h3>
+                        <p className="text-lg text-default-600 mb-4">
+                          {formatShowDate(theaterDetail.shows[0].date)}
+                        </p>
+                      </div>
+
+                      {/* Description */}
+                      {theaterDetail.shows[0].setlist.description && (
+                        <div>
+                          <h4 className="text-lg font-semibold mb-2">Description</h4>
+                          <p className="text-default-700 leading-relaxed">
+                            {theaterDetail.shows[0].setlist.description}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Members */}
+                      {theaterDetail.shows[0].members && theaterDetail.shows[0].members.length > 0 && (
+                        <div>
+                          <h4 className="text-lg font-semibold mb-4">Performing Members</h4>
+                          <div className="flex flex-wrap gap-4">
+                            {theaterDetail.shows[0].members.map((member) => (
+                              <div key={member.id} className="flex flex-col items-center space-y-2">
+                                <Avatar
+                                  src={member.img}
+                                  alt={member.name}
+                                  className="w-16 h-16"
+                                />
+                                <p className="text-sm font-medium text-center">{member.name}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Special Events */}
+                      {(theaterDetail.shows[0].seitansai?.length > 0 || theaterDetail.shows[0].graduation?.length > 0) && (
+                        <div>
+                          <h4 className="text-lg font-semibold mb-2">Special Events</h4>
+                          <div className="flex gap-2">
+                            {theaterDetail.shows[0].seitansai?.map((event, index) => (
+                              <Chip key={`seitansai-${index}`} color="warning" variant="flat">
+                                Birthday: {event.name}
+                              </Chip>
+                            ))}
+                            {theaterDetail.shows[0].graduation?.map((event, index) => (
+                              <Chip key={`graduation-${index}`} color="danger" variant="flat">
+                                Graduation: {event.name}
+                              </Chip>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* IDN Theater Info */}
+                      {theaterDetail.shows[0].idnTheater && (
+                        <div className="bg-default-100 p-4 rounded-lg">
+                          <h4 className="text-lg font-semibold mb-2">Ticket Information</h4>
+                          <div className="flex items-center gap-4">
+                            <Image
+                              src={theaterDetail.shows[0].idnTheater.image}
+                              alt="IDN Theater"
+                              className="w-20 h-20 object-cover rounded-lg"
+                            />
+                            <div>
+                              <p className="font-medium">{theaterDetail.shows[0].idnTheater.title}</p>
+                              <p className="text-success-600 font-bold">
+                                Rp {theaterDetail.shows[0].idnTheater.price?.toLocaleString('id-ID')}
+                              </p>
+                              <p className="text-sm text-default-500">
+                                via {theaterDetail.shows[0].idnTheater.username}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-center text-default-500">Failed to load theater details</p>
+                )}
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                {theaterDetail?.shows?.[0] && (
+                  <Button 
+                    color="primary" 
+                    as={Link}
+                    href={theaterDetail.shows[0].url}
+                    isExternal
+                    showAnchorIcon
+                  >
+                    View on JKT48.com
+                  </Button>
+                )}
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
