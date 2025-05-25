@@ -137,6 +137,23 @@ export default function JKT48LiveStreams() {
     return count.toString();
   };
 
+  // Get appropriate image source based on stream type
+  const getLiveStreamImage = (stream: LiveStream) => {
+    return stream.type === "idn" ? stream.img_alt : stream.img;
+  };
+
+  // Get appropriate image classes based on stream type
+  const getLiveStreamImageClasses = (stream: LiveStream) => {
+    const baseClasses = "w-full h-60 z-0";
+    if (stream.type === "idn") {
+      // Square format for IDN streams
+      return `${baseClasses} object-cover`;
+    } else {
+      // Landscape format for Showroom streams
+      return `${baseClasses} object-cover`;
+    }
+  };
+
   const renderLiveSkeletons = () => {
     return Array(6).fill(0).map((_, index) => (
       <div key={`live-skeleton-${index}`} className="w-full">
@@ -224,8 +241,8 @@ export default function JKT48LiveStreams() {
                 <div className="relative">
                   <Image
                     alt={`${stream.name} live stream`}
-                    className="object-cover w-full h-60 z-0"
-                    src={stream.img}
+                    className={getLiveStreamImageClasses(stream)}
+                    src={getLiveStreamImage(stream)}
                   />
                   <div className="absolute top-2 left-2 z-10">
                     <Chip 
