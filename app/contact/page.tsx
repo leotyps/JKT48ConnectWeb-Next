@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, CardBody, Breadcrumbs, BreadcrumbItem, Link, Button, Input, Textarea, Chip } from "@heroui/react";
+import { Card, CardBody, Breadcrumbs, BreadcrumbItem, Link, Button, Input, Textarea, Chip, Accordion, AccordionItem } from "@heroui/react";
 import { useState } from "react";
 
 interface FormData {
@@ -32,8 +32,8 @@ export default function ContactPage() {
     {
       title: "Email Support",
       description: "Email resmi untuk pertanyaan umum",
-      contact: "support@jkt48connect.com",
-      link: "mailto:support@jkt48connect.com",
+      contact: "support@jkt48connect.my.id",
+      link: "mailto:support@jkt48connect.my.id",
       icon: "📧",
       color: "primary" as const,
       available: "Senin-Jumat",
@@ -43,7 +43,7 @@ export default function ContactPage() {
       title: "Discord",
       description: "Bergabung dengan komunitas Discord",
       contact: "JKT48Connect Server",
-      link: "https://discord.gg/jkt48connect",
+      link: "https://discord.gg/8u4RSqC3RD",
       icon: "💭",
       color: "secondary" as const,
       available: "24/7",
@@ -53,7 +53,7 @@ export default function ContactPage() {
       title: "GitHub",
       description: "Laporkan bug atau request fitur",
       contact: "github.com/valzyy",
-      link: "https://github.com/valzyy",
+      link: "https://github.com/j-forces",
       icon: "🔧",
       color: "warning" as const,
       available: "24/7",
@@ -64,23 +64,43 @@ export default function ContactPage() {
   const faqItems = [
     {
       question: "Bagaimana cara menggunakan bot WhatsApp?",
-      answer: "Kirim pesan ke nomor WhatsApp kami dan bot akan merespons otomatis dengan menu bantuan.",
+      answer: "Kirim pesan ke nomor WhatsApp kami dan bot akan merespons otomatis dengan menu bantuan. Bot akan memberikan berbagai opsi seperti informasi member, jadwal live, berita terbaru, dan fitur lainnya.",
       icon: "❓"
     },
     {
-      question: "Apakah layanan JKT48Connect gratis?",
-      answer: "Ya, semua layanan JKT48Connect gratis untuk digunakan. Kami tidak mengenakan biaya apapun.",
+      question: "Apakah semua layanan JKT48Connect gratis?",
+      answer: "Sebagian besar layanan JKT48Connect gratis untuk digunakan, termasuk bot WhatsApp, Discord bot, dan notifikasi dasar. Namun, untuk penggunaan API key dengan limit tinggi dan fitur premium, tersedia beberapa plan berbayar dengan harga terjangkau.",
       icon: "💰"
     },
     {
+      question: "Apa saja plan API key yang tersedia?",
+      answer: "Kami menyediakan beberapa plan API key: Free Plan (gratis dengan limit terbatas), Basic Plan (Rp 25.000/bulan), Pro Plan (Rp 50.000/bulan), dan Enterprise Plan (custom pricing). Setiap plan memiliki limit request dan fitur yang berbeda sesuai kebutuhan Anda.",
+      icon: "🔑"
+    },
+    {
       question: "Bagaimana cara mendapatkan notifikasi live?",
-      answer: "Daftar melalui bot WhatsApp atau Discord untuk mendapatkan notifikasi real-time tentang JKT48.",
+      answer: "Daftar melalui bot WhatsApp dengan mengirim pesan 'subscribe' atau bergabung dengan Discord server kami. Anda akan mendapatkan notifikasi real-time tentang live streaming, event JKT48, dan pengumuman penting lainnya.",
       icon: "🔔"
     },
     {
       question: "Apakah data saya aman?",
-      answer: "Ya, kami menggunakan enkripsi dan standar keamanan tinggi untuk melindungi data pengguna.",
+      answer: "Ya, kami menggunakan enkripsi end-to-end dan standar keamanan tinggi untuk melindungi data pengguna. Kami tidak menyimpan data pribadi yang tidak perlu dan selalu mengikuti praktik keamanan terbaik dalam industri.",
       icon: "🔒"
+    },
+    {
+      question: "Bagaimana cara upgrade ke plan berbayar?",
+      answer: "Untuk upgrade ke plan berbayar, hubungi kami melalui WhatsApp atau Discord. Tim kami akan membantu Anda memilih plan yang sesuai dengan kebutuhan dan memandu proses pembayaran melalui metode yang tersedia (QRIS, Transfer Bank, E-wallet).",
+      icon: "⬆️"
+    },
+    {
+      question: "Apa keuntungan menggunakan plan berbayar?",
+      answer: "Plan berbayar memberikan limit API yang lebih tinggi, akses ke fitur premium, prioritas support, response time lebih cepat, dan akses ke data analytics yang lebih detail. Cocok untuk developer atau bisnis yang membutuhkan integrasi yang lebih intensif.",
+      icon: "✨"
+    },
+    {
+      question: "Bagaimana sistem refund jika tidak puas?",
+      answer: "Kami menyediakan garansi 7 hari untuk plan berbayar. Jika Anda tidak puas dengan layanan dalam 7 hari pertama, kami akan memberikan refund 100% tanpa pertanyaan. Hubungi support kami untuk proses refund.",
+      icon: "💸"
     }
   ];
 
@@ -256,7 +276,7 @@ ${formData.message}`;
             </CardBody>
           </Card>
 
-          {/* FAQ Section */}
+          {/* FAQ Section with Accordion */}
           <div className="space-y-6">
             <Card className="border border-gray-200 dark:border-gray-800">
               <CardBody className="p-6 sm:p-8">
@@ -270,21 +290,25 @@ ${formData.message}`;
                   </p>
                 </div>
 
-                <div className="space-y-4">
+                <Accordion variant="bordered">
                   {faqItems.map((faq, index) => (
-                    <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-                      <div className="flex items-start gap-3 mb-2">
-                        <div className="text-xl">{faq.icon}</div>
-                        <h4 className="font-semibold text-gray-900 dark:text-white">
+                    <AccordionItem
+                      key={index}
+                      aria-label={faq.question}
+                      startContent={<span className="text-xl">{faq.icon}</span>}
+                      title={
+                        <span className="font-semibold text-gray-900 dark:text-white">
                           {faq.question}
-                        </h4>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm ml-8">
+                        </span>
+                      }
+                      className="text-left"
+                    >
+                      <div className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                         {faq.answer}
-                      </p>
-                    </div>
+                      </div>
+                    </AccordionItem>
                   ))}
-                </div>
+                </Accordion>
               </CardBody>
             </Card>
 
