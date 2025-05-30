@@ -100,7 +100,7 @@ export default function AboutJKT48Connect() {
           <div className="mb-6 sm:mb-8">
             <div className="relative inline-block mb-6 sm:mb-8">
               <Image
-                src="/jkt48connect-logo.png"
+                src="https://files.catbox.moe/i1qudl.jpg"
                 alt="JKT48Connect Logo"
                 width={100}
                 height={100}
