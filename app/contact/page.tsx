@@ -3,8 +3,15 @@
 import { Card, CardBody, Breadcrumbs, BreadcrumbItem, Link, Button, Input, Textarea, Chip } from "@heroui/react";
 import { useState } from "react";
 
+interface FormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     subject: "",
@@ -18,7 +25,7 @@ export default function ContactPage() {
       contact: "+62 857-0147-9245",
       link: "https://wa.me/6285701479245",
       icon: "💬",
-      color: "success",
+      color: "success" as const,
       available: "24/7",
       responseTime: "1-24 jam"
     },
@@ -28,7 +35,7 @@ export default function ContactPage() {
       contact: "support@jkt48connect.com",
       link: "mailto:support@jkt48connect.com",
       icon: "📧",
-      color: "primary",
+      color: "primary" as const,
       available: "Senin-Jumat",
       responseTime: "1-3 hari kerja"
     },
@@ -38,7 +45,7 @@ export default function ContactPage() {
       contact: "JKT48Connect Server",
       link: "https://discord.gg/jkt48connect",
       icon: "💭",
-      color: "secondary",
+      color: "secondary" as const,
       available: "24/7",
       responseTime: "Real-time"
     },
@@ -48,7 +55,7 @@ export default function ContactPage() {
       contact: "github.com/valzyy",
       link: "https://github.com/valzyy",
       icon: "🔧",
-      color: "warning",
+      color: "warning" as const,
       available: "24/7",
       responseTime: "1-7 hari"
     }
@@ -77,7 +84,7 @@ export default function ContactPage() {
     }
   ];
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
