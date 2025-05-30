@@ -84,8 +84,7 @@ export default function ContactPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     // Redirect to WhatsApp with pre-filled message
     const message = `Halo! Saya ingin menghubungi JKT48Connect.
 
@@ -238,15 +237,15 @@ ${formData.message}`;
                 </div>
 
                 <Button
-                  type="submit"
                   color="primary"
                   size="lg"
                   className="w-full font-semibold"
                   startContent="🚀"
+                  onPress={handleSubmit}
                 >
                   Kirim via WhatsApp
                 </Button>
-              </form>
+              </div>
             </CardBody>
           </Card>
 
