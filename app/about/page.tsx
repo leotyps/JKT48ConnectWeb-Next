@@ -409,7 +409,7 @@ export default function AboutJKT48Connect() {
               <div className="text-center mb-6">
                 <h3 className="text-2xl sm:text-3xl font-bold mb-3 text-gray-900 dark:text-white">🔑 API Access Information</h3>
                 <p className="text-gray-600 dark:text-gray-300 text-lg">
-                  Akses penuh fitur JKT48Connect memerlukan API Key
+                  Akses penuh fitur JKT48Connect memerlukan API Key bagi developer yang ingin menggunakannya dalam project masing-masing
                 </p>
               </div>
               
