@@ -250,7 +250,7 @@ export default function AboutJKT48Connect() {
                 key={index} 
                 className={`border transition-all duration-200 ${
                   plan.popular 
-                    ? 'border-blue-300 bg-blue-50/50 ring-1 ring-blue-200' 
+                    ? 'border-blue-400 ring-1 ring-blue-300' 
                     : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
                 }`}
               >
@@ -307,7 +307,7 @@ export default function AboutJKT48Connect() {
                 key={index} 
                 className={`border transition-all duration-200 hover:shadow-md ${
                   project.highlight 
-                    ? 'border-yellow-300 bg-yellow-50/50 ring-1 ring-yellow-200' 
+                    ? 'border-yellow-400 ring-1 ring-yellow-300' 
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
@@ -337,8 +337,8 @@ export default function AboutJKT48Connect() {
 
                   {/* API Key Notice */}
                   {project.requiresKey && (
-                    <div className="p-2 bg-amber-100 border border-amber-200 rounded-lg">
-                      <div className="flex items-center gap-2 text-xs text-amber-800">
+                    <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
+                      <div className="flex items-center gap-2 text-xs text-gray-700">
                         <span>🔐</span>
                         <span>Requires API Key</span>
                       </div>
@@ -347,9 +347,9 @@ export default function AboutJKT48Connect() {
 
                   {/* Contact Info */}
                   {project.contact && (
-                    <div className="p-2 bg-green-100 border border-green-200 rounded-lg">
-                      <div className="text-xs text-green-700 mb-1">📱 WhatsApp:</div>
-                      <Code className="text-xs bg-green-50">{project.contact}</Code>
+                    <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
+                      <div className="text-xs text-gray-600 mb-1">📱 WhatsApp:</div>
+                      <Code className="text-xs bg-gray-50">{project.contact}</Code>
                     </div>
                   )}
 
@@ -405,11 +405,11 @@ export default function AboutJKT48Connect() {
           </div>
           
           <div className="grid sm:grid-cols-2 gap-4">
-            <Card className="border border-blue-200 bg-blue-50/50 hover:shadow-md transition-all duration-200">
+            <Card className="border border-gray-200 hover:shadow-md transition-all duration-200">
               <CardBody className="p-4 text-center space-y-3">
                 <div className="text-3xl">👥</div>
-                <h3 className="text-lg font-bold text-blue-800">J-Force</h3>
-                <p className="text-blue-700 text-sm">
+                <h3 className="text-lg font-bold text-gray-900">J-Force</h3>
+                <p className="text-gray-600 text-sm">
                   Tim inti pengembangan yang menangani seluruh arsitektur dan infrastruktur JKT48Connect ecosystem.
                 </p>
                 <Button
@@ -426,11 +426,11 @@ export default function AboutJKT48Connect() {
               </CardBody>
             </Card>
 
-            <Card className="border border-green-200 bg-green-50/50 hover:shadow-md transition-all duration-200">
+            <Card className="border border-gray-200 hover:shadow-md transition-all duration-200">
               <CardBody className="p-4 text-center space-y-3">
                 <div className="text-3xl">🚀</div>
-                <h3 className="text-lg font-bold text-green-800">Zenova</h3>
-                <p className="text-green-700 text-sm">
+                <h3 className="text-lg font-bold text-gray-900">Zenova</h3>
+                <p className="text-gray-600 text-sm">
                   Divisi spesialis untuk pengembangan bot messaging, terutama WhatsApp dan platform komunikasi lainnya.
                 </p>
                 <Button
@@ -533,7 +533,7 @@ export default function AboutJKT48Connect() {
           </div>
 
           {/* Final CTA */}
-          <Card className="border border-blue-200 bg-blue-50/50">
+          <Card className="border border-gray-200">
             <CardBody className="p-6 text-center space-y-4">
               <div className="text-3xl">🎉</div>
               <h4 className="text-xl font-bold text-gray-900">Ready to Get Started?</h4>
