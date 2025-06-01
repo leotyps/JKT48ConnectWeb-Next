@@ -446,7 +446,7 @@ export default function AboutJKT48Connect() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-blue-600">✓</span>
-                        <span className="text-sm text-gray-600 dark:text-gray-300">Pembelian otomatis melalui Zenova Bot</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Pembelian otomatis melalui Zenova Bot dengan command .buyapikey</span>
                       </div>
                     </div>
                   </div>
