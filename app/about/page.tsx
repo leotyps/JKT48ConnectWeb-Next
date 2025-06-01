@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, CardBody, Image, Breadcrumbs, BreadcrumbItem, Link, Button, Divider, Chip, Avatar } from "@heroui/react";
+import { Card, CardBody, Image, Breadcrumbs, BreadcrumbItem, Link, Button, Divider, Chip, Avatar, Code } from "@heroui/react";
 import { useState } from "react";
 
 export default function AboutJKT48Connect() {
@@ -9,178 +9,180 @@ export default function AboutJKT48Connect() {
   const projects = [
     {
       name: "Zenova WhatsApp Bot",
-      description: "WhatsApp bot dengan fitur JKT48 lengkap, terutama live dan endlive notification yang paling diminati users",
+      description: "Bot WhatsApp paling populer dengan notifikasi live streaming JKT48 dan berbagai fitur canggih lainnya.",
       contact: "6285189020193",
       link: "https://wa.me/6285189020193",
       type: "WhatsApp Bot",
       icon: "💬",
-      features: ["Live Notification", "End Live Notification", "Member Info", "Theater Schedule"],
+      features: ["Live Notification", "End Live Alert", "Member Database", "Theater Schedule", "API Access"],
       highlight: true,
-      color: "success"
+      color: "success",
+      status: "🟢 Active"
     },
     {
       name: "JKT48Connect Discord Bot",
-      description: "Discord bot public dengan fitur live notification dan berbagai fitur JKT48 lainnya",
+      description: "Bot Discord public dengan sistem notifikasi live dan command lengkap untuk server komunitas.",
       link: "https://top.gg/bot/1305141693477027891?s=0f5136415d254",
       type: "Discord Bot",
       icon: "🤖",
-      features: ["Live Notification", "Member Commands", "Theater Info", "Public Access"],
-      color: "primary"
+      features: ["Live Alerts", "Member Commands", "Server Integration", "Public Access"],
+      color: "primary",
+      status: "🟢 Public"
     },
     {
-      name: "JKT48Connect Website",
-      description: "Website resmi JKT48Connect dengan berbagai fitur dan informasi lengkap tentang JKT48",
+      name: "JKT48Connect Web Portal",
+      description: "Platform web komprehensif dengan dashboard, analytics, dan akses ke seluruh fitur ecosystem.",
       type: "Website",
       icon: "🌐",
-      features: ["Member Database", "Theater Schedule", "Live Tracking", "News & Updates"],
-      color: "secondary"
+      features: ["Member Profiles", "Live Tracker", "Analytics", "News Hub"],
+      color: "secondary",
+      status: "🔄 Development"
     },
     {
       name: "@jkt48/core",
-      description: "Package module dengan fitur JKT48 paling lengkap dan komprehensif untuk developer",
+      description: "Package NPM paling komprehensif dengan API lengkap JKT48. Solusi #1 untuk developer.",
       link: "https://npmjs.com/package/@jkt48/core",
       type: "NPM Package",
       icon: "📦",
-      features: ["Complete JKT48 API", "Member Data", "Live Tracking", "Theater Info", "Most Comprehensive"],
+      features: ["Complete JKT48 API", "Real-time Data", "TypeScript Support", "Authentication"],
       highlight: true,
-      color: "warning"
+      color: "warning",
+      status: "🔥 Popular",
+      requiresKey: true
     },
     {
       name: "@jkt48connect-corp/sdk",
-      description: "SDK package dengan fitur JKT48 yang sama namun dalam format SDK yang mudah digunakan",
+      description: "SDK alternatif dengan struktur yang disederhanakan namun tetap powerful untuk integrasi mudah.",
       link: "https://npmjs.com/package/@jkt48connect-corp/sdk",
       type: "SDK Package",
       icon: "⚡",
-      features: ["JKT48 API", "Member Data", "Live Tracking", "SDK Format"],
-      color: "danger"
+      features: ["Simplified API", "Quick Setup", "Lightweight", "Documentation"],
+      color: "danger",
+      status: "📈 Growing",
+      requiresKey: true
     }
   ];
 
-  const teams = [
+  const apiPlans = [
     {
-      name: "J-Force",
-      description: "Tim development utama yang menaungi berbagai project JKT48Connect",
-      link: "https://github.com/j-forces",
-      icon: "👥",
-      color: "primary"
+      name: "Basic",
+      price: "5.000",
+      period: "30 hari",
+      features: ["1,000 requests/day", "Basic endpoints", "Email support"],
+      color: "default",
+      popular: false
     },
     {
-      name: "Zenova",
-      description: "Divisi khusus untuk pengembangan WhatsApp bot dan layanan messaging",
-      icon: "🚀",
-      color: "success"
+      name: "Pro",
+      price: "15.000",
+      period: "30 hari", 
+      features: ["10,000 requests/day", "All endpoints", "Priority support", "Real-time webhooks"],
+      color: "primary",
+      popular: true
+    },
+    {
+      name: "Enterprise",
+      price: "50.000",
+      period: "30 hari",
+      features: ["Unlimited requests", "Custom endpoints", "24/7 support", "Custom integrations"],
+      color: "success",
+      popular: false
     }
   ];
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "WhatsApp Bot": return "success";
-      case "Discord Bot": return "primary";
-      case "Website": return "secondary";
-      case "NPM Package": return "warning";
-      case "SDK Package": return "danger";
-      default: return "default";
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
-      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+    <div className="min-h-screen">
+      <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-12">
         
         {/* Breadcrumbs */}
-        <div className="mb-6 sm:mb-8">
-          <Breadcrumbs size="sm" className="text-sm">
-            <BreadcrumbItem href="/">Home</BreadcrumbItem>
-            <BreadcrumbItem>About</BreadcrumbItem>
-          </Breadcrumbs>
-        </div>
+        <Breadcrumbs size="sm">
+          <BreadcrumbItem href="/">Home</BreadcrumbItem>
+          <BreadcrumbItem>About</BreadcrumbItem>
+        </Breadcrumbs>
 
-        {/* Hero Section */}
-        <div className="text-center mb-12 sm:mb-16 lg:mb-20">
-          <div className="mb-6 sm:mb-8">
-            <div className="relative inline-block mb-6 sm:mb-8">
-              <Image
-                src="https://files.catbox.moe/i1qudl.jpg"
-                alt="JKT48Connect Logo"
-                width={100}
-                height={100}
-                className="rounded-3xl shadow-2xl sm:w-32 sm:h-32 lg:w-40 lg:h-40 border-4 border-white dark:border-gray-800"
-                fallbackSrc="https://via.placeholder.com/150x150?text=JKT48Connect"
-              />
-              <div className="absolute -bottom-2 -right-2 bg-blue-500 w-8 h-8 sm:w-10 sm:h-10 rounded-full border-4 border-white dark:border-gray-950 flex items-center justify-center shadow-lg">
-                <span className="text-white text-sm sm:text-base font-bold">✓</span>
+        {/* Hero Section - Redesigned */}
+        <section className="relative overflow-hidden rounded-3xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10"></div>
+          <div className="relative p-8 md:p-12 lg:p-16">
+            <div className="max-w-4xl mx-auto text-center space-y-6">
+              <div className="relative inline-block">
+                <Image
+                  src="https://files.catbox.moe/i1qudl.jpg"
+                  alt="JKT48Connect"
+                  width={120}
+                  height={120}
+                  className="rounded-2xl shadow-xl border-4 border-white/50"
+                />
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
+                  <span className="text-white text-xs">✓</span>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  JKT48Connect
+                </h1>
+                <p className="text-lg md:text-2xl text-gray-600 font-medium max-w-3xl mx-auto">
+                  Platform teknologi terdepan untuk ekosistem JKT48 Indonesia
+                </p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <Chip size="lg" color="primary" variant="flat" startContent="🚀">
+                    1000+ Users
+                  </Chip>
+                  <Chip size="lg" color="success" variant="flat" startContent="⚡">
+                    Real-time
+                  </Chip>
+                  <Chip size="lg" color="warning" variant="flat" startContent="🔥">
+                    24/7 Active
+                  </Chip>
+                </div>
               </div>
             </div>
           </div>
-          
-          <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 dark:text-white leading-tight">
-              JKT48<span className="text-blue-600">Connect</span>
-            </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-300 leading-relaxed font-medium px-4">
-              Ecosystem terlengkap untuk semua kebutuhan informasi JKT48 Anda
-            </p>
-            <div className="flex justify-center gap-2 flex-wrap px-4">
-              <Chip size="md" color="primary" variant="flat" startContent="🚀">Trusted Platform</Chip>
-              <Chip size="md" color="success" variant="flat" startContent="🎯">Real-time Updates</Chip>
-              <Chip size="md" color="warning" variant="flat" startContent="💡">Innovation Driven</Chip>
-            </div>
-          </div>
-        </div>
+        </section>
 
-        {/* Creator Section */}
-        <div className="mb-12 sm:mb-16 lg:mb-20">
-          <div className="text-center mb-8 sm:mb-10">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
-              Meet The <span className="text-purple-600">Creator</span>
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300">Mastermind behind JKT48Connect ecosystem</p>
+        {/* Creator Spotlight */}
+        <section>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">Meet the Visionary</h2>
+            <p className="text-gray-600 text-lg">Architect behind JKT48Connect ecosystem</p>
           </div>
           
-          <Card className="max-w-4xl mx-auto shadow-2xl border-2 border-gray-100 dark:border-gray-800">
-            <CardBody className="p-6 sm:p-8 lg:p-12">
-              <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-                
-                {/* Avatar */}
-                <div className="flex-shrink-0">
-                  <div className="relative">
-                    <Avatar
-                      src="https://files.catbox.moe/ljpa5c.jpg"
-                      className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 border-4 border-white dark:border-gray-800 shadow-2xl"
-                    />
-                    <div className="absolute -bottom-2 -right-2 bg-green-500 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-4 border-white dark:border-gray-950 flex items-center justify-center shadow-lg">
-                      <span className="text-white font-bold">✓</span>
-                    </div>
+          <Card className="max-w-4xl mx-auto shadow-xl border-0 bg-gradient-to-r from-gray-50 to-blue-50/30">
+            <CardBody className="p-8 md:p-12">
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="relative">
+                  <Avatar
+                    src="https://files.catbox.moe/ljpa5c.jpg"
+                    className="w-32 h-32 md:w-40 md:h-40 border-4 border-white shadow-xl"
+                  />
+                  <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-blue-500 rounded-full border-4 border-white flex items-center justify-center">
+                    <span className="text-white font-bold">V</span>
                   </div>
                 </div>
                 
-                {/* Content */}
-                <div className="flex-1 text-center lg:text-left space-y-4 sm:space-y-6">
+                <div className="flex-1 text-center md:text-left space-y-4">
                   <div>
-                    <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-gray-900 dark:text-white">Valzyy</h3>
-                    <div className="flex flex-wrap justify-center lg:justify-start gap-2 mb-4">
-                      <Chip color="primary" variant="flat" startContent="💻">Fullstack Developer</Chip>
-                      <Chip color="success" variant="flat" startContent="🏗️">System Architect</Chip>
-                      <Chip color="warning" variant="flat" startContent="🚀">Innovation Leader</Chip>
+                    <h3 className="text-3xl font-bold mb-2">Valzyy</h3>
+                    <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
+                      <Chip color="primary" variant="flat">🎯 Founder & CEO</Chip>
+                      <Chip color="success" variant="flat">⚡ Fullstack Engineer</Chip>
+                      <Chip color="warning" variant="flat">🚀 Innovation Lead</Chip>
                     </div>
                   </div>
                   
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-base sm:text-lg">
-                    Pencipta dan pengembang utama JKT48Connect ecosystem. Seorang fullstack developer 
-                    yang berdedikasi menciptakan solusi teknologi terbaik untuk komunitas JKT48 Indonesia.
+                  <p className="text-gray-700 leading-relaxed text-lg">
+                    Pemimpin visioner dan developer utama JKT48Connect. Berpengalaman dalam 
+                    teknologi fullstack dan berdedikasi membangun solusi terbaik untuk komunitas JKT48.
                   </p>
                   
-                  <div className="space-y-4">
-                    <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
-                      <div className="flex items-center justify-center lg:justify-start gap-3 text-sm sm:text-base">
-                        <span className="text-gray-500">📱 Contact:</span> 
-                        <code className="bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded-lg font-mono">
-                          6285701479245
-                        </code>
-                      </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-center md:justify-start gap-3 p-4 rounded-xl bg-white/50">
+                      <span className="text-2xl">📱</span>
+                      <Code className="font-mono text-lg">6285701479245</Code>
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       <Button
                         as={Link}
                         href="https://wa.me/6285701479245"
@@ -190,19 +192,18 @@ export default function AboutJKT48Connect() {
                         startContent="💬"
                         className="font-semibold"
                       >
-                        WhatsApp Valzyy
+                        Contact Valzyy
                       </Button>
                       <Button
                         as={Link}
                         href="https://github.com/j-forces"
                         isExternal
-                        color="default"
                         variant="bordered"
                         size="lg"
-                        startContent="🐙"
+                        startContent="⭐"
                         className="font-semibold"
                       >
-                        GitHub
+                        GitHub Profile
                       </Button>
                     </div>
                   </div>
@@ -210,287 +211,324 @@ export default function AboutJKT48Connect() {
               </div>
             </CardBody>
           </Card>
-        </div>
+        </section>
 
-        {/* Teams Section */}
-        <div className="mb-12 sm:mb-16 lg:mb-20">
-          <div className="text-center mb-8 sm:mb-10">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 dark:text-white">Development <span className="text-blue-600">Teams</span></h2>
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300">
-              Tim-tim yang dibentuk untuk mengembangkan ecosystem JKT48Connect
-            </p>
+        {/* API Key Information */}
+        <section>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">🔐 API Access</h2>
+            <p className="text-gray-600 text-lg">Akses penuh ke JKT48Connect API memerlukan API Key</p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
-            {teams.map((team, index) => (
+
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50">
+              <CardBody className="p-6 md:p-8">
+                <div className="text-center space-y-4">
+                  <div className="text-4xl mb-4">🔑</div>
+                  <h3 className="text-2xl font-bold text-amber-800">API Key Required</h3>
+                  <p className="text-amber-700 leading-relaxed">
+                    Package @jkt48/core dan @jkt48connect-corp/sdk memerlukan API Key untuk mengakses 
+                    seluruh fitur dan endpoint JKT48Connect API.
+                  </p>
+                </div>
+              </CardBody>
+            </Card>
+
+            <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+              <CardBody className="p-6 md:p-8">
+                <div className="text-center space-y-4">
+                  <div className="text-4xl mb-4">🛒</div>
+                  <h3 className="text-2xl font-bold text-green-800">How to Purchase</h3>
+                  <p className="text-green-700 leading-relaxed mb-4">
+                    Beli API Key melalui Zenova Bot dengan command:
+                  </p>
+                  <Code className="block p-4 bg-green-100 text-green-800 font-mono text-sm md:text-base rounded-lg">
+                    .buyapi &lt;Name&gt; &lt;Email&gt; &lt;Type&gt; &lt;KeyCustom&gt;
+                  </Code>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* API Plans */}
+          <div className="grid md:grid-cols-3 gap-6">
+            {apiPlans.map((plan, index) => (
               <Card 
                 key={index} 
-                className="group hover:scale-105 hover:shadow-xl transition-all duration-300 border-2 border-gray-100 dark:border-gray-800"
+                className={`relative border-2 ${
+                  plan.popular 
+                    ? 'border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 scale-105' 
+                    : 'border-gray-200 hover:border-gray-300'
+                } transition-all duration-300`}
               >
-                <CardBody className="p-6 sm:p-8 text-center">
-                  <div className="text-4xl sm:text-5xl mb-4">{team.icon}</div>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-3 text-gray-900 dark:text-white">{team.name}</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                    {team.description}
-                  </p>
-                  {team.link && (
-                    <Button
-                      as={Link}
-                      href={team.link}
-                      isExternal
-                      color={team.color as any}
-                      size="lg"
-                      className="font-semibold"
-                    >
-                      Visit Repository
-                    </Button>
-                  )}
-                </CardBody>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* About Section */}
-        <div className="mb-12 sm:mb-16 lg:mb-20">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-8 sm:mb-10 text-center text-gray-900 dark:text-white">
-            Tentang <span className="text-purple-600">JKT48Connect</span>
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-10 sm:mb-12">
-            {[
-              { icon: "🎯", title: "Mission", desc: "Menyediakan akses informasi JKT48 yang akurat, real-time, dan mudah diakses untuk seluruh komunitas", color: "primary" },
-              { icon: "🚀", title: "Innovation", desc: "Menggunakan teknologi terdepan untuk memberikan experience terbaik bagi para fans JKT48", color: "success" },
-              { icon: "💜", title: "Community", desc: "Membangun ekosistem yang kuat untuk menghubungkan fans JKT48 di seluruh Indonesia", color: "warning" }
-            ].map((item, index) => (
-              <Card key={index} className="group hover:scale-105 hover:shadow-xl transition-all duration-300 border-2 border-gray-100 dark:border-gray-800">
-                <CardBody className="p-6 sm:p-8 text-center">
-                  <div className="text-4xl sm:text-5xl mb-4">{item.icon}</div>
-                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-gray-900 dark:text-white">{item.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{item.desc}</p>
-                </CardBody>
-              </Card>
-            ))}
-          </div>
-          
-          <Card className="bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 shadow-xl">
-            <CardBody className="p-6 sm:p-8 lg:p-12">
-              <div className="text-center">
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg sm:text-xl mb-8">
-                  JKT48Connect lahir dari kebutuhan komunitas akan platform terintegrasi yang menyediakan 
-                  informasi lengkap tentang JKT48. Dengan berbagai tools dan layanan yang telah dikembangkan, 
-                  kami telah melayani ribuan fans JKT48 di seluruh Indonesia.
-                </p>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
-                  {[
-                    { value: "1000+", label: "Active Users", color: "text-blue-600" },
-                    { value: "24/7", label: "Live Monitoring", color: "text-green-600" },
-                    { value: "5+", label: "Major Projects", color: "text-purple-600" },
-                    { value: "100%", label: "Free Access", color: "text-orange-600" }
-                  ].map((stat, index) => (
-                    <div key={index} className="p-4">
-                      <div className={`text-2xl sm:text-3xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
-                      <div className="text-gray-500 dark:text-gray-400 font-medium">{stat.label}</div>
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Chip color="primary" size="sm" className="font-bold">⭐ Most Popular</Chip>
+                  </div>
+                )}
+                <CardBody className="p-6 text-center space-y-4">
+                  <div>
+                    <h4 className="text-xl font-bold mb-2">{plan.name}</h4>
+                    <div className="mb-4">
+                      <span className="text-3xl font-black">Rp{plan.price}</span>
+                      <span className="text-gray-600">/{plan.period}</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {plan.features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center justify-center gap-2 text-sm">
+                        <span className="text-green-500">✓</span>
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <Button
+                    as={Link}
+                    href="https://wa.me/6285189020193"
+                    isExternal
+                    color={plan.color as any}
+                    variant={plan.popular ? "solid" : "bordered"}
+                    size="lg"
+                    className="w-full font-semibold"
+                  >
+                    Get {plan.name}
+                  </Button>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+        </section>
 
-        {/* Projects Section */}
-        <div className="mb-12 sm:mb-16 lg:mb-20">
-          <div className="text-center mb-8 sm:mb-10">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 dark:text-white">Our <span className="text-green-600">Projects</span></h2>
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300">
-              Berbagai project yang telah dikembangkan untuk komunitas JKT48
-            </p>
+        {/* Projects Showcase */}
+        <section>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">🚀 Our Products</h2>
+            <p className="text-gray-600 text-lg">Ekosistem lengkap untuk kebutuhan JKT48 Anda</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((project, index) => (
               <Card 
                 key={index} 
-                className={`h-full group transition-all duration-300 border-2 hover:scale-105 hover:shadow-xl ${
+                className={`group h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border-2 ${
                   project.highlight 
-                    ? 'border-blue-200 dark:border-blue-800 ring-2 ring-blue-100 dark:ring-blue-900' 
-                    : 'border-gray-100 dark:border-gray-800'
+                    ? 'border-yellow-200 bg-gradient-to-br from-yellow-50 to-amber-50' 
+                    : 'border-gray-200 hover:border-gray-300'
                 }`}
                 onMouseEnter={() => setHoveredProject(index)}
                 onMouseLeave={() => setHoveredProject(null)}
               >
-                <CardBody className="p-6 h-full flex flex-col">
+                <CardBody className="p-6 flex flex-col space-y-4">
                   
                   {/* Header */}
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="text-2xl sm:text-3xl flex-shrink-0">{project.icon}</div>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="text-3xl">{project.icon}</div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">{project.name}</h3>
-                        {project.highlight && (
-                          <div className="text-sm text-blue-600 font-semibold">⭐ Featured</div>
-                        )}
+                        <h3 className="font-bold text-lg leading-tight">{project.name}</h3>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Chip size="sm" color={project.color as any} variant="flat">
+                            {project.type}
+                          </Chip>
+                          {project.highlight && (
+                            <Chip size="sm" color="warning" variant="solid" className="text-xs">
+                              ⭐ Featured
+                            </Chip>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <Chip 
-                      size="md" 
-                      color={getTypeColor(project.type)}
-                      variant="flat"
-                      className="flex-shrink-0 ml-2"
-                    >
-                      {project.type}
-                    </Chip>
+                    <div className="text-xs font-medium">{project.status}</div>
                   </div>
                   
                   {/* Description */}
-                  <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed flex-grow">
+                  <p className="text-gray-600 text-sm leading-relaxed flex-grow">
                     {project.description}
                   </p>
 
-                  {/* Contact */}
+                  {/* API Key Notice */}
+                  {project.requiresKey && (
+                    <div className="p-3 bg-amber-100 border border-amber-200 rounded-lg">
+                      <div className="flex items-center gap-2 text-xs text-amber-800">
+                        <span>🔐</span>
+                        <span className="font-medium">Requires API Key</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Contact Info */}
                   {project.contact && (
-                    <div className="mb-4 p-4 bg-green-50 dark:bg-green-950/20 rounded-xl border-2 border-green-200 dark:border-green-800">
-                      <p className="text-sm text-green-700 dark:text-green-300 mb-2 font-semibold">📱 Contact Number:</p>
-                      <code className="font-mono text-sm bg-green-100 dark:bg-green-900/30 px-3 py-2 rounded-lg block">
-                        {project.contact}
-                      </code>
+                    <div className="p-3 bg-green-100 border border-green-200 rounded-lg">
+                      <div className="text-xs text-green-700 mb-1 font-medium">📱 WhatsApp:</div>
+                      <Code className="text-xs bg-green-50">{project.contact}</Code>
                     </div>
                   )}
 
                   {/* Features */}
-                  <div className="mb-6">
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 font-semibold">✨ Features:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {project.features.slice(0, 3).map((feature, idx) => (
+                  <div>
+                    <div className="text-xs text-gray-500 mb-2 font-medium">✨ Key Features:</div>
+                    <div className="flex flex-wrap gap-1">
+                      {project.features.slice(0, 4).map((feature, idx) => (
                         <Chip key={idx} size="sm" variant="bordered" className="text-xs">
                           {feature}
                         </Chip>
                       ))}
-                      {project.features.length > 3 && (
+                      {project.features.length > 4 && (
                         <Chip size="sm" variant="bordered" className="text-xs">
-                          +{project.features.length - 3} more
+                          +{project.features.length - 4}
                         </Chip>
                       )}
                     </div>
                   </div>
 
-                  {/* Action Button */}
+                  {/* Action */}
                   {project.link && (
                     <Button
                       as={Link}
                       href={project.link}
                       isExternal
-                      color={project.highlight ? "primary" : project.color as any}
+                      color={project.highlight ? "warning" : project.color as any}
                       variant={project.highlight ? "solid" : "flat"}
-                      className="w-full font-semibold mt-auto"
-                      size="lg"
+                      className="w-full font-semibold"
                       startContent={
                         project.type === "WhatsApp Bot" ? "💬" :
                         project.type === "Discord Bot" ? "🤖" :
                         project.type.includes("Package") ? "📦" : "🌐"
                       }
                     >
-                      {project.type === "WhatsApp Bot" ? "Chat WhatsApp" :
+                      {project.type === "WhatsApp Bot" ? "Chat Now" :
                        project.type === "Discord Bot" ? "Invite Bot" :
-                       project.type.includes("Package") ? "View Package" : "Visit"}
+                       project.type.includes("Package") ? "View Package" : "Visit Site"}
                     </Button>
                   )}
                 </CardBody>
               </Card>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Featured Packages */}
-        <div className="mb-12 sm:mb-16 lg:mb-20">
-          <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/10 dark:to-orange-950/10 border-2 border-yellow-200 dark:border-yellow-800 shadow-xl">
-            <CardBody className="p-6 sm:p-8 lg:p-12">
-              <div className="text-center mb-8">
-                <h3 className="text-2xl sm:text-3xl font-bold mb-3 text-gray-900 dark:text-white">🏆 Developer Packages</h3>
-                <p className="text-gray-600 dark:text-gray-300 text-lg">
-                  Paket unggulan untuk developer yang ingin mengintegrasikan JKT48 API
+        {/* Development Teams */}
+        <section>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">👥 Development Teams</h2>
+            <p className="text-gray-600 text-lg">Tim pengembang di balik JKT48Connect</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 hover:scale-105 transition-all duration-300">
+              <CardBody className="p-8 text-center space-y-4">
+                <div className="text-5xl">👥</div>
+                <h3 className="text-2xl font-bold text-blue-800">J-Force</h3>
+                <p className="text-blue-700 leading-relaxed">
+                  Tim inti pengembangan yang menangani seluruh arsitektur dan infrastruktur JKT48Connect ecosystem.
                 </p>
+                <Button
+                  as={Link}
+                  href="https://github.com/j-forces"
+                  isExternal
+                  color="primary"
+                  size="lg"
+                  startContent="⭐"
+                  className="font-semibold"
+                >
+                  Visit Repository
+                </Button>
+              </CardBody>
+            </Card>
+
+            <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 hover:scale-105 transition-all duration-300">
+              <CardBody className="p-8 text-center space-y-4">
+                <div className="text-5xl">🚀</div>
+                <h3 className="text-2xl font-bold text-green-800">Zenova</h3>
+                <p className="text-green-700 leading-relaxed">
+                  Divisi spesialis untuk pengembangan bot messaging, terutama WhatsApp dan platform komunikasi lainnya.
+                </p>
+                <Button
+                  as={Link}
+                  href="https://wa.me/6285189020193"
+                  isExternal
+                  color="success"
+                  size="lg"
+                  startContent="💬"
+                  className="font-semibold"
+                >
+                  Chat Zenova Bot
+                </Button>
+              </CardBody>
+            </Card>
+          </div>
+        </section>
+
+        {/* Statistics */}
+        <section>
+          <Card className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 via-pink-50 to-indigo-50">
+            <CardBody className="p-8 md:p-12">
+              <div className="text-center mb-8">
+                <h3 className="text-3xl font-bold mb-2">📊 Platform Statistics</h3>
+                <p className="text-gray-600 text-lg">Dipercaya oleh ribuan pengguna di seluruh Indonesia</p>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 {[
-                  {
-                    icon: "📦",
-                    name: "@jkt48/core",
-                    color: "warning",
-                    desc: "Package dengan fitur JKT48 paling lengkap dan komprehensif. Pilihan utama untuk developer yang membutuhkan akses full JKT48 API.",
-                    badges: ["Most Complete", "Production Ready"],
-                    link: "https://npmjs.com/package/@jkt48/core"
-                  },
-                  {
-                    icon: "⚡",
-                    name: "@jkt48connect-corp/sdk",
-                    color: "danger",
-                    desc: "SDK format dengan fitur yang sama, memberikan kemudahan integrasi dalam berbagai project development.",
-                    badges: ["SDK Format", "Easy Integration"],
-                    link: "https://npmjs.com/package/@jkt48connect-corp/sdk"
-                  }
-                ].map((pkg, index) => (
-                  <Card key={index} className="border-2 border-white dark:border-gray-800 shadow-lg">
-                    <CardBody className="p-6 sm:p-8 text-center">
-                      <div className="text-4xl mb-4">{pkg.icon}</div>
-                      <h4 className="text-xl sm:text-2xl font-bold mb-3 text-yellow-600 dark:text-yellow-400">
-                        {pkg.name}
-                      </h4>
-                      <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                        {pkg.desc}
-                      </p>
-                      <div className="flex flex-wrap justify-center gap-2 mb-6">
-                        {pkg.badges.map((badge, idx) => (
-                          <Chip 
-                            key={idx} 
-                            size="md" 
-                            color={idx === 0 ? pkg.color as any : "success"} 
-                            variant="flat"
-                          >
-                            {badge}
-                          </Chip>
-                        ))}
-                      </div>
-                      <Button
-                        as={Link}
-                        href={pkg.link}
-                        isExternal
-                        color={pkg.color as any}
-                        size="lg"
-                        className="w-full font-semibold"
-                      >
-                        View on NPM
-                      </Button>
-                    </CardBody>
-                  </Card>
+                  { value: "1,500+", label: "Active Users", icon: "👥", color: "text-blue-600" },
+                  { value: "24/7", label: "Uptime", icon: "⚡", color: "text-green-600" },
+                  { value: "5+", label: "Major Products", icon: "🚀", color: "text-purple-600" },
+                  { value: "100%", label: "Free Core Access", icon: "🎯", color: "text-orange-600" }
+                ].map((stat, index) => (
+                  <div key={index} className="space-y-2">
+                    <div className="text-3xl">{stat.icon}</div>
+                    <div className={`text-2xl md:text-3xl font-black ${stat.color}`}>{stat.value}</div>
+                    <div className="text-gray-600 font-medium text-sm">{stat.label}</div>
+                  </div>
                 ))}
               </div>
             </CardBody>
           </Card>
-        </div>
+        </section>
 
-        {/* Contact Section */}
-        <div className="text-center">
-          <div className="mb-8 sm:mb-10">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 dark:text-white">Get In <span className="text-blue-600">Touch</span></h2>
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl mx-auto">
-              Punya pertanyaan, saran, atau ingin berkolaborasi? Tim JKT48Connect siap membantu Anda!
-            </p>
+        {/* Contact & Community */}
+        <section>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">🤝 Join Our Community</h2>
+            <p className="text-gray-600 text-lg">Terhubung dengan ribuan JKT48 fans lainnya</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-10">
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
             {[
-              { icon: "💬", title: "WhatsApp Bot", desc: "Chat dengan Zenova Bot", link: "https://wa.me/6285189020193", btn: "Chat Zenova", color: "success" },
-              { icon: "👨‍💻", title: "Contact Creator", desc: "Hubungi Valzyy langsung", link: "https://wa.me/6285701479245", btn: "Chat Valzyy", color: "primary" },
-              { icon: "🤖", title: "Discord Bot", desc: "Invite JKT48Connect Bot", link: "https://top.gg/bot/1305141693477027891?s=0f5136415d254", btn: "Invite Bot", color: "secondary" }
+              { 
+                icon: "💬", 
+                title: "Zenova Bot", 
+                desc: "Chat dengan bot official untuk akses fitur dan pembelian API key", 
+                link: "https://wa.me/6285189020193", 
+                btn: "Chat Zenova", 
+                color: "success" 
+              },
+              { 
+                icon: "👨‍💻", 
+                title: "Contact Creator", 
+                desc: "Hubungi Valzyy untuk partnership, feedback, atau pertanyaan teknis", 
+                link: "https://wa.me/6285701479245", 
+                btn: "Message Valzyy", 
+                color: "primary" 
+              },
+              { 
+                icon: "🤖", 
+                title: "Discord Bot", 
+                desc: "Invite JKT48Connect bot ke server Discord komunitas Anda", 
+                link: "https://top.gg/bot/1305141693477027891?s=0f5136415d254", 
+                btn: "Invite Bot", 
+                color: "secondary" 
+              }
             ].map((contact, index) => (
-              <Card key={index} className="group hover:scale-105 hover:shadow-xl transition-all duration-300 border-2 border-gray-100 dark:border-gray-800">
-                <CardBody className="p-6 sm:p-8 text-center">
-                  <div className="text-4xl mb-4">{contact.icon}</div>
-                  <h4 className="font-bold mb-2 text-xl text-gray-900 dark:text-white">{contact.title}</h4>
-                  <p className="text-gray-600 dark:text-gray-300 mb-6">{contact.desc}</p>
+              <Card key={index} className="group border-2 border-gray-200 hover:border-gray-300 hover:scale-105 transition-all duration-300">
+                <CardBody className="p-6 text-center space-y-4">
+                  <div className="text-4xl">{contact.icon}</div>
+                  <div>
+                    <h4 className="font-bold text-xl mb-2">{contact.title}</h4>
+                    <p className="text-gray-600 text-sm leading-relaxed">{contact.desc}</p>
+                  </div>
                   <Button
                     as={Link}
                     href={contact.link}
@@ -506,27 +544,43 @@ export default function AboutJKT48Connect() {
             ))}
           </div>
 
-          <Card className="bg-blue-50 dark:bg-blue-950/20 border-2 border-blue-200 dark:border-blue-800 shadow-xl">
-            <CardBody className="p-6 sm:p-8 lg:p-12">
-              <h4 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-900 dark:text-white">🚀 Join Our Community</h4>
-              <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed text-lg max-w-2xl mx-auto">
-                Bergabunglah dengan ribuan fans JKT48 lainnya dan dapatkan update terbaru 
-                dari ecosystem JKT48Connect!
+          {/* Final CTA */}
+          <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <CardBody className="p-8 md:p-12 text-center space-y-6">
+              <div className="text-5xl mb-4">🎉</div>
+              <h4 className="text-2xl md:text-3xl font-bold">Ready to Get Started?</h4>
+              <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
+                Bergabunglah dengan ekosistem JKT48Connect dan nikmati akses ke informasi JKT48 
+                yang paling lengkap dan up-to-date!
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Button color="success" size="lg" startContent="💬" className="font-semibold">
-                  WhatsApp Community
+                <Button 
+                  as={Link}
+                  href="https://wa.me/6285189020193"
+                  isExternal
+                  color="success" 
+                  size="lg" 
+                  startContent="🚀" 
+                  className="font-semibold text-lg px-8"
+                >
+                  Start with Zenova Bot
                 </Button>
-                <Button color="primary" size="lg" startContent="💬" className="font-semibold">
-                  Discord Server
-                </Button>
-                <Button color="secondary" size="lg" startContent="📢" className="font-semibold">
-                  Telegram Channel
+                <Button 
+                  as={Link}
+                  href="https://npmjs.com/package/@jkt48/core"
+                  isExternal
+                  color="warning" 
+                  variant="bordered"
+                  size="lg" 
+                  startContent="📦" 
+                  className="font-semibold text-lg px-8"
+                >
+                  Explore API Package
                 </Button>
               </div>
             </CardBody>
           </Card>
-        </div>
+        </section>
       </div>
     </div>
   );
