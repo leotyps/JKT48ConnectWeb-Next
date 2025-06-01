@@ -1,8 +1,6 @@
 "use client"
 
-import { 
-  Card, CardBody, Image, Breadcrumbs, BreadcrumbItem, Link, Button, Divider, Chip, Avatar, Heading, Text 
-} from "@heroui/react";
+import { Card, CardBody, Image, Breadcrumbs, BreadcrumbItem, Link, Button, Divider, Chip, Avatar } from "@heroui/react";
 import { useState } from "react";
 
 export default function AboutJKT48Connect() {
@@ -86,7 +84,7 @@ export default function AboutJKT48Connect() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white dark:from-gray-900 dark:to-gray-950">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
       <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         
         {/* Breadcrumbs */}
@@ -98,23 +96,28 @@ export default function AboutJKT48Connect() {
         </div>
 
         {/* Hero Section */}
-        <div className="relative text-center mb-12 sm:mb-16 lg:mb-20">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-600 opacity-30 rounded-3xl"></div>
-          <div className="relative z-10 space-y-4 sm:space-y-6 max-w-4xl mx-auto py-12">
-            <div className="flex justify-center">
+        <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+          <div className="mb-6 sm:mb-8">
+            <div className="relative inline-block mb-6 sm:mb-8">
               <Image
                 src="https://files.catbox.moe/i1qudl.jpg"
                 alt="JKT48Connect Logo"
-                width={120}
-                height={120}
-                className="rounded-full shadow-2xl border-4 border-white dark:border-gray-800"
+                width={100}
+                height={100}
+                className="rounded-3xl shadow-2xl sm:w-32 sm:h-32 lg:w-40 lg:h-40 border-4 border-white dark:border-gray-800"
                 fallbackSrc="https://via.placeholder.com/150x150?text=JKT48Connect"
               />
+              <div className="absolute -bottom-2 -right-2 bg-blue-500 w-8 h-8 sm:w-10 sm:h-10 rounded-full border-4 border-white dark:border-gray-950 flex items-center justify-center shadow-lg">
+                <span className="text-white text-sm sm:text-base font-bold">✓</span>
+              </div>
             </div>
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-white leading-tight">
-              JKT48<span className="text-yellow-300">Connect</span>
+          </div>
+          
+          <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 dark:text-white leading-tight">
+              JKT48<span className="text-blue-600">Connect</span>
             </h1>
-            <p className="text-xl sm:text-2xl text-white/90 leading-relaxed font-medium px-4">
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-300 leading-relaxed font-medium px-4">
               Ecosystem terlengkap untuk semua kebutuhan informasi JKT48 Anda
             </p>
             <div className="flex justify-center gap-2 flex-wrap px-4">
@@ -128,47 +131,47 @@ export default function AboutJKT48Connect() {
         {/* Creator Section */}
         <div className="mb-12 sm:mb-16 lg:mb-20">
           <div className="text-center mb-8 sm:mb-10">
-            <Heading size="lg" className="font-bold mb-3 text-gray-900 dark:text-white">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
               Meet The <span className="text-purple-600">Creator</span>
-            </Heading>
-            <Text size="md" className="text-gray-600 dark:text-gray-300">
-              Mastermind behind JKT48Connect ecosystem
-            </Text>
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300">Mastermind behind JKT48Connect ecosystem</p>
           </div>
           
-          <Card className="max-w-4xl mx-auto shadow-lg border-0 rounded-3xl overflow-hidden">
-            <CardBody className="p-6 sm:p-8 lg:p-12 bg-white dark:bg-gray-900">
+          <Card className="max-w-4xl mx-auto shadow-2xl border-2 border-gray-100 dark:border-gray-800">
+            <CardBody className="p-6 sm:p-8 lg:p-12">
               <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
                 
                 {/* Avatar */}
-                <div className="flex-shrink-0 relative">
-                  <Avatar
-                    src="https://files.catbox.moe/ljpa5c.jpg"
-                    className="w-36 h-36 sm:w-44 sm:h-44 lg:w-52 lg:h-52 rounded-full border-4 border-white dark:border-gray-800 shadow-2xl"
-                  />
-                  <div className="absolute -bottom-2 -right-2 bg-green-500 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-4 border-white dark:border-gray-950 flex items-center justify-center shadow-lg">
-                    <span className="text-white font-bold">✓</span>
+                <div className="flex-shrink-0">
+                  <div className="relative">
+                    <Avatar
+                      src="https://files.catbox.moe/ljpa5c.jpg"
+                      className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 border-4 border-white dark:border-gray-800 shadow-2xl"
+                    />
+                    <div className="absolute -bottom-2 -right-2 bg-green-500 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-4 border-white dark:border-gray-950 flex items-center justify-center shadow-lg">
+                      <span className="text-white font-bold">✓</span>
+                    </div>
                   </div>
                 </div>
                 
                 {/* Content */}
                 <div className="flex-1 text-center lg:text-left space-y-4 sm:space-y-6">
                   <div>
-                    <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Valzyy</h3>
-                    <div className="flex flex-wrap justify-center lg:justify-start gap-2 mt-2">
+                    <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-gray-900 dark:text-white">Valzyy</h3>
+                    <div className="flex flex-wrap justify-center lg:justify-start gap-2 mb-4">
                       <Chip color="primary" variant="flat" startContent="💻">Fullstack Developer</Chip>
                       <Chip color="success" variant="flat" startContent="🏗️">System Architect</Chip>
                       <Chip color="warning" variant="flat" startContent="🚀">Innovation Leader</Chip>
                     </div>
                   </div>
                   
-                  <Text size="md" className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-base sm:text-lg">
                     Pencipta dan pengembang utama JKT48Connect ecosystem. Seorang fullstack developer 
-                    yang berdedikasi menciptakan solusi teknologi terbaik untuk komunitas JKT48 Indonesia
-                  </Text>
+                    yang berdedikasi menciptakan solusi teknologi terbaik untuk komunitas JKT48 Indonesia.
+                  </p>
                   
                   <div className="space-y-4">
-                    <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
                       <div className="flex items-center justify-center lg:justify-start gap-3 text-sm sm:text-base">
                         <span className="text-gray-500">📱 Contact:</span> 
                         <code className="bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded-lg font-mono">
@@ -212,26 +215,24 @@ export default function AboutJKT48Connect() {
         {/* Teams Section */}
         <div className="mb-12 sm:mb-16 lg:mb-20">
           <div className="text-center mb-8 sm:mb-10">
-            <Heading size="lg" className="font-bold mb-3 text-gray-900 dark:text-white">
-              Development <span className="text-blue-600">Teams</span>
-            </Heading>
-            <Text size="md" className="text-gray-600 dark:text-gray-300">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 dark:text-white">Development <span className="text-blue-600">Teams</span></h2>
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300">
               Tim-tim yang dibentuk untuk mengembangkan ecosystem JKT48Connect
-            </Text>
+            </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
             {teams.map((team, index) => (
               <Card 
                 key={index} 
-                className="group hover:scale-105 hover:shadow-xl transition-all duration-300 rounded-2xl border-0 overflow-hidden"
+                className="group hover:scale-105 hover:shadow-xl transition-all duration-300 border-2 border-gray-100 dark:border-gray-800"
               >
-                <CardBody className="p-6 sm:p-8 text-center bg-white dark:bg-gray-900">
-                  <div className="text-5xl sm:text-6xl mb-4">{team.icon}</div>
-                  <h3 className="text-2xl sm:text-3xl font-bold mb-3 text-gray-900 dark:text-white">{team.name}</h3>
-                  <Text size="md" className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                <CardBody className="p-6 sm:p-8 text-center">
+                  <div className="text-4xl sm:text-5xl mb-4">{team.icon}</div>
+                  <h3 className="text-xl sm:text-2xl font-bold mb-3 text-gray-900 dark:text-white">{team.name}</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
                     {team.description}
-                  </Text>
+                  </p>
                   {team.link && (
                     <Button
                       as={Link}
@@ -252,9 +253,9 @@ export default function AboutJKT48Connect() {
 
         {/* About Section */}
         <div className="mb-12 sm:mb-16 lg:mb-20">
-          <Heading size="lg" className="text-center font-bold mb-8 sm:mb-10 text-gray-900 dark:text-white">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-8 sm:mb-10 text-center text-gray-900 dark:text-white">
             Tentang <span className="text-purple-600">JKT48Connect</span>
-          </Heading>
+          </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-10 sm:mb-12">
             {[
@@ -262,24 +263,24 @@ export default function AboutJKT48Connect() {
               { icon: "🚀", title: "Innovation", desc: "Menggunakan teknologi terdepan untuk memberikan experience terbaik bagi para fans JKT48", color: "success" },
               { icon: "💜", title: "Community", desc: "Membangun ekosistem yang kuat untuk menghubungkan fans JKT48 di seluruh Indonesia", color: "warning" }
             ].map((item, index) => (
-              <Card key={index} className="group hover:scale-105 hover:shadow-xl transition-all duration-300 rounded-2xl border-0 overflow-hidden">
-                <CardBody className="p-6 sm:p-8 text-center bg-white dark:bg-gray-900">
-                  <div className="text-5xl sm:text-6xl mb-4">{item.icon}</div>
-                  <h3 className="text-2xl sm:text-3xl font-semibold mb-3 text-gray-900 dark:text-white">{item.title}</h3>
-                  <Text size="md" className="text-gray-600 dark:text-gray-300 leading-relaxed">{item.desc}</Text>
+              <Card key={index} className="group hover:scale-105 hover:shadow-xl transition-all duration-300 border-2 border-gray-100 dark:border-gray-800">
+                <CardBody className="p-6 sm:p-8 text-center">
+                  <div className="text-4xl sm:text-5xl mb-4">{item.icon}</div>
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-gray-900 dark:text-white">{item.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{item.desc}</p>
                 </CardBody>
               </Card>
             ))}
           </div>
           
-          <Card className="bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-lg border-0">
+          <Card className="bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 shadow-xl">
             <CardBody className="p-6 sm:p-8 lg:p-12">
               <div className="text-center">
-                <Text size="lg" className="text-gray-700 dark:text-gray-300 leading-relaxed mb-8">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg sm:text-xl mb-8">
                   JKT48Connect lahir dari kebutuhan komunitas akan platform terintegrasi yang menyediakan 
                   informasi lengkap tentang JKT48. Dengan berbagai tools dan layanan yang telah dikembangkan, 
                   kami telah melayani ribuan fans JKT48 di seluruh Indonesia.
-                </Text>
+                </p>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
                   {[
                     { value: "1000+", label: "Active Users", color: "text-blue-600" },
@@ -288,7 +289,7 @@ export default function AboutJKT48Connect() {
                     { value: "100%", label: "Free Access", color: "text-orange-600" }
                   ].map((stat, index) => (
                     <div key={index} className="p-4">
-                      <div className={`text-3xl sm:text-4xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
+                      <div className={`text-2xl sm:text-3xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
                       <div className="text-gray-500 dark:text-gray-400 font-medium">{stat.label}</div>
                     </div>
                   ))}
@@ -301,36 +302,34 @@ export default function AboutJKT48Connect() {
         {/* Projects Section */}
         <div className="mb-12 sm:mb-16 lg:mb-20">
           <div className="text-center mb-8 sm:mb-10">
-            <Heading size="lg" className="font-bold mb-3 text-gray-900 dark:text-white">
-              Our <span className="text-green-600">Projects</span>
-            </Heading>
-            <Text size="md" className="text-gray-600 dark:text-gray-300">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 dark:text-white">Our <span className="text-green-600">Projects</span></h2>
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300">
               Berbagai project yang telah dikembangkan untuk komunitas JKT48
-            </Text>
+            </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {projects.map((project, index) => (
               <Card 
                 key={index} 
-                className={`h-full group transition-all duration-300 rounded-2xl overflow-hidden ${
+                className={`h-full group transition-all duration-300 border-2 hover:scale-105 hover:shadow-xl ${
                   project.highlight 
-                    ? 'shadow-xl ring-2 ring-blue-100 dark:ring-blue-900' 
-                    : 'shadow-lg'
+                    ? 'border-blue-200 dark:border-blue-800 ring-2 ring-blue-100 dark:ring-blue-900' 
+                    : 'border-gray-100 dark:border-gray-800'
                 }`}
                 onMouseEnter={() => setHoveredProject(index)}
                 onMouseLeave={() => setHoveredProject(null)}
               >
-                <CardBody className="p-6 h-full flex flex-col bg-white dark:bg-gray-900">
+                <CardBody className="p-6 h-full flex flex-col">
                   
                   {/* Header */}
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="text-3xl sm:text-4xl flex-shrink-0">{project.icon}</div>
+                      <div className="text-2xl sm:text-3xl flex-shrink-0">{project.icon}</div>
                       <div className="min-w-0 flex-1">
                         <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">{project.name}</h3>
                         {project.highlight && (
-                          <div className="text-sm text-blue-600 font-semibold mt-1">⭐ Featured</div>
+                          <div className="text-sm text-blue-600 font-semibold">⭐ Featured</div>
                         )}
                       </div>
                     </div>
@@ -345,16 +344,14 @@ export default function AboutJKT48Connect() {
                   </div>
                   
                   {/* Description */}
-                  <Text size="sm" className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed flex-grow">
+                  <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed flex-grow">
                     {project.description}
-                  </Text>
+                  </p>
 
                   {/* Contact */}
                   {project.contact && (
                     <div className="mb-4 p-4 bg-green-50 dark:bg-green-950/20 rounded-xl border-2 border-green-200 dark:border-green-800">
-                      <Text size="sm" className="text-green-700 dark:text-green-300 mb-2 font-semibold">
-                        📱 Contact Number:
-                      </Text>
+                      <p className="text-sm text-green-700 dark:text-green-300 mb-2 font-semibold">📱 Contact Number:</p>
                       <code className="font-mono text-sm bg-green-100 dark:bg-green-900/30 px-3 py-2 rounded-lg block">
                         {project.contact}
                       </code>
@@ -363,9 +360,7 @@ export default function AboutJKT48Connect() {
 
                   {/* Features */}
                   <div className="mb-6">
-                    <Text size="sm" className="text-gray-500 dark:text-gray-400 mb-3 font-semibold">
-                      ✨ Features:
-                    </Text>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 font-semibold">✨ Features:</p>
                     <div className="flex flex-wrap gap-2">
                       {project.features.slice(0, 3).map((feature, idx) => (
                         <Chip key={idx} size="sm" variant="bordered" className="text-xs">
@@ -407,43 +402,99 @@ export default function AboutJKT48Connect() {
           </div>
         </div>
 
-        {/* API Key Info Banner */}
+        {/* API Key Information */}
         <div className="mb-12 sm:mb-16 lg:mb-20">
-          <Card className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl shadow-lg overflow-hidden">
-            <CardBody className="p-6 sm:p-8 lg:p-12 text-center">
-              <Heading size="md" className="text-white font-bold mb-4">
-                🔐 API Key Information
-              </Heading>
-              <Text size="md" className="text-white/90 leading-relaxed mb-6">
-                Untuk menggunakan package atau API JKT48Connect, kamu perlu API key terlebih dahulu.<br/>
-                Kamu bisa membeli API key secara otomatis melalui Bot dengan command <code className="bg-white/25 px-2 py-1 rounded">.buyapi</code>, atau langsung hubungi developer (Valzyy).<br/>
-                Semua dokumentasi lengkap untuk API &amp; package ada di bawah.
-              </Text>
-              <Button
-                as={Link}
-                href="https://docs.jkt48connect.my.id"
-                isExternal
-                color="light"
-                size="lg"
-                className="font-semibold bg-white text-indigo-600 hover:bg-gray-100"
-              >
-                📖 Lihat Full Docs
-              </Button>
+          <Card className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-950/10 dark:to-pink-950/10 border-2 border-red-200 dark:border-red-800 shadow-xl">
+            <CardBody className="p-6 sm:p-8">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl sm:text-3xl font-bold mb-3 text-gray-900 dark:text-white">🔑 API Access Information</h3>
+                <p className="text-gray-600 dark:text-gray-300 text-lg">
+                  Akses penuh fitur JKT48Connect memerlukan API Key
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl">📦</div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white mb-2">Package & API Access</h4>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">
+                        Semua fitur dalam package @jkt48/core dan @jkt48connect-corp/sdk memerlukan API Key untuk akses penuh
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl">💰</div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white mb-2">Flexible Pricing Plans</h4>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">
+                        Tersedia berbagai plan harga yang fleksibel sesuai kebutuhan penggunaan Anda
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="p-4 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700">
+                    <h4 className="font-bold text-gray-900 dark:text-white mb-3">🛒 Cara Pembelian API Key:</h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-green-600">✓</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Hubungi Valzyy (Developer) langsung</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-blue-600">✓</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Pembelian otomatis melalui Zenova Bot</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <Button
+                      as={Link}
+                      href="https://wa.me/6285701479245"
+                      isExternal
+                      color="success"
+                      size="md"
+                      startContent="👨‍💻"
+                      className="font-semibold flex-1"
+                    >
+                      Contact Valzyy
+                    </Button>
+                    <Button
+                      as={Link}
+                      href="https://wa.me/6285189020193"
+                      isExternal
+                      color="primary"
+                      size="md"
+                      startContent="🤖"
+                      className="font-semibold flex-1"
+                    >
+                      Zenova Bot
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </CardBody>
           </Card>
         </div>
 
         {/* Featured Packages */}
         <div className="mb-12 sm:mb-16 lg:mb-20">
-          <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/10 dark:to-orange-950/10 rounded-3xl shadow-lg overflow-hidden">
+          <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/10 dark:to-orange-950/10 border-2 border-yellow-200 dark:border-yellow-800 shadow-xl">
             <CardBody className="p-6 sm:p-8 lg:p-12">
               <div className="text-center mb-8">
-                <Heading size="md" className="font-bold mb-3 text-gray-900 dark:text-white">
-                  🏆 Developer Packages
-                </Heading>
-                <Text size="md" className="text-gray-600 dark:text-gray-300">
+                <h3 className="text-2xl sm:text-3xl font-bold mb-3 text-gray-900 dark:text-white">🏆 Developer Packages</h3>
+                <p className="text-gray-600 dark:text-gray-300 text-lg">
                   Paket unggulan untuk developer yang ingin mengintegrasikan JKT48 API
-                </Text>
+                </p>
+                <div className="mt-4 p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+                    ⚠️ Memerlukan API Key untuk akses penuh
+                  </p>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
@@ -465,15 +516,15 @@ export default function AboutJKT48Connect() {
                     link: "https://npmjs.com/package/@jkt48connect-corp/sdk"
                   }
                 ].map((pkg, index) => (
-                  <Card key={index} className="border-0 rounded-2xl overflow-hidden shadow-lg">
-                    <CardBody className="p-6 sm:p-8 text-center bg-white dark:bg-gray-900">
-                      <div className="text-5xl mb-4">{pkg.icon}</div>
-                      <h4 className="text-2xl sm:text-3xl font-bold mb-3 text-gray-900 dark:text-gray-100">
+                  <Card key={index} className="border-2 border-white dark:border-gray-800 shadow-lg">
+                    <CardBody className="p-6 sm:p-8 text-center">
+                      <div className="text-4xl mb-4">{pkg.icon}</div>
+                      <h4 className="text-xl sm:text-2xl font-bold mb-3 text-yellow-600 dark:text-yellow-400">
                         {pkg.name}
                       </h4>
-                      <Text size="md" className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                      <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
                         {pkg.desc}
-                      </Text>
+                      </p>
                       <div className="flex flex-wrap justify-center gap-2 mb-6">
                         {pkg.badges.map((badge, idx) => (
                           <Chip 
@@ -505,14 +556,12 @@ export default function AboutJKT48Connect() {
         </div>
 
         {/* Contact Section */}
-        <div className="text-center mb-20">
+        <div className="text-center">
           <div className="mb-8 sm:mb-10">
-            <Heading size="lg" className="font-bold mb-4 text-gray-900 dark:text-white">
-              Get In <span className="text-blue-600">Touch</span>
-            </Heading>
-            <Text size="md" className="text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 dark:text-white">Get In <span className="text-blue-600">Touch</span></h2>
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl mx-auto">
               Punya pertanyaan, saran, atau ingin berkolaborasi? Tim JKT48Connect siap membantu Anda!
-            </Text>
+            </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-10">
@@ -521,11 +570,11 @@ export default function AboutJKT48Connect() {
               { icon: "👨‍💻", title: "Contact Creator", desc: "Hubungi Valzyy langsung", link: "https://wa.me/6285701479245", btn: "Chat Valzyy", color: "primary" },
               { icon: "🤖", title: "Discord Bot", desc: "Invite JKT48Connect Bot", link: "https://top.gg/bot/1305141693477027891?s=0f5136415d254", btn: "Invite Bot", color: "secondary" }
             ].map((contact, index) => (
-              <Card key={index} className="group hover:scale-105 hover:shadow-xl transition-all duration-300 rounded-2xl border-0 overflow-hidden">
-                <CardBody className="p-6 sm:p-8 text-center bg-white dark:bg-gray-900">
-                  <div className="text-5xl mb-4">{contact.icon}</div>
-                  <h4 className="font-bold mb-2 text-2xl text-gray-900 dark:text-white">{contact.title}</h4>
-                  <Text size="md" className="text-gray-600 dark:text-gray-300 mb-6">{contact.desc}</Text>
+              <Card key={index} className="group hover:scale-105 hover:shadow-xl transition-all duration-300 border-2 border-gray-100 dark:border-gray-800">
+                <CardBody className="p-6 sm:p-8 text-center">
+                  <div className="text-4xl mb-4">{contact.icon}</div>
+                  <h4 className="font-bold mb-2 text-xl text-gray-900 dark:text-white">{contact.title}</h4>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6">{contact.desc}</p>
                   <Button
                     as={Link}
                     href={contact.link}
@@ -541,13 +590,13 @@ export default function AboutJKT48Connect() {
             ))}
           </div>
 
-          <Card className="bg-blue-50 dark:bg-blue-950/20 rounded-3xl shadow-lg overflow-hidden border-0">
+          <Card className="bg-blue-50 dark:bg-blue-950/20 border-2 border-blue-200 dark:border-blue-800 shadow-xl">
             <CardBody className="p-6 sm:p-8 lg:p-12">
-              <Heading size="md" className="font-bold mb-4 text-gray-900 dark:text-white">🚀 Join Our Community</Heading>
-              <Text size="md" className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed text-lg max-w-2xl mx-auto">
+              <h4 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-900 dark:text-white">🚀 Join Our Community</h4>
+              <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed text-lg max-w-2xl mx-auto">
                 Bergabunglah dengan ribuan fans JKT48 lainnya dan dapatkan update terbaru 
                 dari ecosystem JKT48Connect!
-              </Text>
+              </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Button color="success" size="lg" startContent="💬" className="font-semibold">
                   WhatsApp Community
@@ -562,7 +611,6 @@ export default function AboutJKT48Connect() {
             </CardBody>
           </Card>
         </div>
-
       </div>
     </div>
   );
