@@ -34,8 +34,8 @@ import {
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg
     className={className}
-    width="20"
-    height="20"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="currentColor"
     xmlns="http://www.w3.org/2000/svg"
@@ -55,11 +55,11 @@ export const Navbar = () => {
     <Input
       aria-label="Search"
       classNames={{
-        inputWrapper: "bg-default-100 hover:bg-default-200 transition-colors",
+        inputWrapper: "bg-default-100",
         input: "text-sm",
       }}
       endContent={
-        <Kbd className="hidden lg:inline-block text-xs" keys={["command"]}>
+        <Kbd className="hidden lg:inline-block" keys={["command"]}>
           K
         </Kbd>
       }
@@ -69,7 +69,6 @@ export const Navbar = () => {
         <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
       }
       type="search"
-      size="sm"
     />
   );
 
@@ -79,31 +78,22 @@ export const Navbar = () => {
       position="sticky"
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      className="backdrop-blur-md bg-background/80 border-b border-divider"
-      height="60px"
     >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-        <NavbarBrand as="li" className="gap-2 max-w-fit">
-          <NextLink 
-            className="flex justify-start items-center gap-2 hover:opacity-80 transition-opacity" 
-            href="/"
-          >
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">JKT</span>
-            </div>
-            <p className="font-bold text-inherit text-lg">JKT48Connect</p>
+        <NavbarBrand as="li" className="gap-3 max-w-fit">
+          <NextLink className="flex justify-start items-center gap-1" href="/">
+            <p className="font-bold text-inherit">JKT48Connect</p>
           </NextLink>
         </NavbarBrand>
-        
-        <ul className="hidden lg:flex gap-1 justify-start ml-4">
+        <ul className="hidden lg:flex gap-4 justify-start ml-2">
           {siteConfig.navItems.map((item) => (
             <NavbarItem key={item.href}>
               <NextLink
                 className={clsx(
-                  "px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                  "hover:bg-default-100 hover:text-primary",
-                  "data-[active=true]:text-primary data-[active=true]:bg-primary/10"
+                  linkStyles({ color: "foreground" }),
+                  "data-[active=true]:text-primary data-[active=true]:font-medium",
                 )}
+                color="foreground"
                 href={item.href}
               >
                 {item.label}
@@ -117,49 +107,27 @@ export const Navbar = () => {
         className="hidden sm:flex basis-1/5 sm:basis-full"
         justify="end"
       >
-        <NavbarItem className="hidden sm:flex gap-1">
-          <Link 
-            isExternal 
-            aria-label="WhatsApp" 
-            href={siteConfig.links.twitter}
-            className="p-2 rounded-lg hover:bg-default-100 transition-all duration-200 hover:scale-105"
-          >
-            <WhatsAppIcon className="text-default-500 hover:text-green-500 transition-colors" />
+        <NavbarItem className="hidden sm:flex gap-2">
+          <Link isExternal aria-label="WhatsApp" href={siteConfig.links.twitter}>
+            <WhatsAppIcon className="text-default-500" />
           </Link>
-          <Link 
-            isExternal 
-            aria-label="Discord" 
-            href={siteConfig.links.discord}
-            className="p-2 rounded-lg hover:bg-default-100 transition-all duration-200 hover:scale-105"
-          >
-            <DiscordIcon className="text-default-500 hover:text-indigo-500 transition-colors w-5 h-5" />
+          <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>
+            <DiscordIcon className="text-default-500" />
           </Link>
-          <Link 
-            isExternal 
-            aria-label="Github" 
-            href={siteConfig.links.github}
-            className="p-2 rounded-lg hover:bg-default-100 transition-all duration-200 hover:scale-105"
-          >
-            <GithubIcon className="text-default-500 hover:text-foreground transition-colors w-5 h-5" />
+          <Link isExternal aria-label="Github" href={siteConfig.links.github}>
+            <GithubIcon className="text-default-500" />
           </Link>
-          <div className="ml-2">
-            <ThemeSwitch />
-          </div>
+          <ThemeSwitch />
         </NavbarItem>
-        
-        <NavbarItem className="hidden lg:flex ml-2">
-          {searchInput}
-        </NavbarItem>
-        
-        <NavbarItem className="hidden md:flex ml-2">
+        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
+        <NavbarItem className="hidden md:flex">
           <Button
             isExternal
             as={Link}
-            className="text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 border-0 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+            className="text-sm font-normal text-default-600 bg-default-100"
             href={siteConfig.links.sponsor}
-            startContent={<HeartFilledIcon className="text-white w-4 h-4" />}
-            variant="solid"
-            size="sm"
+            startContent={<HeartFilledIcon className="text-danger" />}
+            variant="flat"
           >
             Sponsor
           </Button>
@@ -167,105 +135,90 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-        <div className="flex items-center gap-1">
-          <Link 
-            isExternal 
-            aria-label="Github" 
-            href={siteConfig.links.github}
-            className="p-2 rounded-lg hover:bg-default-100 transition-all duration-200"
-          >
-            <GithubIcon className="text-default-500 w-5 h-5" />
-          </Link>
-          <ThemeSwitch />
-          <NavbarMenuToggle className="ml-1" />
-        </div>
+        <Link isExternal aria-label="Github" href={siteConfig.links.github}>
+          <GithubIcon className="text-default-500" />
+        </Link>
+        <ThemeSwitch />
+        <NavbarMenuToggle />
       </NavbarContent>
 
-      <NavbarMenu className="pt-4 max-h-[calc(100vh-60px)] overflow-y-auto">
-        {/* Search Section */}
-        <div className="px-4 mb-4">
+      <NavbarMenu>
+        <div className="px-4 py-2">
           {searchInput}
         </div>
         
-        <div className="border-t border-divider"></div>
+        <div className="border-t border-divider my-2"></div>
         
-        {/* Navigation Items */}
-        <div className="px-4 py-3">
-          <div className="flex flex-col gap-1">
-            {siteConfig.navMenuItems.map((item, index) => (
-              <NavbarMenuItem key={`${item}-${index}`}>
-                <NextLink
-                  className={clsx(
-                    "w-full px-4 py-3 rounded-xl text-foreground",
-                    "hover:bg-default-100 active:bg-default-200",
-                    "transition-all duration-200 ease-out",
-                    "font-medium text-base",
-                    "flex items-center justify-between group",
-                    "transform hover:translate-x-1"
-                  )}
-                  href={item.href}
-                  onClick={handleMenuItemClick}
+        <div className="px-4 flex flex-col gap-1">
+          {siteConfig.navMenuItems.map((item, index) => (
+            <NavbarMenuItem key={`${item}-${index}`}>
+              <NextLink
+                className={clsx(
+                  "w-full px-3 py-2.5 rounded-lg text-foreground",
+                  "hover:bg-default-100 hover:text-primary",
+                  "transition-all duration-200 ease-in-out",
+                  "font-medium text-base",
+                  "flex items-center justify-between group"
+                )}
+                href={item.href}
+                onClick={handleMenuItemClick}
+              >
+                <span>{item.label}</span>
+                <svg 
+                  className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor"
                 >
-                  <span>{item.label}</span>
-                  <svg 
-                    className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all duration-200 transform group-hover:translate-x-1" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </NextLink>
-              </NavbarMenuItem>
-            ))}
-          </div>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </NextLink>
+            </NavbarMenuItem>
+          ))}
         </div>
 
-        <div className="border-t border-divider"></div>
+        <div className="border-t border-divider my-4"></div>
         
-        {/* Social Links & Sponsor */}
-        <div className="px-4 py-4">
-          {/* Social Links */}
-          <div className="flex gap-2 justify-center mb-4">
+        <div className="px-4 pb-4">
+          <div className="flex gap-4 justify-center">
             <Link 
               isExternal 
               aria-label="WhatsApp" 
               href={siteConfig.links.twitter}
-              className="p-3 rounded-xl hover:bg-default-100 transition-all duration-200 hover:scale-105"
+              className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
             >
-              <WhatsAppIcon className="text-default-500 hover:text-green-500 transition-colors" />
+              <WhatsAppIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
             </Link>
             <Link 
               isExternal 
               aria-label="Discord" 
               href={siteConfig.links.discord}
-              className="p-3 rounded-xl hover:bg-default-100 transition-all duration-200 hover:scale-105"
+              className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
             >
-              <DiscordIcon className="text-default-500 hover:text-indigo-500 transition-colors w-5 h-5" />
+              <DiscordIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
             </Link>
             <Link 
               isExternal 
               aria-label="Github" 
               href={siteConfig.links.github}
-              className="p-3 rounded-xl hover:bg-default-100 transition-all duration-200 hover:scale-105"
+              className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
             >
-              <GithubIcon className="text-default-500 hover:text-foreground transition-colors w-5 h-5" />
+              <GithubIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
             </Link>
           </div>
           
-          {/* Sponsor Button */}
-          <Button
-            isExternal
-            as={Link}
-            className="w-full text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 border-0 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
-            href={siteConfig.links.sponsor}
-            startContent={<HeartFilledIcon className="text-white w-4 h-4" />}
-            variant="solid"
-            size="md"
-          >
-            Sponsor
-          </Button>
+          <div className="mt-4">
+            <Button
+              isExternal
+              as={Link}
+              className="w-full text-sm font-normal text-default-600 bg-default-100 hover:bg-default-200"
+              href={siteConfig.links.sponsor}
+              startContent={<HeartFilledIcon className="text-danger" />}
+              variant="flat"
+            >
+              Sponsor
+            </Button>
+          </div>
         </div>
       </NavbarMenu>
     </HeroUINavbar>
