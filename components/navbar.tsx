@@ -55,16 +55,17 @@ export const Navbar = () => {
     <Input
       aria-label="Search"
       classNames={{
-        inputWrapper: "bg-default-100",
-        input: "text-sm",
+        inputWrapper: "bg-default-100/70 backdrop-blur-md border border-default-200/50 hover:border-default-300/80 focus-within:border-primary/50 transition-all duration-300",
+        input: "text-sm placeholder:text-default-400",
       }}
       endContent={
-        <Kbd className="hidden lg:inline-block" keys={["command"]}>
+        <Kbd className="hidden lg:inline-block shadow-sm bg-default-200/50 text-default-600" keys={["command"]}>
           K
         </Kbd>
       }
       labelPlacement="outside"
-      placeholder="Search..."
+      placeholder="Search anything..."
+      radius="lg"
       startContent={
         <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
       }
@@ -74,6 +75,7 @@ export const Navbar = () => {
 
   return (
     <HeroUINavbar 
+      className="backdrop-blur-md bg-background/80 border-b border-divider/50"
       maxWidth="xl" 
       position="sticky"
       isMenuOpen={isMenuOpen}
@@ -81,17 +83,28 @@ export const Navbar = () => {
     >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
-          <NextLink className="flex justify-start items-center gap-1" href="/">
-            <p className="font-bold text-inherit">JKT48Connect</p>
+          <NextLink className="flex justify-start items-center gap-2 group" href="/">
+            <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <span className="text-white font-bold text-sm">J</span>
+            </div>
+            <div>
+              <p className="font-bold text-inherit bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                JKT48Connect
+              </p>
+              <p className="text-xs text-default-500 -mt-1">Community Hub</p>
+            </div>
           </NextLink>
         </NavbarBrand>
-        <ul className="hidden lg:flex gap-4 justify-start ml-2">
+        <ul className="hidden lg:flex gap-6 justify-start ml-6">
           {siteConfig.navItems.map((item) => (
             <NavbarItem key={item.href}>
               <NextLink
                 className={clsx(
                   linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium",
+                  "data-[active=true]:text-primary data-[active=true]:font-semibold",
+                  "hover:text-primary transition-colors duration-200 font-medium relative",
+                  "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary",
+                  "after:transition-all after:duration-300 hover:after:w-full"
                 )}
                 color="foreground"
                 href={item.href}
@@ -107,14 +120,29 @@ export const Navbar = () => {
         className="hidden sm:flex basis-1/5 sm:basis-full"
         justify="end"
       >
-        <NavbarItem className="hidden sm:flex gap-2">
-          <Link isExternal aria-label="WhatsApp" href={siteConfig.links.twitter}>
+        <NavbarItem className="hidden sm:flex gap-3">
+          <Link 
+            isExternal 
+            aria-label="WhatsApp" 
+            href={siteConfig.links.twitter}
+            className="p-2 rounded-full hover:bg-success/10 hover:text-success transition-all duration-200 hover:scale-110"
+          >
             <WhatsAppIcon className="text-default-500" />
           </Link>
-          <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>
+          <Link 
+            isExternal 
+            aria-label="Discord" 
+            href={siteConfig.links.discord}
+            className="p-2 rounded-full hover:bg-secondary/10 hover:text-secondary transition-all duration-200 hover:scale-110"
+          >
             <DiscordIcon className="text-default-500" />
           </Link>
-          <Link isExternal aria-label="Github" href={siteConfig.links.github}>
+          <Link 
+            isExternal 
+            aria-label="Github" 
+            href={siteConfig.links.github}
+            className="p-2 rounded-full hover:bg-default-100 hover:text-foreground transition-all duration-200 hover:scale-110"
+          >
             <GithubIcon className="text-default-500" />
           </Link>
           <ThemeSwitch />
@@ -124,10 +152,11 @@ export const Navbar = () => {
           <Button
             isExternal
             as={Link}
-            className="text-sm font-normal text-default-600 bg-default-100"
+            className="text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
             href={siteConfig.links.sponsor}
-            startContent={<HeartFilledIcon className="text-danger" />}
-            variant="flat"
+            radius="lg"
+            startContent={<HeartFilledIcon className="text-white animate-pulse" />}
+            variant="solid"
           >
             Sponsor
           </Button>
@@ -135,37 +164,50 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-        <Link isExternal aria-label="Github" href={siteConfig.links.github}>
-          <GithubIcon className="text-default-500" />
-        </Link>
-        <ThemeSwitch />
-        <NavbarMenuToggle />
+        <div className="flex items-center gap-2">
+          <Link 
+            isExternal 
+            aria-label="Github" 
+            href={siteConfig.links.github}
+            className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
+          >
+            <GithubIcon className="text-default-500" />
+          </Link>
+          <ThemeSwitch />
+          <NavbarMenuToggle className="ml-2" />
+        </div>
       </NavbarContent>
 
-      <NavbarMenu>
-        <div className="px-4 py-2">
+      <NavbarMenu className="bg-background/95 backdrop-blur-xl border-none">
+        <div className="px-6 py-4">
           {searchInput}
         </div>
         
-        <div className="border-t border-divider my-2"></div>
+        <div className="border-t border-divider/30 my-2"></div>
         
-        <div className="px-4 flex flex-col gap-1">
+        <div className="px-6 flex flex-col gap-2">
           {siteConfig.navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
               <NextLink
                 className={clsx(
-                  "w-full px-3 py-2.5 rounded-lg text-foreground",
-                  "hover:bg-default-100 hover:text-primary",
-                  "transition-all duration-200 ease-in-out",
-                  "font-medium text-base",
-                  "flex items-center justify-between group"
+                  "w-full px-4 py-3 rounded-xl text-foreground",
+                  "hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10",
+                  "hover:text-primary hover:shadow-sm",
+                  "transition-all duration-300 ease-out",
+                  "font-medium text-base border border-transparent",
+                  "hover:border-primary/20",
+                  "flex items-center justify-between group",
+                  "transform hover:scale-102"
                 )}
                 href={item.href}
                 onClick={handleMenuItemClick}
               >
-                <span>{item.label}</span>
+                <span className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-primary/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  {item.label}
+                </span>
                 <svg 
-                  className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200" 
+                  className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all duration-200 transform group-hover:translate-x-1" 
                   viewBox="0 0 24 24" 
                   fill="none" 
                   stroke="currentColor"
@@ -177,48 +219,48 @@ export const Navbar = () => {
           ))}
         </div>
 
-        <div className="border-t border-divider my-4"></div>
+        <div className="border-t border-divider/30 my-6"></div>
         
-        <div className="px-4 pb-4">
-          <div className="flex gap-4 justify-center">
+        <div className="px-6 pb-6">
+          <div className="flex gap-4 justify-center mb-6">
             <Link 
               isExternal 
               aria-label="WhatsApp" 
               href={siteConfig.links.twitter}
-              className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
+              className="p-3 rounded-xl bg-success/10 hover:bg-success/20 border border-success/20 hover:border-success/40 transition-all duration-200 hover:scale-110"
             >
-              <WhatsAppIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
+              <WhatsAppIcon className="text-success" />
             </Link>
             <Link 
               isExternal 
               aria-label="Discord" 
               href={siteConfig.links.discord}
-              className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
+              className="p-3 rounded-xl bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 hover:border-secondary/40 transition-all duration-200 hover:scale-110"
             >
-              <DiscordIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
+              <DiscordIcon className="text-secondary" />
             </Link>
             <Link 
               isExternal 
               aria-label="Github" 
               href={siteConfig.links.github}
-              className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
+              className="p-3 rounded-xl bg-default-100 hover:bg-default-200 border border-default-200 hover:border-default-300 transition-all duration-200 hover:scale-110"
             >
-              <GithubIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
+              <GithubIcon className="text-default-600" />
             </Link>
           </div>
           
-          <div className="mt-4">
-            <Button
-              isExternal
-              as={Link}
-              className="w-full text-sm font-normal text-default-600 bg-default-100 hover:bg-default-200"
-              href={siteConfig.links.sponsor}
-              startContent={<HeartFilledIcon className="text-danger" />}
-              variant="flat"
-            >
-              Sponsor
-            </Button>
-          </div>
+          <Button
+            isExternal
+            as={Link}
+            className="w-full text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 shadow-lg hover:shadow-xl transition-all duration-200"
+            href={siteConfig.links.sponsor}
+            radius="xl"
+            size="lg"
+            startContent={<HeartFilledIcon className="text-white animate-pulse" />}
+            variant="solid"
+          >
+            Support Our Community
+          </Button>
         </div>
       </NavbarMenu>
     </HeroUINavbar>
