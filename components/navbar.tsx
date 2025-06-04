@@ -196,8 +196,7 @@ export const Navbar = () => {
                   "transition-all duration-300 ease-out",
                   "font-medium text-base border border-transparent",
                   "hover:border-primary/20",
-                  "flex items-center justify-between group",
-                  "transform hover:scale-102"
+                  "flex items-center justify-between group"
                 )}
                 href={item.href}
                 onClick={handleMenuItemClick}
@@ -254,7 +253,7 @@ export const Navbar = () => {
             as={Link}
             className="w-full text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 shadow-lg hover:shadow-xl transition-all duration-200"
             href={siteConfig.links.sponsor}
-            radius="xl"
+            radius="lg"
             size="lg"
             startContent={<HeartFilledIcon className="text-white animate-pulse" />}
             variant="solid"
