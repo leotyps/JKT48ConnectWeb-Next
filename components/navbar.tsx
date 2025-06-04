@@ -44,6 +44,61 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+// Icon Components untuk menu items
+const HomeIcon = ({ className }: { className?: string }) => (
+  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <polyline points="9,22 9,12 15,12 15,22"/>
+  </svg>
+);
+
+const AboutIcon = ({ className }: { className?: string }) => (
+  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="m9,12 2,2 4-4"/>
+  </svg>
+);
+
+const ServicesIcon = ({ className }: { className?: string }) => (
+  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect width="7" height="9" x="3" y="3" rx="1"/>
+    <rect width="7" height="5" x="14" y="3" rx="1"/>
+    <rect width="7" height="9" x="14" y="12" rx="1"/>
+    <rect width="7" height="5" x="3" y="16" rx="1"/>
+  </svg>
+);
+
+const ContactIcon = ({ className }: { className?: string }) => (
+  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+  </svg>
+);
+
+const BlogIcon = ({ className }: { className?: string }) => (
+  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+    <polyline points="14,2 14,8 20,8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/>
+    <line x1="16" y1="17" x2="8" y2="17"/>
+    <polyline points="10,9 9,9 8,9"/>
+  </svg>
+);
+
+// Mapping icons dengan menu items
+const getMenuIcon = (label: string) => {
+  const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
+    'Home': HomeIcon,
+    'About': AboutIcon,
+    'Services': ServicesIcon,
+    'Contact': ContactIcon,
+    'Blog': BlogIcon,
+    'Docs': AboutIcon, // fallback
+    'Pricing': ServicesIcon, // fallback
+  };
+  
+  return iconMap[label] || HomeIcon;
+};
+
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -55,16 +110,18 @@ export const Navbar = () => {
     <Input
       aria-label="Search"
       classNames={{
-        inputWrapper: "bg-default-100/70 backdrop-blur-md border border-default-200/50 hover:border-default-300/80 focus-within:border-primary/50 transition-all duration-300",
-        input: "text-sm placeholder:text-default-400",
+        base: "max-w-full sm:max-w-[10rem] h-10",
+        mainWrapper: "h-full",
+        input: "text-small",
+        inputWrapper: "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20 backdrop-blur-md border border-default-200/50 shadow-sm hover:shadow-md transition-all duration-300",
       }}
       endContent={
-        <Kbd className="hidden lg:inline-block shadow-sm bg-default-200/50 text-default-600" keys={["command"]}>
+        <Kbd className="hidden lg:inline-block" keys={["command"]}>
           K
         </Kbd>
       }
       labelPlacement="outside"
-      placeholder="Search anything..."
+      placeholder="Search..."
       radius="lg"
       startContent={
         <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
@@ -75,44 +132,47 @@ export const Navbar = () => {
 
   return (
     <HeroUINavbar 
-      className="backdrop-blur-md bg-background/80 border-b border-divider/50"
       maxWidth="xl" 
       position="sticky"
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
+      className="bg-background/70 dark:bg-background/70 backdrop-blur-md backdrop-saturate-150 border-b border-divider"
+      height="4.5rem"
     >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
-          <NextLink className="flex justify-start items-center gap-2 group" href="/">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-              <span className="text-white font-bold text-sm">J</span>
+          <NextLink className="flex justify-start items-center gap-2 hover:opacity-80 transition-opacity duration-200" href="/">
+            <div className="bg-gradient-to-br from-primary-500 to-secondary-500 w-8 h-8 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">J48</span>
             </div>
-            <div>
-              <p className="font-bold text-inherit bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                JKT48Connect
-              </p>
-              <p className="text-xs text-default-500 -mt-1">Community Hub</p>
-            </div>
+            <p className="font-bold text-inherit bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
+              JKT48Connect
+            </p>
           </NextLink>
         </NavbarBrand>
-        <ul className="hidden lg:flex gap-6 justify-start ml-6">
-          {siteConfig.navItems.map((item) => (
-            <NavbarItem key={item.href}>
-              <NextLink
-                className={clsx(
-                  linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-semibold",
-                  "hover:text-primary transition-colors duration-200 font-medium relative",
-                  "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary",
-                  "after:transition-all after:duration-300 hover:after:w-full"
-                )}
-                color="foreground"
-                href={item.href}
-              >
-                {item.label}
-              </NextLink>
-            </NavbarItem>
-          ))}
+        
+        <ul className="hidden lg:flex gap-2 justify-start ml-4">
+          {siteConfig.navItems.map((item) => {
+            const IconComponent = getMenuIcon(item.label);
+            return (
+              <NavbarItem key={item.href}>
+                <NextLink
+                  className={clsx(
+                    "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium",
+                    "text-foreground/80 hover:text-foreground hover:bg-default-100",
+                    "transition-all duration-300 ease-out",
+                    "data-[active=true]:text-primary data-[active=true]:bg-primary/10",
+                    "relative overflow-hidden group"
+                  )}
+                  href={item.href}
+                >
+                  <IconComponent className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
+                  <span>{item.label}</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
+                </NextLink>
+              </NavbarItem>
+            );
+          })}
         </ul>
       </NavbarContent>
 
@@ -120,43 +180,50 @@ export const Navbar = () => {
         className="hidden sm:flex basis-1/5 sm:basis-full"
         justify="end"
       >
-        <NavbarItem className="hidden sm:flex gap-3">
+        <NavbarItem className="hidden sm:flex gap-1">
           <Link 
             isExternal 
             aria-label="WhatsApp" 
             href={siteConfig.links.twitter}
-            className="p-2 rounded-full hover:bg-success/10 hover:text-success transition-all duration-200 hover:scale-110"
+            className="p-2 rounded-full hover:bg-default-100 hover:scale-110 transition-all duration-300"
           >
-            <WhatsAppIcon className="text-default-500" />
+            <WhatsAppIcon className="text-default-500 hover:text-success-500 transition-colors duration-300" />
           </Link>
           <Link 
             isExternal 
             aria-label="Discord" 
             href={siteConfig.links.discord}
-            className="p-2 rounded-full hover:bg-secondary/10 hover:text-secondary transition-all duration-200 hover:scale-110"
+            className="p-2 rounded-full hover:bg-default-100 hover:scale-110 transition-all duration-300"
           >
-            <DiscordIcon className="text-default-500" />
+            <DiscordIcon className="text-default-500 hover:text-secondary-500 transition-colors duration-300" />
           </Link>
           <Link 
             isExternal 
             aria-label="Github" 
             href={siteConfig.links.github}
-            className="p-2 rounded-full hover:bg-default-100 hover:text-foreground transition-all duration-200 hover:scale-110"
+            className="p-2 rounded-full hover:bg-default-100 hover:scale-110 transition-all duration-300"
           >
-            <GithubIcon className="text-default-500" />
+            <GithubIcon className="text-default-500 hover:text-foreground transition-colors duration-300" />
           </Link>
-          <ThemeSwitch />
+          <div className="mx-1">
+            <ThemeSwitch />
+          </div>
         </NavbarItem>
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
+        
+        <NavbarItem className="hidden lg:flex">
+          {searchInput}
+        </NavbarItem>
+        
         <NavbarItem className="hidden md:flex">
           <Button
             isExternal
             as={Link}
-            className="text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+            className="text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             href={siteConfig.links.sponsor}
-            radius="lg"
             startContent={<HeartFilledIcon className="text-white animate-pulse" />}
             variant="solid"
+            radius="full"
+            size="sm"
           >
             Sponsor
           </Button>
@@ -164,101 +231,105 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-        <div className="flex items-center gap-2">
-          <Link 
-            isExternal 
-            aria-label="Github" 
-            href={siteConfig.links.github}
-            className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
-          >
-            <GithubIcon className="text-default-500" />
-          </Link>
-          <ThemeSwitch />
-          <NavbarMenuToggle className="ml-2" />
-        </div>
+        <Link 
+          isExternal 
+          aria-label="Github" 
+          href={siteConfig.links.github}
+          className="p-2 rounded-full hover:bg-default-100 transition-all duration-300"
+        >
+          <GithubIcon className="text-default-500" />
+        </Link>
+        <ThemeSwitch />
+        <NavbarMenuToggle className="w-6 h-6" />
       </NavbarContent>
 
-      <NavbarMenu className="bg-background/95 backdrop-blur-xl border-none">
+      <NavbarMenu className="bg-background/95 backdrop-blur-xl border-none shadow-2xl">
         <div className="px-6 py-4">
           {searchInput}
         </div>
         
-        <div className="border-t border-divider/30 my-2"></div>
+        <div className="border-t border-divider/50"></div>
         
-        <div className="px-6 flex flex-col gap-2">
-          {siteConfig.navMenuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item}-${index}`}>
-              <NextLink
-                className={clsx(
-                  "w-full px-4 py-3 rounded-xl text-foreground",
-                  "hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10",
-                  "hover:text-primary hover:shadow-sm",
-                  "transition-all duration-300 ease-out",
-                  "font-medium text-base border border-transparent",
-                  "hover:border-primary/20",
-                  "flex items-center justify-between group"
-                )}
-                href={item.href}
-                onClick={handleMenuItemClick}
-              >
-                <span className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-primary/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                  {item.label}
-                </span>
-                <svg 
-                  className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all duration-200 transform group-hover:translate-x-1" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor"
+        <div className="px-6 py-4 flex flex-col gap-2">
+          {siteConfig.navMenuItems.map((item, index) => {
+            const IconComponent = getMenuIcon(item.label);
+            return (
+              <NavbarMenuItem key={`${item}-${index}`}>
+                <NextLink
+                  className={clsx(
+                    "w-full px-4 py-3.5 rounded-xl text-foreground/90",
+                    "hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10",
+                    "hover:text-foreground hover:shadow-md",
+                    "transition-all duration-300 ease-out",
+                    "font-medium text-base",
+                    "flex items-center gap-3 group",
+                    "border border-transparent hover:border-primary/20",
+                    "relative overflow-hidden"
+                  )}
+                  href={item.href}
+                  onClick={handleMenuItemClick}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </NextLink>
-            </NavbarMenuItem>
-          ))}
+                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-default-100 group-hover:bg-primary/10 transition-all duration-300">
+                    <IconComponent className="w-5 h-5 text-default-600 group-hover:text-primary transition-all duration-300" />
+                  </div>
+                  <span className="flex-1">{item.label}</span>
+                  <svg 
+                    className="w-5 h-5 opacity-0 group-hover:opacity-100 text-primary transform translate-x-0 group-hover:translate-x-1 transition-all duration-300" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+                </NextLink>
+              </NavbarMenuItem>
+            );
+          })}
         </div>
 
-        <div className="border-t border-divider/30 my-6"></div>
+        <div className="border-t border-divider/50 mx-6"></div>
         
-        <div className="px-6 pb-6">
-          <div className="flex gap-4 justify-center mb-6">
+        <div className="px-6 py-6">
+          <div className="flex gap-2 justify-center mb-6">
             <Link 
               isExternal 
               aria-label="WhatsApp" 
               href={siteConfig.links.twitter}
-              className="p-3 rounded-xl bg-success/10 hover:bg-success/20 border border-success/20 hover:border-success/40 transition-all duration-200 hover:scale-110"
+              className="p-3 rounded-full bg-default-100 hover:bg-success-100 hover:scale-110 transition-all duration-300 group"
             >
-              <WhatsAppIcon className="text-success" />
+              <WhatsAppIcon className="text-default-600 group-hover:text-success-600 transition-colors duration-300" />
             </Link>
             <Link 
               isExternal 
               aria-label="Discord" 
               href={siteConfig.links.discord}
-              className="p-3 rounded-xl bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 hover:border-secondary/40 transition-all duration-200 hover:scale-110"
+              className="p-3 rounded-full bg-default-100 hover:bg-secondary-100 hover:scale-110 transition-all duration-300 group"
             >
-              <DiscordIcon className="text-secondary" />
+              <DiscordIcon className="text-default-600 group-hover:text-secondary-600 transition-colors duration-300" />
             </Link>
             <Link 
               isExternal 
               aria-label="Github" 
               href={siteConfig.links.github}
-              className="p-3 rounded-xl bg-default-100 hover:bg-default-200 border border-default-200 hover:border-default-300 transition-all duration-200 hover:scale-110"
+              className="p-3 rounded-full bg-default-100 hover:bg-default-200 hover:scale-110 transition-all duration-300 group"
             >
-              <GithubIcon className="text-default-600" />
+              <GithubIcon className="text-default-600 group-hover:text-foreground transition-colors duration-300" />
             </Link>
           </div>
           
           <Button
             isExternal
             as={Link}
-            className="w-full text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 shadow-lg hover:shadow-xl transition-all duration-200"
+            className="w-full text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             href={siteConfig.links.sponsor}
-            radius="lg"
-            size="lg"
             startContent={<HeartFilledIcon className="text-white animate-pulse" />}
             variant="solid"
+            radius="full"
+            size="lg"
           >
-            Support Our Community
+            Sponsor Our Project
           </Button>
         </div>
       </NavbarMenu>
