@@ -47,7 +47,7 @@ interface TransactionData {
 const API_PACKAGES: Record<string, APIPackage> = {
   basic: {
     name: 'basic',
-    price: 100,
+    price: 1250,
     limit: 1000,
     description: 'Cocok untuk penggunaan personal',
     features: ['1,000 API calls/month', 'Basic support', 'Standard rate limiting'],
