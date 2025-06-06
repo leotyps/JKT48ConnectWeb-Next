@@ -200,7 +200,7 @@ export default function JKT48APIStore() {
               });
 
               // Import the package dynamically to ensure fresh instance
-              const { default: jkt48Api } = await import('@jkt48/core');
+              const jkt48Api = require('@jkt48/core');
               
               // Use the same pattern as your working bot code
               const result = await jkt48Api.admin.createKey(
