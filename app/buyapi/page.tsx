@@ -190,28 +190,65 @@ export default function JKT48APIStore() {
             setTransactionData(transaction);
             setPaymentStatus('checking');
             
-            // Create API Key
+            // Create API Key - PERBAIKAN DI SINI
             try {
+              console.log('Creating API key with params:', {
+                owner: paymentData.userInfo.name,
+                email: paymentData.userInfo.email,
+                packageType: selectedPackage,
+                customKey: paymentData.userInfo.customKey || null
+              });
+
               const jkt48Api = require('@jkt48/core');
+              
+              // Method 1: Menggunakan pattern yang pertama
               const result = await jkt48Api.admin.createKey(
-                paymentData.userInfo.name,
-                paymentData.userInfo.email,
-                selectedPackage,
-                paymentData.userInfo.customKey
+                paymentData.userInfo.name,                    // owner
+                paymentData.userInfo.email,                   // email
+                selectedPackage,                              // packageType
+                paymentData.userInfo.customKey || null       // customApiKey (null jika kosong)
               );
 
-              if (result.status) {
+              console.log('API Key creation result:', result);
+
+              // Validasi response
+              if (result && result.status === true) {
                 setApiKeyResult(result.data);
                 setPaymentStatus('success');
                 onPaymentOpenChange(); // Close payment modal
                 onSuccessOpen(); // Open success modal
               } else {
-                throw new Error(result.message || 'Failed to create API Key');
+                throw new Error(result?.message || 'Failed to create API Key - Invalid response from server');
               }
             } catch (apiError) {
               console.error('API Key creation error:', apiError);
               setPaymentStatus('failed');
-              alert('Payment successful but failed to create API Key. Please contact support.');
+              
+              // Error handling yang lebih detail
+              const errorMessage = apiError instanceof Error ? apiError.message : 'Unknown error occurred';
+              alert(`Payment successful but failed to create API Key: ${errorMessage}\n\nTransaction ID: ${transaction.buyer_reff}\nPlease contact support with this information.`);
+              
+              // Bisa juga mencoba method alternatif
+              try {
+                console.log('Trying alternative method...');
+                const createKey = await jkt48Api.admin.createKey(
+                  paymentData.userInfo.name,                    // owner
+                  paymentData.userInfo.email,                   // email
+                  selectedPackage,                              // type
+                  paymentData.userInfo.customKey || undefined   // apikey
+                );
+
+                if (createKey && createKey.status === true) {
+                  setApiKeyResult(createKey.data);
+                  setPaymentStatus('success');
+                  onPaymentOpenChange();
+                  onSuccessOpen();
+                } else {
+                  console.error('Alternative method also failed:', createKey);
+                }
+              } catch (altError) {
+                console.error('Alternative method error:', altError);
+              }
             }
           }
         } catch (error) {
