@@ -46,15 +46,15 @@ interface TransactionData {
 
 const API_PACKAGES: Record<string, APIPackage> = {
   basic: {
-    name: 'Basic',
-    price: 2500,
+    name: 'basic',
+    price: 100,
     limit: 1000,
     description: 'Cocok untuk penggunaan personal',
     features: ['1,000 API calls/month', 'Basic support', 'Standard rate limiting'],
     color: 'primary'
   },
   premium: {
-    name: 'Premium',
+    name: 'premium',
     price: 6500,
     limit: 5000,
     description: 'Cocok untuk aplikasi kecil',
@@ -62,7 +62,7 @@ const API_PACKAGES: Record<string, APIPackage> = {
     color: 'secondary'
   },
   enterprise: {
-    name: 'Enterprise',
+    name: 'enterprise',
     price: 35000,
     limit: 25000,
     description: 'Cocok untuk aplikasi besar',
@@ -190,70 +190,72 @@ export default function JKT48APIStore() {
             setTransactionData(transaction);
             setPaymentStatus('checking');
             
-            // Create API Key - PERBAIKAN SCOPE VARIABLE
+            // Create API Key - FIXED VERSION
             try {
               console.log('Creating API key with params:', {
                 owner: paymentData.userInfo.name,
                 email: paymentData.userInfo.email,
                 packageType: selectedPackage,
-                customKey: paymentData.userInfo.customKey || null
+                customKey: paymentData.userInfo.customKey || undefined
               });
 
-              const jkt48Api = require('@jkt48/core');
+              // Import the package dynamically to ensure fresh instance
+              const { default: jkt48Api } = await import('@jkt48/core');
               
-              // Method 1: Menggunakan pattern yang pertama
+              // Use the same pattern as your working bot code
               const result = await jkt48Api.admin.createKey(
                 paymentData.userInfo.name,                    // owner
                 paymentData.userInfo.email,                   // email
-                selectedPackage,                              // packageType
-                paymentData.userInfo.customKey || null       // customApiKey (null jika kosong)
+                selectedPackage,                              // packageType (basic/premium/enterprise)
+                paymentData.userInfo.customKey || undefined   // customApiKey (undefined if empty)
               );
 
               console.log('API Key creation result:', result);
 
-              // Validasi response
-              if (result && result.status === true) {
+              // Validate response
+              if (result && result.status === true && result.data) {
                 setApiKeyResult(result.data);
                 setPaymentStatus('success');
                 onPaymentOpenChange(); // Close payment modal
                 onSuccessOpen(); // Open success modal
               } else {
-                throw new Error(result?.message || 'Failed to create API Key - Invalid response from server');
+                throw new Error(result?.message || 'Invalid response from server - no data returned');
               }
+              
             } catch (apiError) {
               console.error('API Key creation error:', apiError);
-              setPaymentStatus('failed');
               
-              // Error handling yang lebih detail
-              const errorMessage = apiError instanceof Error ? apiError.message : 'Unknown error occurred';
-              alert(`Payment successful but failed to create API Key: ${errorMessage}\n\nTransaction ID: ${transaction.buyer_reff}\nPlease contact support with this information.`);
-              
-              // Method alternatif dengan deklarasi ulang jkt48Api
+              // Try alternative method using require() like in your bot code
               try {
-                console.log('Trying alternative method...');
-                const jkt48ApiAlt = require('@jkt48/core'); // Deklarasi ulang untuk scope yang benar
+                console.log('Trying alternative method with require...');
                 
-                const createKey = await jkt48ApiAlt.admin.createKey(
-                  paymentData.userInfo.name,                    // owner
-                  paymentData.userInfo.email,                   // email
-                  selectedPackage,                              // type
-                  paymentData.userInfo.customKey || undefined   // apikey
+                // This might work better in some environments
+                const jkt48Api = require('@jkt48/core');
+                
+                const altResult = await jkt48Api.admin.createKey(
+                  paymentData.userInfo.name,
+                  paymentData.userInfo.email,
+                  selectedPackage,
+                  paymentData.userInfo.customKey || undefined
                 );
 
-                console.log('Alternative method result:', createKey);
+                console.log('Alternative method result:', altResult);
 
-                if (createKey && createKey.status === true) {
-                  setApiKeyResult(createKey.data);
+                if (altResult && altResult.status === true && altResult.data) {
+                  setApiKeyResult(altResult.data);
                   setPaymentStatus('success');
                   onPaymentOpenChange();
                   onSuccessOpen();
                 } else {
-                  console.error('Alternative method also failed:', createKey);
-                  throw new Error(createKey?.message || 'Alternative method also failed');
+                  throw new Error(altResult?.message || 'Alternative method failed - no valid response');
                 }
+                
               } catch (altError) {
-                console.error('Alternative method error:', altError);
-                // Tidak perlu alert lagi karena sudah ada alert di atas
+                console.error('Both methods failed:', altError);
+                setPaymentStatus('failed');
+                
+                const errorMessage = apiError instanceof Error ? apiError.message : 'Unknown error occurred';
+                alert(`Payment successful but failed to create API Key: ${errorMessage}\n\nTransaction ID: ${transaction.buyer_reff}\nPlease contact support with this information.`);
               }
             }
           }
