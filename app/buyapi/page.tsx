@@ -298,15 +298,15 @@ export default function JKT48APIStore() {
         </Breadcrumbs>
 
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8 px-4">
-          <h1 className="text-2xl sm:text-4xl font-bold mb-2 sm:mb-4">JKT48Connect API Store</h1>
-          <p className="text-sm sm:text-lg text-default-600">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold mb-4">JKT48Connect API Store</h1>
+          <p className="text-lg text-default-600">
             Dapatkan akses ke API JKT48Connect dengan berbagai paket yang sesuai kebutuhan Anda
           </p>
         </div>
 
         {/* Package Selection */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8 px-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {Object.entries(API_PACKAGES).map(([key, pkg]) => (
             <Card 
               key={key} 
@@ -318,29 +318,29 @@ export default function JKT48APIStore() {
               }`}
               onPress={() => setSelectedPackage(key)}
             >
-              <CardHeader className="pb-2 px-3 sm:px-4 pt-3 sm:pt-4">
+              <CardHeader className="pb-2">
                 <div className="flex justify-between items-start w-full">
-                  <div className="flex-1">
-                    <h3 className="text-lg sm:text-xl font-bold capitalize">{pkg.name}</h3>
-                    <p className="text-default-500 text-xs sm:text-sm">{pkg.description}</p>
+                  <div>
+                    <h3 className="text-xl font-bold">{pkg.name}</h3>
+                    <p className="text-default-500 text-sm">{pkg.description}</p>
                   </div>
-                  <Chip color={pkg.color} variant="flat" size="sm" className="ml-2">
+                  <Chip color={pkg.color} variant="flat" size="sm">
                     {pkg.name}
                   </Chip>
                 </div>
               </CardHeader>
-              <CardBody className="pt-0 px-3 sm:px-4 pb-3 sm:pb-4">
-                <div className="mb-3 sm:mb-4">
-                  <span className="text-2xl sm:text-3xl font-bold">Rp {pkg.price.toLocaleString()}</span>
-                  <span className="text-default-500 text-sm">/month</span>
+              <CardBody className="pt-0">
+                <div className="mb-4">
+                  <span className="text-3xl font-bold">Rp {pkg.price.toLocaleString()}</span>
+                  <span className="text-default-500">/month</span>
                 </div>
-                <div className="space-y-1.5 sm:space-y-2">
+                <div className="space-y-2">
                   {pkg.features.map((feature, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4 text-success mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <div key={index} className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-success" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
-                      <span className="text-xs sm:text-sm">{feature}</span>
+                      <span className="text-sm">{feature}</span>
                     </div>
                   ))}
                 </div>
@@ -351,19 +351,18 @@ export default function JKT48APIStore() {
 
         {/* Purchase Form */}
         {selectedPackage && (
-          <Card className="mb-6 sm:mb-8 mx-4">
-            <CardHeader className="px-4 sm:px-6">
-              <h3 className="text-lg sm:text-xl font-bold">Purchase Information</h3>
+          <Card className="mb-8">
+            <CardHeader>
+              <h3 className="text-xl font-bold">Purchase Information</h3>
             </CardHeader>
-            <CardBody className="px-4 sm:px-6">
-              <div className="grid grid-cols-1 gap-4">
+            <CardBody>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   isRequired
                   label="Full Name"
                   placeholder="Enter your full name"
                   value={userInfo.name}
                   onValueChange={(value) => setUserInfo(prev => ({ ...prev, name: value }))}
-                  size="sm"
                 />
                 <Input
                   isRequired
@@ -372,7 +371,6 @@ export default function JKT48APIStore() {
                   placeholder="Enter your email"
                   value={userInfo.email}
                   onValueChange={(value) => setUserInfo(prev => ({ ...prev, email: value }))}
-                  size="sm"
                 />
                 <Input
                   label="Custom API Key (Optional)"
@@ -380,7 +378,6 @@ export default function JKT48APIStore() {
                   value={userInfo.customKey}
                   onValueChange={(value) => setUserInfo(prev => ({ ...prev, customKey: value }))}
                   description="If empty, a random API key will be generated"
-                  size="sm"
                 />
               </div>
               
@@ -388,7 +385,6 @@ export default function JKT48APIStore() {
                 <Button
                   color="primary"
                   size="lg"
-                  className="w-full sm:w-auto"
                   isLoading={loading}
                   onPress={handlePurchase}
                   isDisabled={!selectedPackage || !userInfo.name || !userInfo.email}
@@ -401,24 +397,21 @@ export default function JKT48APIStore() {
         )}
 
         {/* How to Use Section */}
-        <Card className="mx-4">
-          <CardHeader className="px-4 sm:px-6">
-            <h3 className="text-lg sm:text-xl font-bold">How to Use JKT48Connect API</h3>
+        <Card>
+          <CardHeader>
+            <h3 className="text-xl font-bold">How to Use JKT48Connect API</h3>
           </CardHeader>
-          <CardBody className="px-4 sm:px-6">
+          <CardBody>
             <div className="space-y-4">
               <div>
-                <h4 className="font-semibold mb-2 text-sm sm:text-base">Installation</h4>
-                <div className="bg-default-100 px-3 py-2 rounded overflow-x-auto">
-                  <code className="text-xs sm:text-sm whitespace-nowrap">
-                    npm install @jkt48/core
-                  </code>
-                </div>
+                <h4 className="font-semibold mb-2">Installation</h4>
+                <code className="bg-default-100 px-3 py-2 rounded block">
+                  npm install @jkt48/core
+                </code>
               </div>
               <div>
-                <h4 className="font-semibold mb-2 text-sm sm:text-base">Basic Usage</h4>
-                <div className="bg-default-100 p-3 sm:p-4 rounded text-xs sm:text-sm overflow-x-auto">
-                  <pre className="whitespace-pre">
+                <h4 className="font-semibold mb-2">Basic Usage</h4>
+                <pre className="bg-default-100 p-4 rounded text-sm overflow-x-auto">
 {`const jkt48Api = require('@jkt48/core');
 
 // Get members list
@@ -429,43 +422,28 @@ const memberDetail = await jkt48Api.memberDetail('Freya', 'YOUR_API_KEY');
 
 // Get recent news
 const news = await jkt48Api.news('YOUR_API_KEY');`}
-                  </pre>
-                </div>
+                </pre>
               </div>
             </div>
           </CardBody>
         </Card>
+      </div>
 
       {/* Payment Modal */}
       <Modal 
         isOpen={isPaymentOpen} 
         onOpenChange={onPaymentOpenChange}
-        size="full"
-        scrollBehavior="inside"
+        size="2xl"
         isDismissable={false}
         hideCloseButton
-        classNames={{
-          base: "sm:max-w-2xl sm:mx-4",
-          body: "p-4 sm:p-6",
-          header: "p-4 sm:p-6 pb-2",
-          footer: "p-4 sm:p-6 pt-2"
-        }}
       >
         <ModalContent>
           <ModalHeader>
-            <div className="flex flex-col w-full">
-              <h3 className="text-lg sm:text-xl font-bold">Complete Payment</h3>
-              <div className="flex items-center justify-between mt-2">
-                <p className="text-sm text-default-500">
-                  Time remaining: {formatTime(timeRemaining)}
-                </p>
-                <Progress 
-                  value={(600 - timeRemaining) / 600 * 100} 
-                  color="primary"
-                  size="sm"
-                  className="w-24 sm:w-32"
-                />
-              </div>
+            <div className="flex flex-col">
+              <h3 className="text-lg font-bold">Complete Payment</h3>
+              <p className="text-sm text-default-500">
+                Time remaining: {formatTime(timeRemaining)}
+              </p>
             </div>
           </ModalHeader>
           <ModalBody>
@@ -473,15 +451,15 @@ const news = await jkt48Api.news('YOUR_API_KEY');`}
               <div className="space-y-4">
                 {/* Payment Info */}
                 <Card>
-                  <CardBody className="p-3 sm:p-4">
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
+                  <CardBody>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <p className="text-default-500">Package</p>
-                        <p className="font-semibold capitalize">{paymentData.packageInfo.name}</p>
+                        <p className="font-semibold">{paymentData.packageInfo.name}</p>
                       </div>
                       <div>
                         <p className="text-default-500">Owner</p>
-                        <p className="font-semibold truncate">{paymentData.userInfo.name}</p>
+                        <p className="font-semibold">{paymentData.userInfo.name}</p>
                       </div>
                       <div>
                         <p className="text-default-500">Amount</p>
@@ -491,9 +469,9 @@ const news = await jkt48Api.news('YOUR_API_KEY');`}
                         <p className="text-default-500">Fee</p>
                         <p className="font-semibold">Rp {paymentData.fee.toLocaleString()}</p>
                       </div>
-                      <div className="col-span-2 border-t pt-2 mt-1">
+                      <div className="col-span-2">
                         <p className="text-default-500">Total</p>
-                        <p className="font-bold text-lg sm:text-xl">Rp {paymentData.total.toLocaleString()}</p>
+                        <p className="font-bold text-lg">Rp {paymentData.total.toLocaleString()}</p>
                       </div>
                     </div>
                   </CardBody>
@@ -501,16 +479,14 @@ const news = await jkt48Api.news('YOUR_API_KEY');`}
 
                 {/* QR Code */}
                 <div className="text-center">
-                  <p className="mb-4 text-sm sm:text-base">Scan QR code below to complete payment</p>
-                  <div className="flex justify-center">
-                    <Image
-                      src={paymentData.qrImageUrl}
-                      alt="Payment QR Code"
-                      width={200}
-                      height={200}
-                      className="w-48 h-48 sm:w-64 sm:h-64"
-                    />
-                  </div>
+                  <p className="mb-4">Scan QR code below to complete payment</p>
+                  <Image
+                    src={paymentData.qrImageUrl}
+                    alt="Payment QR Code"
+                    width={250}
+                    height={250}
+                    className="mx-auto"
+                  />
                 </div>
 
                 {/* Status */}
@@ -528,31 +504,34 @@ const news = await jkt48Api.news('YOUR_API_KEY');`}
                     </div>
                   )}
                   {paymentStatus === 'failed' && (
-                    <div className="bg-danger-50 border border-danger-200 rounded-lg p-3">
-                      <p className="text-danger text-sm font-medium">Payment timeout or failed</p>
-                      <p className="text-danger-600 text-xs mt-1">Please try again or contact support</p>
-                    </div>
+                    <p className="text-danger">Payment timeout or failed</p>
                   )}
                 </div>
+
+                {/* Progress */}
+                <Progress 
+                  value={(600 - timeRemaining) / 600 * 100} 
+                  color="primary"
+                  size="sm"
+                />
               </div>
             )}
           </ModalBody>
-          <ModalFooter className="flex flex-col sm:flex-row gap-2">
+          <ModalFooter>
             <Button 
               color="danger" 
               variant="light" 
-              className="w-full sm:w-auto"
               onPress={() => {
                 setPaymentStatus('idle');
                 onPaymentOpenChange();
               }}
             >
-              Cancel Payment
+              Cancel
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
-        
+
       {/* Success Modal */}
 <Modal 
   isOpen={isSuccessOpen} 
