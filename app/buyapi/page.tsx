@@ -190,7 +190,7 @@ export default function JKT48APIStore() {
             setTransactionData(transaction);
             setPaymentStatus('checking');
             
-            // Create API Key - PERBAIKAN DI SINI
+            // Create API Key - PERBAIKAN SCOPE VARIABLE
             try {
               console.log('Creating API key with params:', {
                 owner: paymentData.userInfo.name,
@@ -228,15 +228,19 @@ export default function JKT48APIStore() {
               const errorMessage = apiError instanceof Error ? apiError.message : 'Unknown error occurred';
               alert(`Payment successful but failed to create API Key: ${errorMessage}\n\nTransaction ID: ${transaction.buyer_reff}\nPlease contact support with this information.`);
               
-              // Bisa juga mencoba method alternatif
+              // Method alternatif dengan deklarasi ulang jkt48Api
               try {
                 console.log('Trying alternative method...');
-                const createKey = await jkt48Api.admin.createKey(
+                const jkt48ApiAlt = require('@jkt48/core'); // Deklarasi ulang untuk scope yang benar
+                
+                const createKey = await jkt48ApiAlt.admin.createKey(
                   paymentData.userInfo.name,                    // owner
                   paymentData.userInfo.email,                   // email
                   selectedPackage,                              // type
                   paymentData.userInfo.customKey || undefined   // apikey
                 );
+
+                console.log('Alternative method result:', createKey);
 
                 if (createKey && createKey.status === true) {
                   setApiKeyResult(createKey.data);
@@ -245,9 +249,11 @@ export default function JKT48APIStore() {
                   onSuccessOpen();
                 } else {
                   console.error('Alternative method also failed:', createKey);
+                  throw new Error(createKey?.message || 'Alternative method also failed');
                 }
               } catch (altError) {
                 console.error('Alternative method error:', altError);
+                // Tidak perlu alert lagi karena sudah ada alert di atas
               }
             }
           }
