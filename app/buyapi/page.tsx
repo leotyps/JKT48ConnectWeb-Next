@@ -533,114 +533,182 @@ const news = await jkt48Api.news('YOUR_API_KEY');`}
       </Modal>
 
       {/* Success Modal */}
-      <Modal 
-        isOpen={isSuccessOpen} 
-        onOpenChange={onSuccessOpenChange}
-        size="3xl"
-      >
-        <ModalContent>
-          <ModalHeader>
-            <h3 className="text-lg font-bold text-success">🎉 API Key Created Successfully!</h3>
-          </ModalHeader>
-          <ModalBody>
-            {apiKeyResult && transactionData && (
-              <div className="space-y-4">
-                <Card>
-                  <CardBody>
-                    <h4 className="font-semibold mb-3">API Key Details</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div className="col-span-full">
-                        <p className="text-default-500">API Key</p>
-                        <code className="bg-default-100 px-2 py-1 rounded text-xs break-all">
-                          {apiKeyResult.key}
-                        </code>
-                      </div>
-                      <div>
-                        <p className="text-default-500">Owner</p>
-                        <p className="font-semibold">{apiKeyResult.owner}</p>
-                      </div>
-                      <div>
-                        <p className="text-default-500">Email</p>
-                        <p className="font-semibold">{apiKeyResult.email}</p>
-                      </div>
-                      <div>
-                        <p className="text-default-500">Package</p>
-                        <p className="font-semibold">{apiKeyResult.package}</p>
-                      </div>
-                      <div>
-                        <p className="text-default-500">Limit</p>
-                        <p className="font-semibold">{apiKeyResult.limit.toLocaleString()} requests</p>
-                      </div>
-                      <div>
-                        <p className="text-default-500">Status</p>
-                        <Chip color="success" size="sm">
-                          {apiKeyResult.active ? 'Active' : 'Inactive'}
-                        </Chip>
-                      </div>
-                      <div>
-                        <p className="text-default-500">Created</p>
-                        <p className="font-semibold">{new Date(apiKeyResult.createdAt).toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-default-500">Expires</p>
-                        <p className="font-semibold">{new Date(apiKeyResult.expireAt).toLocaleString()}</p>
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
-
-                <Card>
-                  <CardBody>
-                    <h4 className="font-semibold mb-3">Transaction Details</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-default-500">Amount Paid</p>
-                        <p className="font-semibold">Rp {transactionData.amount}</p>
-                      </div>
-                      <div>
-                        <p className="text-default-500">Date</p>
-                        <p className="font-semibold">{transactionData.date}</p>
-                      </div>
-                      <div className="col-span-full">
-                        <p className="text-default-500">Transaction ID</p>
-                        <p className="font-semibold">{transactionData.buyer_reff}</p>
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
-
-                <div className="bg-warning-50 border border-warning-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-warning-800 mb-2">Important Notes:</h4>
-                  <ul className="text-sm text-warning-700 space-y-1">
-                    <li>• Keep your API key secure and don't share it publicly</li>
-                    <li>• Your API key is ready to use immediately</li>
-                    <li>• Monitor your usage to avoid exceeding limits</li>
-                    <li>• Contact support if you need assistance</li>
-                  </ul>
+<Modal 
+  isOpen={isSuccessOpen} 
+  onOpenChange={onSuccessOpenChange}
+  size="full"
+  scrollBehavior="inside"
+  classNames={{
+    base: "sm:max-w-3xl sm:mx-4",
+    body: "p-4",
+    header: "p-4 pb-2",
+    footer: "p-4 pt-2"
+  }}
+>
+  <ModalContent>
+    <ModalHeader>
+      <div className="text-center w-full">
+        <h3 className="text-lg sm:text-xl font-bold text-success">🎉 API Key Created Successfully!</h3>
+      </div>
+    </ModalHeader>
+    <ModalBody>
+      {apiKeyResult && transactionData && (
+        <div className="space-y-4">
+          {/* API Key Details Card */}
+          <Card>
+            <CardBody className="p-3 sm:p-4">
+              <h4 className="font-semibold mb-3 text-sm sm:text-base">API Key Details</h4>
+              <div className="space-y-3">
+                {/* API Key - Full width on mobile */}
+                <div>
+                  <p className="text-default-500 text-xs sm:text-sm mb-1">API Key</p>
+                  <div className="bg-default-100 p-2 rounded text-xs break-all">
+                    <code className="select-all">{apiKeyResult.key}</code>
+                  </div>
+                  <p className="text-xs text-default-400 mt-1">Tap to select all</p>
+                </div>
+                
+                {/* Two columns on larger screens, single column on mobile */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                  <div>
+                    <p className="text-default-500">Owner</p>
+                    <p className="font-semibold break-words">{apiKeyResult.owner}</p>
+                  </div>
+                  <div>
+                    <p className="text-default-500">Email</p>
+                    <p className="font-semibold break-words">{apiKeyResult.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-default-500">Package</p>
+                    <p className="font-semibold capitalize">{apiKeyResult.package}</p>
+                  </div>
+                  <div>
+                    <p className="text-default-500">Limit</p>
+                    <p className="font-semibold">{apiKeyResult.limit.toLocaleString()} requests</p>
+                  </div>
+                  <div>
+                    <p className="text-default-500">Status</p>
+                    <Chip color="success" size="sm" className="text-xs">
+                      {apiKeyResult.active ? 'Active' : 'Inactive'}
+                    </Chip>
+                  </div>
+                  <div>
+                    <p className="text-default-500">Created</p>
+                    <p className="font-semibold text-xs sm:text-sm">
+                      {new Date(apiKeyResult.createdAt).toLocaleDateString()}
+                    </p>
+                    <p className="text-xs text-default-400">
+                      {new Date(apiKeyResult.createdAt).toLocaleTimeString()}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Expiry - Full width */}
+                <div className="border-t pt-3">
+                  <p className="text-default-500 text-xs sm:text-sm">Expires</p>
+                  <p className="font-semibold text-sm sm:text-base">
+                    {new Date(apiKeyResult.expireAt).toLocaleDateString()}
+                  </p>
+                  <p className="text-xs text-default-400">
+                    {new Date(apiKeyResult.expireAt).toLocaleTimeString()}
+                  </p>
                 </div>
               </div>
-            )}
-          </ModalBody>
-          <ModalFooter>
-            <Button 
-              color="primary" 
-              onPress={() => {
-                onSuccessOpenChange();
-                resetForm();
-              }}
-            >
-              Create Another API Key
-            </Button>
-            <Button 
-              color="success" 
-              variant="light" 
-              onPress={onSuccessOpenChange}
-            >
-              Close
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+            </CardBody>
+          </Card>
+
+          {/* Transaction Details Card */}
+          <Card>
+            <CardBody className="p-3 sm:p-4">
+              <h4 className="font-semibold mb-3 text-sm sm:text-base">Transaction Details</h4>
+              <div className="space-y-3 text-xs sm:text-sm">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-default-500">Amount Paid</p>
+                    <p className="font-semibold">Rp {transactionData.amount}</p>
+                  </div>
+                  <div>
+                    <p className="text-default-500">Date</p>
+                    <p className="font-semibold text-xs sm:text-sm">
+                      {transactionData.date}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-default-500">Transaction ID</p>
+                  <div className="bg-default-100 p-2 rounded mt-1">
+                    <code className="text-xs break-all select-all">{transactionData.buyer_reff}</code>
+                  </div>
+                  <p className="text-xs text-default-400 mt-1">Tap to select all</p>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          {/* Important Notes */}
+          <div className="bg-warning-50 border border-warning-200 rounded-lg p-3 sm:p-4">
+            <h4 className="font-semibold text-warning-800 mb-2 text-sm sm:text-base">Important Notes:</h4>
+            <ul className="text-xs sm:text-sm text-warning-700 space-y-1.5">
+              <li className="flex items-start gap-2">
+                <span className="text-warning-600 mt-0.5">•</span>
+                <span>Keep your API key secure and don't share it publicly</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-warning-600 mt-0.5">•</span>
+                <span>Your API key is ready to use immediately</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-warning-600 mt-0.5">•</span>
+                <span>Monitor your usage to avoid exceeding limits</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-warning-600 mt-0.5">•</span>
+                <span>Contact support if you need assistance</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Quick Actions */}
+          <Card className="bg-primary-50/50">
+            <CardBody className="p-3 sm:p-4">
+              <h4 className="font-semibold mb-2 text-sm sm:text-base text-primary-800">Quick Start</h4>
+              <p className="text-xs sm:text-sm text-primary-700 mb-3">
+                Copy this code to start using your API key:
+              </p>
+              <div className="bg-default-900 text-default-50 p-3 rounded text-xs overflow-x-auto">
+                <code className="whitespace-pre select-all">
+{`const jkt48Api = require('@jkt48/core');
+const members = await jkt48Api.members('${apiKeyResult.key}');`}
+                </code>
+              </div>
+              <p className="text-xs text-primary-600 mt-2">Tap code to select all</p>
+            </CardBody>
+          </Card>
+        </div>
+      )}
+    </ModalBody>
+    <ModalFooter className="flex flex-col sm:flex-row gap-2">
+      <Button 
+        color="primary" 
+        className="w-full sm:w-auto order-2 sm:order-1"
+        onPress={() => {
+          onSuccessOpenChange();
+          resetForm();
+        }}
+      >
+        Create Another API Key
+      </Button>
+      <Button 
+        color="success" 
+        variant="light" 
+        className="w-full sm:w-auto order-1 sm:order-2"
+        onPress={onSuccessOpenChange}
+      >
+        Close
+      </Button>
+    </ModalFooter>
+  </ModalContent>
+</Modal>
     </section>
   );
 }
