@@ -36,6 +36,10 @@ export const siteConfig = {
       label: "Buy Apikey",
       href: "/buyapi",
     },
+    {
+      label: "Check Apikey",
+      href: "/check",
+    },
   ],
   navMenuItems: [
     {
@@ -63,8 +67,8 @@ export const siteConfig = {
       href: "/replay",
     },
     {
-      label: "Buy Apikey",
-      href: "/buyapi",
+      label: "Check Apikey",
+      href: "/check",
     },
   ],
   links: {
