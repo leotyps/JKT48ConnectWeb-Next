@@ -67,6 +67,10 @@ export const siteConfig = {
       href: "/replay",
     },
     {
+      label: "Buy Apikey",
+      href: "/buyapi",
+    },
+    {
       label: "Check Apikey",
       href: "/check",
     },
