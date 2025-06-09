@@ -13,7 +13,7 @@ interface APIKeyDetail {
   limit_count: string;
   active: boolean;
   created_at: string;
-  expire_at: string;
+  expire_at: string | null; // Allow null for permanent keys
   stats: {
     totalRequests: number;
     requestsToday: number;
@@ -166,11 +166,15 @@ export default function JKT48APIChecker() {
     if (!keyDetail) return 0;
     const usage = parseInt(keyDetail.usage_count);
     const limit = parseInt(keyDetail.limit_count);
+    
+    // If limit is -1, it's unlimited
+    if (limit === -1) return 0;
+    
     return Math.min((usage / limit) * 100, 100);
   };
 
   const getDaysUntilExpiry = () => {
-    if (!keyDetail) return 0;
+    if (!keyDetail || !keyDetail.expire_at) return -1; // -1 indicates permanent
     const expireDate = new Date(keyDetail.expire_at);
     const now = new Date();
     const diffTime = expireDate.getTime() - now.getTime();
@@ -179,10 +183,29 @@ export default function JKT48APIChecker() {
   };
 
   const getUsageColor = () => {
+    const limit = parseInt(keyDetail?.limit_count || "0");
+    
+    // If unlimited, always show success color
+    if (limit === -1) return 'success';
+    
     const percentage = calculateUsagePercentage();
     if (percentage >= 90) return 'danger';
     if (percentage >= 70) return 'warning';
     return 'success';
+  };
+
+  const isUnlimited = () => {
+    return keyDetail && parseInt(keyDetail.limit_count) === -1;
+  };
+
+  const isPermanent = () => {
+    return keyDetail && !keyDetail.expire_at;
+  };
+
+  const formatLimitDisplay = () => {
+    if (!keyDetail) return '';
+    const limit = parseInt(keyDetail.limit_count);
+    return limit === -1 ? 'Unlimited' : limit.toLocaleString();
   };
 
   const resetForm = () => {
@@ -388,12 +411,24 @@ export default function JKT48APIChecker() {
               <CardHeader>
                 <div className="flex justify-between items-center w-full">
                   <h3 className="text-xl font-bold">API Key Status</h3>
-                  <Chip 
-                    color={keyDetail.active ? 'success' : 'danger'}
-                    variant="flat"
-                  >
-                    {keyDetail.active ? 'Active' : 'Inactive'}
-                  </Chip>
+                  <div className="flex gap-2">
+                    <Chip 
+                      color={keyDetail.active ? 'success' : 'danger'}
+                      variant="flat"
+                    >
+                      {keyDetail.active ? 'Active' : 'Inactive'}
+                    </Chip>
+                    {isPermanent() && (
+                      <Chip color="secondary" variant="flat">
+                        Permanent
+                      </Chip>
+                    )}
+                    {isUnlimited() && (
+                      <Chip color="primary" variant="flat">
+                        Unlimited
+                      </Chip>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardBody>
@@ -434,18 +469,28 @@ export default function JKT48APIChecker() {
                       <div className="flex justify-between items-center mb-2">
                         <p className="text-default-500 text-sm">Usage This Month</p>
                         <p className="text-sm">
-                          {parseInt(keyDetail.usage_count).toLocaleString()} / {parseInt(keyDetail.limit_count).toLocaleString()}
+                          {parseInt(keyDetail.usage_count).toLocaleString()} / {formatLimitDisplay()}
                         </p>
                       </div>
-                      <Progress 
-                        value={calculateUsagePercentage()}
-                        color={getUsageColor()}
-                        size="md"
-                        className="mb-1"
-                      />
-                      <p className="text-xs text-default-400">
-                        {calculateUsagePercentage().toFixed(1)}% used
-                      </p>
+                      {!isUnlimited() ? (
+                        <>
+                          <Progress 
+                            value={calculateUsagePercentage()}
+                            color={getUsageColor()}
+                            size="md"
+                            className="mb-1"
+                          />
+                          <p className="text-xs text-default-400">
+                            {calculateUsagePercentage().toFixed(1)}% used
+                          </p>
+                        </>
+                      ) : (
+                        <div className="bg-primary-50 p-3 rounded">
+                          <p className="text-sm text-primary-600 font-medium">
+                            ✨ Unlimited usage - No restrictions!
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -459,22 +504,36 @@ export default function JKT48APIChecker() {
                     </div>
 
                     <div>
-                      <p className="text-default-500 text-sm">Days Until Expiry</p>
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold text-lg">{getDaysUntilExpiry()}</p>
-                        {getDaysUntilExpiry() <= 7 && (
-                          <Chip color="warning" size="sm">
-                            Expiring Soon
+                      <p className="text-default-500 text-sm">Expiry Status</p>
+                      {isPermanent() ? (
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-lg text-success-600">Permanent</p>
+                          <Chip color="success" size="sm">
+                            Never Expires
                           </Chip>
-                        )}
-                      </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-lg">{getDaysUntilExpiry()} days</p>
+                          {getDaysUntilExpiry() <= 7 && getDaysUntilExpiry() > 0 && (
+                            <Chip color="warning" size="sm">
+                              Expiring Soon
+                            </Chip>
+                          )}
+                          {getDaysUntilExpiry() === 0 && (
+                            <Chip color="danger" size="sm">
+                              Expired
+                            </Chip>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
               </CardBody>
             </Card>
 
-            {/* Dates Information */}
+                        {/* Dates Information */}
             <Card>
               <CardHeader>
                 <h3 className="text-xl font-bold">Timeline</h3>
@@ -491,17 +550,24 @@ export default function JKT48APIChecker() {
                   
                   <div className="space-y-2">
                     <p className="text-default-500 text-sm">Expiry Date</p>
-                    <div>
-                      <p className="font-semibold">{formatDate(keyDetail.expire_at).date}</p>
-                      <p className="text-sm text-default-600">{formatDate(keyDetail.expire_at).time}</p>
-                    </div>
+                    {isPermanent() ? (
+                      <div>
+                        <p className="font-semibold text-success-600">Permanent</p>
+                        <p className="text-sm text-success-500">This API key never expires</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="font-semibold">{formatDate(keyDetail.expire_at!).date}</p>
+                        <p className="text-sm text-default-600">{formatDate(keyDetail.expire_at!).time}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardBody>
             </Card>
 
-            {/* Usage Recommendations */}
-            {calculateUsagePercentage() > 80 && (
+            {/* Usage Recommendations - Updated conditions */}
+            {!isUnlimited() && calculateUsagePercentage() > 80 && (
               <Alert color="warning">
                 <div>
                   <h4 className="font-semibold">High Usage Warning</h4>
@@ -513,7 +579,7 @@ export default function JKT48APIChecker() {
               </Alert>
             )}
 
-            {getDaysUntilExpiry() <= 7 && getDaysUntilExpiry() > 0 && (
+            {!isPermanent() && getDaysUntilExpiry() <= 7 && getDaysUntilExpiry() > 0 && (
               <Alert color="warning">
                 <div>
                   <h4 className="font-semibold">Expiry Warning</h4>
@@ -525,12 +591,30 @@ export default function JKT48APIChecker() {
               </Alert>
             )}
 
-            {getDaysUntilExpiry() === 0 && (
+            {!isPermanent() && getDaysUntilExpiry() === 0 && (
               <Alert color="danger">
                 <div>
                   <h4 className="font-semibold">API Key Expired</h4>
                   <p>
                     Your API key has expired. Please purchase a new API key to continue using the service.
+                  </p>
+                </div>
+              </Alert>
+            )}
+            
+            
+            {/* Show positive message for premium features */}
+            {(isUnlimited() || isPermanent()) && (
+              <Alert color="success">
+                <div>
+                  <h4 className="font-semibold">Premium Features Active</h4>
+                  <p>
+                    {isUnlimited() && isPermanent() 
+                      ? "You have unlimited usage and permanent access to the API!"
+                      : isUnlimited() 
+                      ? "You have unlimited API usage for this billing period!"
+                      : "Your API key has permanent access and will never expire!"
+                    }
                   </p>
                 </div>
               </Alert>
