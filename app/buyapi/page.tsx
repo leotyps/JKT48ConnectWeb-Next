@@ -368,7 +368,7 @@ export default function JKT48APIStore() {
                   isRequired
                   type="email"
                   label="Email Address"
-                  placeholder="Enter your email"
+                  placeholder="Enter your active email"
                   value={userInfo.email}
                   onValueChange={(value) => setUserInfo(prev => ({ ...prev, email: value }))}
                 />
