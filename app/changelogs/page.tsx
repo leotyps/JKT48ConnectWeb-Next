@@ -116,7 +116,7 @@ export default function JKT48Changelogs() {
     published: false,
     changes: []
   });
-  const [newChange, setNewChange] = useState({ type: 'added' as const, description: '' });
+  const [newChange, setNewChange] = useState<{ type: 'added' | 'changed' | 'deprecated' | 'removed' | 'fixed' | 'security'; description: string }>({ type: 'added', description: '' });
   const [newBadge, setNewBadge] = useState('');
 
   // Modal states
@@ -568,7 +568,7 @@ export default function JKT48Changelogs() {
                       placeholder="Change type"
                       selectedKeys={[newChange.type]}
                       onSelectionChange={(keys) => {
-                        const key = Array.from(keys)[0] as keyof typeof CHANGE_TYPES;
+                        const key = Array.from(keys)[0] as 'added' | 'changed' | 'deprecated' | 'removed' | 'fixed' | 'security';
                         setNewChange(prev => ({ ...prev, type: key }));
                       }}
                       className="w-40"
