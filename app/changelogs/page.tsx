@@ -1,4 +1,6 @@
 // src/app/changelogs/page.tsx
+"use client"
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Card, CardBody, CardFooter, CardHeader, Image, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, Link, Input, Select, SelectItem, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Avatar, Divider, Tabs, Tab, Progress, Textarea, Badge } from "@heroui/react";
