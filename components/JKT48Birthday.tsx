@@ -97,69 +97,93 @@ export default function JKT48Birthdays() {
 
   const renderMemberCard = (member: BirthdayMember, isTodayBirthday: boolean = false) => (
     <div key={member.url_key} className="relative">
-      <Card 
-        isPressable 
-        shadow={isTodayBirthday ? "lg" : "sm"}
-        className={`w-full transition-all duration-300 hover:scale-105 ${
-          isTodayBirthday ? 'ring-2 ring-warning-400 shadow-warning-200/50' : ''
-        }`}
-        onPress={() => window.open(`https://jkt48.com/member/detail/id/${member.url_key}?lang=id`, '_blank')}
-      >
-        {isTodayBirthday && (
-          <Badge 
-            content={<FaBirthdayCake className="text-white" />}
-            color="warning"
-            placement="top-right"
-            className="z-10"
-            size="lg"
-          />
-        )}
-        
-        <CardBody className="overflow-visible p-0 relative">
-          <Image
-            alt={`${member.name}'s photo`}
-            className="w-full object-cover h-[220px]"
-            radius="lg"
-            shadow="sm"
-            src={member.img}
-            width="100%"
-          />
-          {isTodayBirthday && (
-            <div className="absolute inset-0 bg-gradient-to-t from-warning-500/20 to-transparent rounded-lg" />
-          )}
-        </CardBody>
-        
-        <CardFooter className="text-small flex-col items-start gap-2 p-4">
-          <div className="w-full flex items-center justify-between">
-            <b className="text-base truncate">{member.name}</b>
-            {isTodayBirthday && (
-              <Chip 
-                color="warning" 
-                variant="flat" 
-                size="sm"
-                startContent={<FaBirthdayCake className="text-xs" />}
-              >
-                Birthday!
-              </Chip>
-            )}
-          </div>
+      {isTodayBirthday ? (
+        <Badge 
+          color="warning" 
+          placement="top-right"
+          size="lg"
+          content={<FaBirthdayCake className="text-white text-xs" />}
+        >
+          <Card 
+            isPressable 
+            shadow="lg"
+            className="w-full transition-all duration-300 hover:scale-105 ring-2 ring-warning-400 shadow-warning-200/50"
+            onPress={() => window.open(`https://jkt48.com/member/detail/id/${member.url_key}?lang=id`, '_blank')}
+          >
+            <CardBody className="overflow-visible p-0 relative">
+              <Image
+                alt={`${member.name}'s photo`}
+                className="w-full object-cover h-[220px]"
+                radius="lg"
+                shadow="sm"
+                src={member.img}
+                width="100%"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-warning-500/20 to-transparent rounded-lg" />
+            </CardBody>
+            
+            <CardFooter className="text-small flex-col items-start gap-2 p-4">
+              <div className="w-full flex items-center justify-between">
+                <b className="text-base truncate">{member.name}</b>
+                <Chip 
+                  color="warning" 
+                  variant="flat" 
+                  size="sm"
+                  startContent={<FaBirthdayCake className="text-xs" />}
+                >
+                  Birthday!
+                </Chip>
+              </div>
+              
+              <div className="w-full flex justify-between items-center">
+                <div className="flex items-center gap-1">
+                  <FaCalendarAlt className="text-xs text-default-400" />
+                  <p className="text-default-500 text-xs">{formatBirthdate(member.birthdate)}</p>
+                </div>
+                
+                <div className="text-xs font-medium text-warning-600">
+                  Hari ini!
+                </div>
+              </div>
+            </CardFooter>
+          </Card>
+        </Badge>
+      ) : (
+        <Card 
+          isPressable 
+          shadow="sm"
+          className="w-full transition-all duration-300 hover:scale-105"
+          onPress={() => window.open(`https://jkt48.com/member/detail/id/${member.url_key}?lang=id`, '_blank')}
+        >
+          <CardBody className="overflow-visible p-0 relative">
+            <Image
+              alt={`${member.name}'s photo`}
+              className="w-full object-cover h-[220px]"
+              radius="lg"
+              shadow="sm"
+              src={member.img}
+              width="100%"
+            />
+          </CardBody>
           
-          <div className="w-full flex justify-between items-center">
-            <div className="flex items-center gap-1">
-              <FaCalendarAlt className="text-xs text-default-400" />
-              <p className="text-default-500 text-xs">{formatBirthdate(member.birthdate)}</p>
+          <CardFooter className="text-small flex-col items-start gap-2 p-4">
+            <div className="w-full flex items-center justify-between">
+              <b className="text-base truncate">{member.name}</b>
             </div>
             
-            <div className={`text-xs font-medium ${
-              isTodayBirthday ? 'text-warning-600' : 'text-primary-500'
-            }`}>
-              {isTodayBirthday 
-                ? "Hari ini!" 
-                : `${getDaysUntilBirthday(member.birthdate)} hari lagi`}
+            <div className="w-full flex justify-between items-center">
+              <div className="flex items-center gap-1">
+                <FaCalendarAlt className="text-xs text-default-400" />
+                <p className="text-default-500 text-xs">{formatBirthdate(member.birthdate)}</p>
+              </div>
+              
+              <div className="text-xs font-medium text-primary-500">
+                {`${getDaysUntilBirthday(member.birthdate)} hari lagi`}
+              </div>
             </div>
-          </div>
-        </CardFooter>
-      </Card>
+          </CardFooter>
+        </Card>
+      )}
     </div>
   );
 
@@ -227,4 +251,4 @@ export default function JKT48Birthdays() {
       )}
     </div>
   );
-}
+      }
