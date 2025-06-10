@@ -148,47 +148,60 @@ const ChangelogsPage = () => {
     setFilteredChangelogs(filtered);
   }, [changelogs, searchTerm, filterType, showUnpublished, isAdmin]);
 
-  // Handle form submission
-  const handleSubmit = async () => {
-    if (!formData.version || !formData.title || !formData.description) {
-      alert("Please fill in all required fields");
-      return;
+// Handle form submission
+const handleSubmit = async () => {
+  if (!formData.version || !formData.title || !formData.description) {
+    alert("Please fill in all required fields");
+    return;
+  }
+
+  const formDataToSend = new FormData();
+  formDataToSend.append("version", formData.version || "");
+  formDataToSend.append("title", formData.title || "");
+  formDataToSend.append("description", formData.description || "");
+  formDataToSend.append("type", formData.type || "patch");
+  formDataToSend.append("author", formData.author || "");
+  formDataToSend.append("badges", JSON.stringify(formData.badges || []));
+  formDataToSend.append("published", JSON.stringify(formData.published || false));
+  formDataToSend.append("changes", JSON.stringify(formData.changes || []));
+
+  if (imageFile) {
+    formDataToSend.append("image", imageFile);
+  }
+
+  try {
+    const response = await axios.post("https://v2.jkt48connect.my.id/api/database/create-changelog?username=vzy&password=vzy&apikey=JKTCONNECT", formDataToSend, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (response.status === 201) {
+      alert("Changelog created/updated successfully");
+      resetForm();
+      onFormOpenChange();
+      fetchChangelogs();
+    } else {
+      alert("Failed to create/update changelog");
     }
-
-    const formDataToSend = new FormData();
-    formDataToSend.append("version", formData.version || "");
-    formDataToSend.append("title", formData.title || "");
-    formDataToSend.append("description", formData.description || "");
-    formDataToSend.append("type", formData.type || "patch");
-    formDataToSend.append("author", formData.author || "");
-    formDataToSend.append("badges", JSON.stringify(formData.badges || []));
-    formDataToSend.append("published", JSON.stringify(formData.published || false));
-    formDataToSend.append("changes", JSON.stringify(formData.changes || []));
-
-    if (imageFile) {
-      formDataToSend.append("image", imageFile);
+  } catch (error) {
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error("Error response from server:", error.response.data);
+      alert(`Error submitting form: ${error.response.data.message}`);
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error("No response received from server:", error.request);
+      alert("No response received from server. Please check your network connection.");
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error("Error setting up the request:", error.message);
+      alert(`Error submitting form: ${error.message}`);
     }
+  }
+};
 
-    try {
-      const response = await axios.post("https://v2.jkt48connect.my.id/api/database/create-changelog?username=vzy&password=vzy&apikey=JKTCONNECT", formDataToSend, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (response.status === 201) {
-        alert("Changelog created/updated successfully");
-        resetForm();
-        onFormOpenChange();
-        fetchChangelogs();
-      } else {
-        alert("Failed to create/update changelog");
-      }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      alert("Error submitting form");
-    }
-  };
 
   // Reset form
   const resetForm = () => {
