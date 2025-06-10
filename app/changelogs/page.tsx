@@ -185,19 +185,26 @@ const handleSubmit = async () => {
       alert("Failed to create/update changelog");
     }
   } catch (error) {
-    if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      console.error("Error response from server:", error.response.data);
-      alert(`Error submitting form: ${error.response.data.message}`);
-    } else if (error.request) {
-      // The request was made but no response was received
-      console.error("No response received from server:", error.request);
-      alert("No response received from server. Please check your network connection.");
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error("Error setting up the request:", error.message);
+    if (error instanceof Error) {
+      // Handle standard JavaScript errors
+      console.error("Error submitting form:", error.message);
       alert(`Error submitting form: ${error.message}`);
+    } else if (axios.isAxiosError(error)) {
+      // Handle Axios-specific errors
+      if (error.response) {
+        console.error("Error response from server:", error.response.data);
+        alert(`Error submitting form: ${error.response.data.message}`);
+      } else if (error.request) {
+        console.error("No response received from server:", error.request);
+        alert("No response received from server. Please check your network connection.");
+      } else {
+        console.error("Error setting up the request:", error.message);
+        alert(`Error submitting form: ${error.message}`);
+      }
+    } else {
+      // Handle other types of errors
+      console.error("Unknown error:", error);
+      alert("An unknown error occurred. Please try again.");
     }
   }
 };
