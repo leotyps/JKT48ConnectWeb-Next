@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Card, CardBody, CardFooter, CardHeader, Image, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, Link, Input, Select, SelectItem, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Avatar, Divider, Tabs, Tab, Progress, Textarea, Badge } from "@heroui/react";
 import { Calendar, Tag, User, Plus, Edit, Trash2, Eye, EyeOff, Upload, X } from "lucide-react";
-
+import { fetchChangelogs } from './api'; // Adjust the path as needed
 interface Changelog {
   id: string;
   version: string;
