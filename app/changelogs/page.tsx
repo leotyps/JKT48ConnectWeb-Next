@@ -81,17 +81,15 @@ export default function Changelogs() {
   // Fetch changelogs from backend
   useEffect(() => {
     const fetchChangelogs = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get('https://v2.jkt48connect.my.id/api/database/changelogs?username=vzy&password=vzy&apikey=JKTCONNECT');
-        setChangelogs(response.data.data);
-        setFilteredChangelogs(response.data.data);
-      } catch (error) {
-        console.error('Error fetching changelogs:', error);
-      }
-      setLoading(false);
-    };
+    try {
+      const response = await axios.get('https://v2.jkt48connect.my.id/api/database/changelogs?username=vzy&password=vzy&apikey=JKTCONNECT');
+      setChangelogs(response.data.data);
+    } catch (error) {
+      console.error('Error fetching changelogs:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchChangelogs();
   }, []);
 
