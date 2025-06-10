@@ -45,7 +45,7 @@ export default function Home() {
           project with easy API access and cool dev tools.
         </span>
         <div className={subtitle({ class: "mt-4" })}>
-          Use JKT48Connect’s API and tools to build something fun.
+          Use JKT48Connect's API and tools to build something fun.
         </div>
       </div>
 
@@ -71,25 +71,48 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* Integrated Image Slider */}
-      <div className="w-full max-w-4xl mt-8">
-        <div className="w-full overflow-hidden relative h-48">
-          {sliderImages.map((src, index) => (
-            <div 
-              key={index} 
-              className={`absolute top-0 left-0 w-full h-full transition-opacity duration-500 ease-in-out ${
-                currentIndex === index ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              <Image
-                
-                alt={`Slide image ${index + 1}`}
-                className="w-full h-full object-contain"
-                src={src}
-              />
-            </div>
-          ))}
+      {/* Image Slider with Glow Gradient Effect */}
+      <div className="w-full max-w-4xl mt-8 relative">
+        {/* Animated Background Gradient */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 rounded-lg blur-xl opacity-30 animate-pulse"></div>
+        
+        {/* Main Container */}
+        <div className="relative bg-black/20 backdrop-blur-sm rounded-lg p-1 border border-white/10">
+          {/* Slider Container */}
+          <div className="w-full overflow-hidden relative h-48 rounded-lg">
+            {/* Inner Glow Effect */}
+            <div className="absolute inset-0 bg-gradient-to-t from-violet-500/20 via-transparent to-pink-500/20 z-10 rounded-lg"></div>
+            
+            {sliderImages.map((src, index) => (
+              <div 
+                key={index} 
+                className={`absolute top-0 left-0 w-full h-full transition-all duration-700 ease-in-out ${
+                  currentIndex === index 
+                    ? "opacity-100 scale-100" 
+                    : "opacity-0 scale-105"
+                }`}
+              >
+                <Image
+                  alt={`Slide image ${index + 1}`}
+                  className="w-full h-full object-contain rounded-lg"
+                  src={src}
+                />
+              </div>
+            ))}
+            
+            {/* Overlay Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-purple-500/5 to-pink-500/10 rounded-lg"></div>
+          </div>
+          
+          {/* Bottom Glow Line */}
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-3/4 h-0.5 bg-gradient-to-r from-transparent via-violet-400 to-transparent blur-sm"></div>
         </div>
+
+        {/* Floating Particles Effect */}
+        <div className="absolute top-4 left-4 w-2 h-2 bg-pink-400 rounded-full animate-ping opacity-60"></div>
+        <div className="absolute top-8 right-6 w-1 h-1 bg-violet-400 rounded-full animate-pulse opacity-80"></div>
+        <div className="absolute bottom-6 left-8 w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce opacity-70"></div>
+        <div className="absolute bottom-4 right-4 w-1 h-1 bg-purple-400 rounded-full animate-ping opacity-50"></div>
       </div>
 
       <JKT48TheaterCard />
@@ -98,6 +121,17 @@ export default function Home() {
       <JKT48Birthday />
       <JKT48Theater />
       <JKT48Youtube />
+
+      <style jsx global>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+      `}</style>
     </section>
   );
 }
