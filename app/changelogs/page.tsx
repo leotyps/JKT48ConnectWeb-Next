@@ -1,10 +1,8 @@
-// src/components/Changelogs.js
-"use client"
-
-import React, { useState, useEffect } from 'react';
+// src/app/changelogs/page.tsx
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Card, CardBody, CardFooter, CardHeader, Image, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, Link, Input, Select, SelectItem, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Avatar, Divider, Tabs, Tab, Progress, Textarea, Badge } from "@heroui/react";
 import { Calendar, Tag, User, Plus, Edit, Trash2, Eye, EyeOff, Upload, X } from "lucide-react";
-import axios from 'axios';
 
 interface Changelog {
   id: string;
@@ -24,22 +22,22 @@ interface Changelog {
 }
 
 const CHANGE_TYPES = {
-  added: { label: 'Added', color: 'success' as const, icon: '✨' },
-  changed: { label: 'Changed', color: 'primary' as const, icon: '🔄' },
-  deprecated: { label: 'Deprecated', color: 'warning' as const, icon: '⚠️' },
-  removed: { label: 'Removed', color: 'danger' as const, icon: '🗑️' },
-  fixed: { label: 'Fixed', color: 'secondary' as const, icon: '🐛' },
-  security: { label: 'Security', color: 'danger' as const, icon: '🔒' }
+  added: { label: 'Added', color: 'success', icon: '✨' },
+  changed: { label: 'Changed', color: 'primary', icon: '🔄' },
+  deprecated: { label: 'Deprecated', color: 'warning', icon: '⚠️' },
+  removed: { label: 'Removed', color: 'danger', icon: '🗑️' },
+  fixed: { label: 'Fixed', color: 'secondary', icon: '🐛' },
+  security: { label: 'Security', color: 'danger', icon: '🔒' }
 };
 
 const VERSION_TYPES = {
-  major: { label: 'Major', color: 'danger' as const },
-  minor: { label: 'Minor', color: 'primary' as const },
-  patch: { label: 'Patch', color: 'success' as const },
-  hotfix: { label: 'Hotfix', color: 'warning' as const }
+  major: { label: 'Major', color: 'danger' },
+  minor: { label: 'Minor', color: 'primary' },
+  patch: { label: 'Patch', color: 'success' },
+  hotfix: { label: 'Hotfix', color: 'warning' }
 };
 
-export default function Changelogs() {
+const ChangelogsPage = () => {
   const [changelogs, setChangelogs] = useState<Changelog[]>([]);
   const [filteredChangelogs, setFilteredChangelogs] = useState<Changelog[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -81,15 +79,17 @@ export default function Changelogs() {
   // Fetch changelogs from backend
   useEffect(() => {
     const fetchChangelogs = async () => {
-    try {
-      const response = await axios.get('https://v2.jkt48connect.my.id/api/database/changelogs?username=vzy&password=vzy&apikey=JKTCONNECT');
-      setChangelogs(response.data.data);
-    } catch (error) {
-      console.error('Error fetching changelogs:', error);
-    }
-  };
+      setLoading(true);
+      try {
+        const response = await axios.get('https://v2.jkt48connect.my.id/api/database/changelogs?username=vzy&password=vzy&apikey=JKTCONNECT');
+        setChangelogs(response.data.data);
+        setFilteredChangelogs(response.data.data);
+      } catch (error) {
+        console.error('Error fetching changelogs:', error);
+      }
+      setLoading(false);
+    };
 
-  useEffect(() => {
     fetchChangelogs();
   }, []);
 
@@ -114,47 +114,47 @@ export default function Changelogs() {
     setFilteredChangelogs(filtered);
   }, [changelogs, searchTerm, filterType, showUnpublished, isAdmin]);
 
-// Handle form submission
-const handleSubmit = async () => {
-  if (!formData.version || !formData.title || !formData.description) {
-    alert('Please fill in all required fields');
-    return;
-  }
-
-  const formDataToSend = new FormData();
-  formDataToSend.append('version', formData.version || '');
-  formDataToSend.append('title', formData.title || '');
-  formDataToSend.append('description', formData.description || '');
-  formDataToSend.append('type', formData.type || 'patch'); // Provide a default value if undefined
-  formDataToSend.append('author', formData.author || '');
-  formDataToSend.append('badges', JSON.stringify(formData.badges || []));
-  formDataToSend.append('published', JSON.stringify(formData.published || false));
-  formDataToSend.append('changes', JSON.stringify(formData.changes || []));
-
-  if (imageFile) {
-    formDataToSend.append('image', imageFile);
-  }
-
-  try {
-    const response = await axios.post('https://v2.jkt48connect.my.id/api/database/create-changelog?username=vzy&password=vzy&apikey=JKTCONNECT', formDataToSend, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-
-    if (response.status === 201) {
-      alert('Changelog created/updated successfully');
-      resetForm();
-      onFormOpenChange();
-      fetchChangelogs();
-    } else {
-      alert('Failed to create/update changelog');
+  // Handle form submission
+  const handleSubmit = async () => {
+    if (!formData.version || !formData.title || !formData.description) {
+      alert('Please fill in all required fields');
+      return;
     }
-  } catch (error) {
-    console.error('Error submitting form:', error);
-    alert('Error submitting form');
-  }
-};
+
+    const formDataToSend = new FormData();
+    formDataToSend.append('version', formData.version || '');
+    formDataToSend.append('title', formData.title || '');
+    formDataToSend.append('description', formData.description || '');
+    formDataToSend.append('type', formData.type || 'patch');
+    formDataToSend.append('author', formData.author || '');
+    formDataToSend.append('badges', JSON.stringify(formData.badges || []));
+    formDataToSend.append('published', JSON.stringify(formData.published || false));
+    formDataToSend.append('changes', JSON.stringify(formData.changes || []));
+
+    if (imageFile) {
+      formDataToSend.append('image', imageFile);
+    }
+
+    try {
+      const response = await axios.post('https://v2.jkt48connect.my.id/api/database/create-changelog?username=vzy&password=vzy&apikey=JKTCONNECT', formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.status === 201) {
+        alert('Changelog created/updated successfully');
+        resetForm();
+        onFormOpenChange();
+        fetchChangelogs();
+      } else {
+        alert('Failed to create/update changelog');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Error submitting form');
+    }
+  };
 
   // Reset form
   const resetForm = () => {
@@ -250,7 +250,7 @@ const handleSubmit = async () => {
   // Toggle published status
   const togglePublished = async (id: string) => {
     try {
-      const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}?username=vzy&password=vzy&apikey=JKTCONNECT`, { published: !changelogs.find(log => log.id === id).published });
+      const response = await axios.put(`https://v2.jkt48connect/api/database/changelog/${id}?username=vzy&password=vzy&apikey=JKTCONNECT`, { published: !changelogs.find(log => log.id === id).published });
       if (response.status === 200) {
         alert('Published status updated successfully');
         fetchChangelogs();
@@ -776,4 +776,6 @@ const handleSubmit = async () => {
       )}
     </section>
   );
-}
+};
+
+export default ChangelogsPage;
