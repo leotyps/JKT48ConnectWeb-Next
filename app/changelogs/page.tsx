@@ -303,11 +303,14 @@ export default function JKT48Changelogs() {
             }}
             className="min-w-48"
           >
-            <SelectItem key="all">All Types</SelectItem>
-            {Object.entries(VERSION_TYPES).map(([key, type]) => (
-              <SelectItem key={key}>{type.label}</SelectItem>
-            ))}
-          </Select>
+            <Select>
+  <SelectItem key="all">All Types</SelectItem>
+  <>
+    {Object.entries(VERSION_TYPES).map(([key, type]) => (
+      <SelectItem key={key}>{type.label}</SelectItem>
+    ))}
+  </>
+</Select>
 
           {isAdmin && (
             <>
