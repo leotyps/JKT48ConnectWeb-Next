@@ -120,6 +120,7 @@ export default function JKT48Changelogs() {
   const [newBadge, setNewBadge] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [imageLoadError, setImageLoadError] = useState<boolean>(false);
 
   // Modal states
   const {isOpen: isFormOpen, onOpen: onFormOpen, onOpenChange: onFormOpenChange} = useDisclosure();
@@ -202,6 +203,7 @@ export default function JKT48Changelogs() {
     setNewBadge('');
     setImageFile(null);
     setImagePreview('');
+    setImageLoadError(false);
   };
 
   // Handle edit
@@ -209,6 +211,7 @@ export default function JKT48Changelogs() {
     setEditingLog(changelog);
     setFormData(changelog);
     setImagePreview(changelog.image || '');
+    setImageLoadError(false);
     onFormOpen();
   };
 
@@ -294,6 +297,7 @@ export default function JKT48Changelogs() {
         const result = e.target?.result as string;
         setImagePreview(result);
         setFormData(prev => ({ ...prev, image: result }));
+        setImageLoadError(false);
       };
       reader.readAsDataURL(file);
     }
@@ -304,6 +308,12 @@ export default function JKT48Changelogs() {
     setImageFile(null);
     setImagePreview('');
     setFormData(prev => ({ ...prev, image: '' }));
+    setImageLoadError(false);
+  };
+
+  // Handle image load error
+  const handleImageError = () => {
+    setImageLoadError(true);
   };
 
   return (
@@ -461,11 +471,14 @@ export default function JKT48Changelogs() {
               
               <CardBody className="pt-0">
                 {changelog.image && (
-                  <Image
-                    src={changelog.image}
-                    alt={`${changelog.title} preview`}
-                    className="w-full max-w-md mx-auto mb-4 rounded-lg"
-                  />
+                  <div className="w-full max-w-md mx-auto mb-4">
+                    <Image
+                      src={changelog.image}
+                      alt={`${changelog.title} preview`}
+                      className="w-full rounded-lg"
+                      onError={handleImageError}
+                    />
+                  </div>
                 )}
 
                 <div className="space-y-3">
@@ -568,6 +581,7 @@ export default function JKT48Changelogs() {
                     onValueChange={(value) => {
                       setFormData(prev => ({ ...prev, image: value }));
                       setImagePreview(value);
+                      setImageLoadError(false);
                     }}
                   />
                 </div>
@@ -607,16 +621,18 @@ export default function JKT48Changelogs() {
                     {/* Image Preview */}
                     {(imagePreview || formData.image) && (
                       <div className="border rounded-lg p-4 bg-default-50">
-                        <Image
-                          src={imagePreview || formData.image}
-                          alt="Image preview"
-                          className="w-full max-w-sm mx-auto rounded-lg"
-                          fallback={
-                            <div className="w-full max-w-sm mx-auto h-48 bg-default-200 rounded-lg flex items-center justify-center">
-                              <p className="text-default-500">Image preview</p>
-                            </div>
-                          }
-                        />
+                        {!imageLoadError ? (
+                          <Image
+                            src={imagePreview || formData.image}
+                            alt="Image preview"
+                            className="w-full max-w-sm mx-auto rounded-lg"
+                            onError={() => setImageLoadError(true)}
+                          />
+                        ) : (
+                          <div className="w-full max-w-sm mx-auto h-48 bg-default-200 rounded-lg flex items-center justify-center">
+                            <p className="text-default-500">Failed to load image</p>
+                          </div>
+                        )}
                         <p className="text-xs text-default-500 mt-2 text-center">
                           Image preview • Max size: 5MB
                         </p>
@@ -640,7 +656,7 @@ export default function JKT48Changelogs() {
                       placeholder="Add badge"
                       value={newBadge}
                       onValueChange={setNewBadge}
-                      onKeyPress={(e) => {
+                      onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           addBadge();
@@ -689,7 +705,7 @@ export default function JKT48Changelogs() {
                       placeholder="Change description"
                       value={newChange.description}
                       onValueChange={(value) => setNewChange(prev => ({ ...prev, description: value }))}
-                      onKeyPress={(e) => {
+                      onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           addChange();
