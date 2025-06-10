@@ -53,20 +53,20 @@ interface Changelog {
 }
 
 const CHANGE_TYPES = {
-  added: { label: "Added", color: "success", icon: "✨" },
-  changed: { label: "Changed", color: "primary", icon: "🔄" },
-  deprecated: { label: "Deprecated", color: "warning", icon: "⚠️" },
-  removed: { label: "Removed", color: "danger", icon: "🗑️" },
-  fixed: { label: "Fixed", color: "secondary", icon: "🐛" },
-  security: { label: "Security", color: "danger", icon: "🔒" },
-};
+  added: { label: "Added", color: "success" as const, icon: "✨" },
+  changed: { label: "Changed", color: "primary" as const, icon: "🔄" },
+  deprecated: { label: "Deprecated", color: "warning" as const, icon: "⚠️" },
+  removed: { label: "Removed", color: "danger" as const, icon: "🗑️" },
+  fixed: { label: "Fixed", color: "secondary" as const, icon: "🐛" },
+  security: { label: "Security", color: "danger" as const, icon: "🔒" },
+} as const;
 
 const VERSION_TYPES = {
-  major: { label: "Major", color: "danger" },
-  minor: { label: "Minor", color: "primary" },
-  patch: { label: "Patch", color: "success" },
-  hotfix: { label: "Hotfix", color: "warning" },
-};
+  major: { label: "Major", color: "danger" as const },
+  minor: { label: "Minor", color: "primary" as const },
+  patch: { label: "Patch", color: "success" as const },
+  hotfix: { label: "Hotfix", color: "warning" as const }
+} as const;
 
 const ChangelogsPage = () => {
   const [changelogs, setChangelogs] = useState<Changelog[]>([]);
@@ -428,7 +428,10 @@ const ChangelogsPage = () => {
                       >
                         v{changelog.version}
                       </Chip>
-                      <Chip color={VERSION_TYPES[changelog.type].color} size="sm">
+                      <Chip
+                        color={VERSION_TYPES[changelog.type].color}
+                        size="sm"
+                      >
                         {VERSION_TYPES[changelog.type].label}
                       </Chip>
                       {!changelog.published && (
