@@ -69,7 +69,7 @@ const VERSION_TYPES = {
 } as const;
 
 const ChangelogsPage = () => {
-  const [changelogs, setChangelogs] = useState<Changelog[]>([]);
+  const [changelogs, setChangelogs] = useState([]);
   const [filteredChangelogs, setFilteredChangelogs] = useState<Changelog[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -112,19 +112,17 @@ const ChangelogsPage = () => {
 
   // Fetch changelogs from backend
   useEffect(() => {
-    const fetchChangelogs = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get("https://v2.jkt48connect.my.id/api/database/changelogs?username=vzy&password=vzy&apikey=JKTCONNECT");
-        setChangelogs(response.data.data);
-        setFilteredChangelogs(response.data.data);
-      } catch (error) {
-        console.error("Error fetching changelogs:", error);
-      }
-      setLoading(false);
-    };
+    const loadChangelogs = async () => {
+     try {
+       const data = await fetchChangelogs();
+       setChangelogs(data);
+     } catch (error) {
+        console.error('Failed to load changelogs:', error);
+        alert('Failed to load changelogs. Please try again.');
+     }
+   };
 
-    fetchChangelogs();
+    loadChangelogs();
   }, []);
 
   // Filter changelogs
