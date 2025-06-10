@@ -118,6 +118,8 @@ export default function JKT48Changelogs() {
   });
   const [newChange, setNewChange] = useState<{ type: 'added' | 'changed' | 'deprecated' | 'removed' | 'fixed' | 'security'; description: string }>({ type: 'added', description: '' });
   const [newBadge, setNewBadge] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
 
   // Modal states
   const {isOpen: isFormOpen, onOpen: onFormOpen, onOpenChange: onFormOpenChange} = useDisclosure();
@@ -198,12 +200,15 @@ export default function JKT48Changelogs() {
     setEditingLog(null);
     setNewChange({ type: 'added', description: '' });
     setNewBadge('');
+    setImageFile(null);
+    setImagePreview('');
   };
 
   // Handle edit
   const handleEdit = (changelog: Changelog) => {
     setEditingLog(changelog);
     setFormData(changelog);
+    setImagePreview(changelog.image || '');
     onFormOpen();
   };
 
@@ -262,6 +267,42 @@ export default function JKT48Changelogs() {
     setChangelogs(prev => prev.map(log => 
       log.id === id ? { ...log, published: !log.published } : log
     ));
+  };
+
+  // Handle image upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+
+      setImageFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setImagePreview(result);
+        setFormData(prev => ({ ...prev, image: result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Remove image
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview('');
+    setFormData(prev => ({ ...prev, image: '' }));
   };
 
   return (
@@ -523,8 +564,71 @@ export default function JKT48Changelogs() {
                     label="Image URL"
                     placeholder="Optional image URL"
                     value={formData.image || ''}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, image: value }))}
+                    onValueChange={(value) => {
+                      setFormData(prev => ({ ...prev, image: value }));
+                      setImagePreview(value);
+                    }}
                   />
+                </div>
+
+                {/* Image Upload Section */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Image</label>
+                  <div className="space-y-3">
+                    {/* Image Upload Button */}
+                    <div className="flex gap-2">
+                      <Button
+                        color="primary"
+                        variant="bordered"
+                        startContent={<Upload className="w-4 h-4" />}
+                        onPress={() => {
+                          const input = document.createElement('input');
+                          input.type = 'file';
+                          input.accept = 'image/*';
+                          input.onchange = handleImageUpload;
+                          input.click();
+                        }}
+                      >
+                        Upload Image
+                      </Button>
+                      {(imagePreview || formData.image) && (
+                        <Button
+                          color="danger"
+                          variant="light"
+                          startContent={<X className="w-4 h-4" />}
+                          onPress={removeImage}
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* Image Preview */}
+                    {(imagePreview || formData.image) && (
+                      <div className="border rounded-lg p-4 bg-default-50">
+                        <Image
+                          src={imagePreview || formData.image}
+                          alt="Image preview"
+                          className="w-full max-w-sm mx-auto rounded-lg"
+                          fallback={
+                            <div className="w-full max-w-sm mx-auto h-48 bg-default-200 rounded-lg flex items-center justify-center">
+                              <p className="text-default-500">Image preview</p>
+                            </div>
+                          }
+                        />
+                        <p className="text-xs text-default-500 mt-2 text-center">
+                          Image preview • Max size: 5MB
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Upload Guidelines */}
+                    <div className="text-xs text-default-500">
+                      <p>• Supported formats: JPG, PNG, GIF, WebP</p>
+                      <p>• Maximum file size: 5MB</p>
+                      <p>• Recommended dimensions: 400x200px or similar aspect ratio</p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Badges */}
