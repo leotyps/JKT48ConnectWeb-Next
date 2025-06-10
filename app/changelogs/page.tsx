@@ -1,20 +1,48 @@
 // src/app/changelogs/page.tsx
-"use client"
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Card, CardBody, CardFooter, CardHeader, Image, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, Link, Input, Select, SelectItem, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Avatar, Divider, Tabs, Tab, Progress, Textarea, Badge } from "@heroui/react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import {
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Image,
+  Skeleton,
+  Breadcrumbs,
+  BreadcrumbItem,
+  Chip,
+  Link,
+  Input,
+  Select,
+  SelectItem,
+  Button,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+  Avatar,
+  Divider,
+  Tabs,
+  Tab,
+  Progress,
+  Textarea,
+  Badge,
+} from "@heroui/react";
 import { Calendar, Tag, User, Plus, Edit, Trash2, Eye, EyeOff, Upload, X } from "lucide-react";
-import { fetchChangelogs } from './api'; // Adjust the path as needed
+
 interface Changelog {
   id: string;
   version: string;
   title: string;
   description: string;
   date: string;
-  type: 'major' | 'minor' | 'patch' | 'hotfix';
+  type: "major" | "minor" | "patch" | "hotfix";
   changes: {
-    type: 'added' | 'changed' | 'deprecated' | 'removed' | 'fixed' | 'security';
+    type: "added" | "changed" | "deprecated" | "removed" | "fixed" | "security";
     description: string;
   }[];
   author: string;
@@ -24,19 +52,19 @@ interface Changelog {
 }
 
 const CHANGE_TYPES = {
-  added: { label: 'Added', color: 'success', icon: '✨' },
-  changed: { label: 'Changed', color: 'primary', icon: '🔄' },
-  deprecated: { label: 'Deprecated', color: 'warning', icon: '⚠️' },
-  removed: { label: 'Removed', color: 'danger', icon: '🗑️' },
-  fixed: { label: 'Fixed', color: 'secondary', icon: '🐛' },
-  security: { label: 'Security', color: 'danger', icon: '🔒' }
+  added: { label: "Added", color: "success", icon: "✨" },
+  changed: { label: "Changed", color: "primary", icon: "🔄" },
+  deprecated: { label: "Deprecated", color: "warning", icon: "⚠️" },
+  removed: { label: "Removed", color: "danger", icon: "🗑️" },
+  fixed: { label: "Fixed", color: "secondary", icon: "🐛" },
+  security: { label: "Security", color: "danger", icon: "🔒" },
 };
 
 const VERSION_TYPES = {
-  major: { label: 'Major', color: 'danger' },
-  minor: { label: 'Minor', color: 'primary' },
-  patch: { label: 'Patch', color: 'success' },
-  hotfix: { label: 'Hotfix', color: 'warning' }
+  major: { label: "Major", color: "danger" },
+  minor: { label: "Minor", color: "primary" },
+  patch: { label: "Patch", color: "success" },
+  hotfix: { label: "Hotfix", color: "warning" },
 };
 
 const ChangelogsPage = () => {
@@ -44,38 +72,41 @@ const ChangelogsPage = () => {
   const [filteredChangelogs, setFilteredChangelogs] = useState<Changelog[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("all");
   const [showUnpublished, setShowUnpublished] = useState(false);
 
   // Form states for admin
   const [editingLog, setEditingLog] = useState<Changelog | null>(null);
   const [formData, setFormData] = useState<Partial<Changelog>>({
-    version: '',
-    title: '',
-    description: '',
-    type: 'patch',
-    author: '',
+    version: "",
+    title: "",
+    description: "",
+    type: "patch",
+    author: "",
     badges: [],
-    image: '',
+    image: "",
     published: false,
-    changes: []
+    changes: [],
   });
-  const [newChange, setNewChange] = useState<{ type: 'added' | 'changed' | 'deprecated' | 'removed' | 'fixed' | 'security'; description: string }>({ type: 'added', description: '' });
-  const [newBadge, setNewBadge] = useState('');
+  const [newChange, setNewChange] = useState<{
+    type: "added" | "changed" | "deprecated" | "removed" | "fixed" | "security";
+    description: string;
+  }>({ type: "added", description: "" });
+  const [newBadge, setNewBadge] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string>("");
   const [imageLoadError, setImageLoadError] = useState<boolean>(false);
 
   // Modal states
   const { isOpen: isFormOpen, onOpen: onFormOpen, onOpenChange: onFormOpenChange } = useDisclosure();
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
-  const [deleteTarget, setDeleteTarget] = useState<string>('');
+  const [deleteTarget, setDeleteTarget] = useState<string>("");
 
   // Check admin status from URL
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    setIsAdmin(urlParams.get('admin') === 'true');
+    setIsAdmin(urlParams.get("admin") === "true");
   }, []);
 
   // Fetch changelogs from backend
@@ -83,11 +114,11 @@ const ChangelogsPage = () => {
     const fetchChangelogs = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('https://v2.jkt48connect.my.id/api/database/changelogs?username=vzy&password=vzy&apikey=JKTCONNECT');
+        const response = await axios.get("https://v2.jkt48connect.my.id/api/database/changelogs?username=vzy&password=vzy&apikey=JKTCONNECT");
         setChangelogs(response.data.data);
         setFilteredChangelogs(response.data.data);
       } catch (error) {
-        console.error('Error fetching changelogs:', error);
+        console.error("Error fetching changelogs:", error);
       }
       setLoading(false);
     };
@@ -97,15 +128,15 @@ const ChangelogsPage = () => {
 
   // Filter changelogs
   useEffect(() => {
-    let filtered = changelogs.filter(log => {
+    let filtered = changelogs.filter((log) => {
       if (!showUnpublished && !log.published && !isAdmin) return false;
 
-      const matchesSearch = searchTerm === '' ||
+      const matchesSearch = searchTerm === "" ||
         log.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.version.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesType = filterType === 'all' || log.type === filterType;
+      const matchesType = filterType === "all" || log.type === filterType;
 
       return matchesSearch && matchesType;
     });
@@ -119,63 +150,63 @@ const ChangelogsPage = () => {
   // Handle form submission
   const handleSubmit = async () => {
     if (!formData.version || !formData.title || !formData.description) {
-      alert('Please fill in all required fields');
+      alert("Please fill in all required fields");
       return;
     }
 
     const formDataToSend = new FormData();
-    formDataToSend.append('version', formData.version || '');
-    formDataToSend.append('title', formData.title || '');
-    formDataToSend.append('description', formData.description || '');
-    formDataToSend.append('type', formData.type || 'patch');
-    formDataToSend.append('author', formData.author || '');
-    formDataToSend.append('badges', JSON.stringify(formData.badges || []));
-    formDataToSend.append('published', JSON.stringify(formData.published || false));
-    formDataToSend.append('changes', JSON.stringify(formData.changes || []));
+    formDataToSend.append("version", formData.version || "");
+    formDataToSend.append("title", formData.title || "");
+    formDataToSend.append("description", formData.description || "");
+    formDataToSend.append("type", formData.type || "patch");
+    formDataToSend.append("author", formData.author || "");
+    formDataToSend.append("badges", JSON.stringify(formData.badges || []));
+    formDataToSend.append("published", JSON.stringify(formData.published || false));
+    formDataToSend.append("changes", JSON.stringify(formData.changes || []));
 
     if (imageFile) {
-      formDataToSend.append('image', imageFile);
+      formDataToSend.append("image", imageFile);
     }
 
     try {
-      const response = await axios.post('https://v2.jkt48connect.my.id/api/database/create-changelog?username=vzy&password=vzy&apikey=JKTCONNECT', formDataToSend, {
+      const response = await axios.post("https://v2.jkt48connect.my.id/api/database/create-changelog?username=vzy&password=vzy&apikey=JKTCONNECT", formDataToSend, {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       if (response.status === 201) {
-        alert('Changelog created/updated successfully');
+        alert("Changelog created/updated successfully");
         resetForm();
         onFormOpenChange();
         fetchChangelogs();
       } else {
-        alert('Failed to create/update changelog');
+        alert("Failed to create/update changelog");
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('Error submitting form');
+      console.error("Error submitting form:", error);
+      alert("Error submitting form");
     }
   };
 
   // Reset form
   const resetForm = () => {
     setFormData({
-      version: '',
-      title: '',
-      description: '',
-      type: 'patch',
-      author: '',
+      version: "",
+      title: "",
+      description: "",
+      type: "patch",
+      author: "",
       badges: [],
-      image: '',
+      image: "",
       published: false,
-      changes: []
+      changes: [],
     });
     setEditingLog(null);
-    setNewChange({ type: 'added', description: '' });
-    setNewBadge('');
+    setNewChange({ type: "added", description: "" });
+    setNewBadge("");
     setImageFile(null);
-    setImagePreview('');
+    setImagePreview("");
     setImageLoadError(false);
   };
 
@@ -183,7 +214,7 @@ const ChangelogsPage = () => {
   const handleEdit = (changelog: Changelog) => {
     setEditingLog(changelog);
     setFormData(changelog);
-    setImagePreview(changelog.image || '');
+    setImagePreview(changelog.image || "");
     setImageLoadError(false);
     onFormOpen();
   };
@@ -198,35 +229,35 @@ const ChangelogsPage = () => {
     try {
       const response = await axios.delete(`https://v2.jkt48connect.my.id/api/database/changelog/${deleteTarget}?username=vzy&password=vzy&apikey=JKTCONNECT`);
       if (response.status === 200) {
-        alert('Changelog deleted successfully');
+        alert("Changelog deleted successfully");
         fetchChangelogs();
       } else {
-        alert('Failed to delete changelog');
+        alert("Failed to delete changelog");
       }
     } catch (error) {
-      console.error('Error deleting changelog:', error);
-      alert('Error deleting changelog');
+      console.error("Error deleting changelog:", error);
+      alert("Error deleting changelog");
     }
     onDeleteOpenChange();
-    setDeleteTarget('');
+    setDeleteTarget("");
   };
 
   // Add change to form
   const addChange = () => {
     if (!newChange.description.trim()) return;
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      changes: [...(prev.changes || []), newChange]
+      changes: [...(prev.changes || []), newChange],
     }));
-    setNewChange({ type: 'added', description: '' });
+    setNewChange({ type: "added", description: "" });
   };
 
   // Remove change from form
   const removeChange = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      changes: prev.changes?.filter((_, i) => i !== index) || []
+      changes: prev.changes?.filter((_, i) => i !== index) || [],
     }));
   };
 
@@ -234,34 +265,36 @@ const ChangelogsPage = () => {
   const addBadge = () => {
     if (!newBadge.trim()) return;
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      badges: [...(prev.badges || []), newBadge.trim()]
+      badges: [...(prev.badges || []), newBadge.trim()],
     }));
-    setNewBadge('');
+    setNewBadge("");
   };
 
   // Remove badge from form
   const removeBadge = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      badges: prev.badges?.filter((_, i) => i !== index) || []
+      badges: prev.badges?.filter((_, i) => i !== index) || [],
     }));
   };
 
   // Toggle published status
   const togglePublished = async (id: string) => {
     try {
-      const response = await axios.put(`https://v2.jkt48connect/api/database/changelog/${id}?username=vzy&password=vzy&apikey=JKTCONNECT`, { published: !changelogs.find(log => log.id === id).published });
+      const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}?username=vzy&password=vzy&apikey=JKTCONNECT`, {
+        published: !changelogs.find((log) => log.id === id)?.published,
+      });
       if (response.status === 200) {
-        alert('Published status updated successfully');
+        alert("Published status updated successfully");
         fetchChangelogs();
       } else {
-        alert('Failed to update published status');
+        alert("Failed to update published status");
       }
     } catch (error) {
-      console.error('Error toggling published status:', error);
-      alert('Error toggling published status');
+      console.error("Error toggling published status:", error);
+      alert("Error toggling published status");
     }
   };
 
@@ -271,13 +304,13 @@ const ChangelogsPage = () => {
     if (file) {
       // Check file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
+        alert("File size must be less than 5MB");
         return;
       }
 
       // Check file type
-      if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file");
         return;
       }
 
@@ -288,7 +321,7 @@ const ChangelogsPage = () => {
       reader.onload = (e) => {
         const result = e.target?.result as string;
         setImagePreview(result);
-        setFormData(prev => ({ ...prev, image: result }));
+        setFormData((prev) => ({ ...prev, image: result }));
         setImageLoadError(false);
       };
       reader.readAsDataURL(file);
@@ -298,8 +331,8 @@ const ChangelogsPage = () => {
   // Remove image
   const removeImage = () => {
     setImageFile(null);
-    setImagePreview('');
-    setFormData(prev => ({ ...prev, image: '' }));
+    setImagePreview("");
+    setFormData((prev) => ({ ...prev, image: "" }));
     setImageLoadError(false);
   };
 
@@ -340,10 +373,10 @@ const ChangelogsPage = () => {
 
           <Select
             placeholder="Filter by type"
-            selectedKeys={filterType === 'all' ? [] : [filterType]}
+            selectedKeys={filterType === "all" ? [] : [filterType]}
             onSelectionChange={(keys) => {
               const key = Array.from(keys)[0] as string;
-              setFilterType(key || 'all');
+              setFilterType(key || "all");
             }}
             className="min-w-48"
           >
@@ -373,7 +406,7 @@ const ChangelogsPage = () => {
                 startContent={showUnpublished ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                 onPress={() => setShowUnpublished(!showUnpublished)}
               >
-                {showUnpublished ? 'Hide' : 'Show'} Unpublished
+                {showUnpublished ? "Hide" : "Show"} Unpublished
               </Button>
             </>
           )}
@@ -382,7 +415,7 @@ const ChangelogsPage = () => {
         {/* Changelogs List */}
         <div className="space-y-6">
           {filteredChangelogs.map((changelog) => (
-            <Card key={changelog.id} className={`${!changelog.published ? 'opacity-60 border-dashed' : ''}`}>
+            <Card key={changelog.id} className={`${!changelog.published ? "opacity-60 border-dashed" : ""}`}>
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start w-full">
                   <div className="flex-1">
@@ -398,7 +431,9 @@ const ChangelogsPage = () => {
                         {VERSION_TYPES[changelog.type].label}
                       </Chip>
                       {!changelog.published && (
-                        <Chip color="warning" size="sm">Draft</Chip>
+                        <Chip color="warning" size="sm">
+                          Draft
+                        </Chip>
                       )}
                     </div>
                     <h3 className="text-xl font-bold mb-1">{changelog.title}</h3>
@@ -407,10 +442,10 @@ const ChangelogsPage = () => {
                     <div className="flex items-center gap-4 text-sm text-default-500">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
-                        {new Date(changelog.date).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
+                        {new Date(changelog.date).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
                         })}
                       </div>
                       <div className="flex items-center gap-1">
@@ -513,7 +548,7 @@ const ChangelogsPage = () => {
           <ModalContent>
             <ModalHeader>
               <h3 className="text-lg font-bold">
-                {editingLog ? 'Edit Changelog' : 'Add New Changelog'}
+                {editingLog ? "Edit Changelog" : "Add New Changelog"}
               </h3>
             </ModalHeader>
             <ModalBody>
@@ -524,16 +559,16 @@ const ChangelogsPage = () => {
                     isRequired
                     label="Version"
                     placeholder="e.g., 2.1.0"
-                    value={formData.version || ''}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, version: value }))}
+                    value={formData.version || ""}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, version: value }))}
                   />
                   <Select
                     isRequired
                     label="Type"
                     selectedKeys={formData.type ? [formData.type] : []}
                     onSelectionChange={(keys) => {
-                      const key = Array.from(keys)[0] as Changelog['type'];
-                      setFormData(prev => ({ ...prev, type: key }));
+                      const key = Array.from(keys)[0] as Changelog["type"];
+                      setFormData((prev) => ({ ...prev, type: key }));
                     }}
                   >
                     <SelectItem key="major">Major</SelectItem>
@@ -547,31 +582,31 @@ const ChangelogsPage = () => {
                   isRequired
                   label="Title"
                   placeholder="Brief title for this release"
-                  value={formData.title || ''}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, title: value }))}
+                  value={formData.title || ""}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, title: value }))}
                 />
 
                 <Textarea
                   isRequired
                   label="Description"
                   placeholder="Detailed description of this release"
-                  value={formData.description || ''}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+                  value={formData.description || ""}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, description: value }))}
                 />
 
                 <div className="grid grid-cols-2 gap-4">
                   <Input
                     label="Author"
                     placeholder="Author name"
-                    value={formData.author || ''}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, author: value }))}
+                    value={formData.author || ""}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, author: value }))}
                   />
                   <Input
                     label="Image URL"
                     placeholder="Optional image URL"
-                    value={formData.image || ''}
+                    value={formData.image || ""}
                     onValueChange={(value) => {
-                      setFormData(prev => ({ ...prev, image: value }));
+                      setFormData((prev) => ({ ...prev, image: value }));
                       setImagePreview(value);
                       setImageLoadError(false);
                     }}
@@ -589,9 +624,9 @@ const ChangelogsPage = () => {
                         variant="bordered"
                         startContent={<Upload className="w-4 h-4" />}
                         onPress={() => {
-                          const input = document.createElement('input');
-                          input.type = 'file';
-                          input.accept = 'image/*';
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = "image/*";
                           input.onchange = (e) => handleImageUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
                           input.click();
                         }}
@@ -649,7 +684,7 @@ const ChangelogsPage = () => {
                       value={newBadge}
                       onValueChange={setNewBadge}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
+                        if (e.key === "Enter") {
                           e.preventDefault();
                           addBadge();
                         }
@@ -681,8 +716,8 @@ const ChangelogsPage = () => {
                       placeholder="Change type"
                       selectedKeys={[newChange.type]}
                       onSelectionChange={(keys) => {
-                        const key = Array.from(keys)[0] as 'added' | 'changed' | 'deprecated' | 'removed' | 'fixed' | 'security';
-                        setNewChange(prev => ({ ...prev, type: key }));
+                        const key = Array.from(keys)[0] as "added" | "changed" | "deprecated" | "removed" | "fixed" | "security";
+                        setNewChange((prev) => ({ ...prev, type: key }));
                       }}
                       className="w-40"
                     >
@@ -696,9 +731,9 @@ const ChangelogsPage = () => {
                     <Input
                       placeholder="Change description"
                       value={newChange.description}
-                      onValueChange={(value) => setNewChange(prev => ({ ...prev, description: value }))}
+                      onValueChange={(value) => setNewChange((prev) => ({ ...prev, description: value }))}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
+                        if (e.key === "Enter") {
                           e.preventDefault();
                           addChange();
                         }
@@ -711,8 +746,13 @@ const ChangelogsPage = () => {
                   <div className="space-y-2">
                     {formData.changes?.map((change, index) => (
                       <div key={index} className="flex items-center gap-2 p-2 bg-default-50 rounded">
-                        <Chip size="sm" color={CHANGE_TYPES[change.type].color} variant="flat">
-                          {CHANGE_TYPES[change.type].label}
+                        <Chip
+                          size="sm"
+                          color={CHANGE_TYPES[change.type].color}
+                          variant="flat"
+                          className="mt-0.5"
+                        >
+                          {CHANGE_TYPES[change.type].icon} {CHANGE_TYPES[change.type].label}
                         </Chip>
                         <span className="flex-1 text-sm">{change.description}</span>
                         <Button
@@ -736,7 +776,7 @@ const ChangelogsPage = () => {
                     size="sm"
                     color={formData.published ? "success" : "default"}
                     variant={formData.published ? "solid" : "bordered"}
-                    onPress={() => setFormData(prev => ({ ...prev, published: !prev.published }))}
+                    onPress={() => setFormData((prev) => ({ ...prev, published: !prev.published }))}
                   >
                     {formData.published ? "Published" : "Draft"}
                   </Button>
@@ -748,7 +788,7 @@ const ChangelogsPage = () => {
                 Cancel
               </Button>
               <Button color="primary" onPress={handleSubmit}>
-                {editingLog ? 'Update' : 'Create'} Changelog
+                {editingLog ? "Update" : "Create"} Changelog
               </Button>
             </ModalFooter>
           </ModalContent>
