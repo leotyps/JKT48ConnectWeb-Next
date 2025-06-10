@@ -3,7 +3,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Card, CardBody, CardHeader, Input, Button, Avatar, Spinner, Breadcrumbs, BreadcrumbItem, Chip } from "@heroui/react";
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface Message {
   id: string;
@@ -11,6 +10,7 @@ interface Message {
   content: string;
   timestamp: Date;
   isTyping?: boolean;
+  error?: boolean;
 }
 
 interface ChatStats {
@@ -33,27 +33,16 @@ export default function JKT48ChatBot() {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [genAI, setGenAI] = useState<GoogleGenerativeAI | null>(null);
   const [chatStats, setChatStats] = useState<ChatStats>({
     totalMessages: 1,
     totalTokens: 0,
     sessionStartTime: new Date()
   });
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Initialize Gemini AI
-  useEffect(() => {
-    try {
-      const ai = new GoogleGenerativeAI(GEMINI_API_KEY);
-      setGenAI(ai);
-    } catch (err) {
-      console.error('Failed to initialize Gemini AI:', err);
-      setError('Failed to initialize AI service');
-    }
-  }, []);
 
   // Auto scroll to bottom
   const scrollToBottom = () => {
@@ -83,7 +72,7 @@ export default function JKT48ChatBot() {
       ));
       
       // Adjust typing speed based on word length
-      const delay = words[i].length > 8 ? 100 : 50;
+      const delay = words[i].length > 8 ? 80 : 40;
       await new Promise(resolve => setTimeout(resolve, delay));
     }
     
@@ -95,8 +84,66 @@ export default function JKT48ChatBot() {
     ));
   };
 
+  const callGeminiAPI = async (prompt: string, retries = 3): Promise<string> => {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+    
+    const requestBody = {
+      contents: [{
+        parts: [{
+          text: prompt
+        }]
+      }],
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 1024,
+      }
+    };
+
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+          if (response.status === 429) {
+            // Rate limited, wait and retry
+            await new Promise(resolve => setTimeout(resolve, (attempt + 1) * 2000));
+            continue;
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+          return data.candidates[0].content.parts[0].text;
+        } else {
+          throw new Error('Invalid response format from Gemini API');
+        }
+      } catch (error) {
+        console.error(`Attempt ${attempt + 1} failed:`, error);
+        
+        if (attempt === retries - 1) {
+          throw error;
+        }
+        
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, (attempt + 1) * 1000));
+      }
+    }
+    
+    throw new Error('All retry attempts failed');
+  };
+
   const sendMessage = async () => {
-    if (!inputMessage.trim() || isLoading || !genAI) return;
+    if (!inputMessage.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -111,8 +158,6 @@ export default function JKT48ChatBot() {
     setError(null);
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-      
       // Create assistant message with typing indicator
       const assistantMessageId = (Date.now() + 1).toString();
       const assistantMessage: Message = {
@@ -126,31 +171,52 @@ export default function JKT48ChatBot() {
       setMessages(prev => [...prev, assistantMessage]);
       setIsTyping(true);
 
-      const result = await model.generateContent(userMessage.content);
-      const response = await result.response;
-      const text = response.text();
-
+      const response = await callGeminiAPI(userMessage.content);
+      
       setIsTyping(false);
+      setRetryCount(0);
       
       // Use typewriter effect for assistant response
-      await typewriterEffect(text, assistantMessageId);
+      await typewriterEffect(response, assistantMessageId);
 
       // Update stats
       setChatStats(prev => ({
         ...prev,
         totalMessages: prev.totalMessages + 2,
-        totalTokens: prev.totalTokens + userMessage.content.length + text.length
+        totalTokens: prev.totalTokens + userMessage.content.length + response.length
       }));
 
     } catch (err) {
       console.error('Error sending message:', err);
-      setError('Failed to get response. Please try again.');
+      setRetryCount(prev => prev + 1);
+      
+      let errorMessage = 'Failed to get response. Please try again.';
+      
+      if (err instanceof Error) {
+        if (err.message.includes('429')) {
+          errorMessage = 'Rate limit exceeded. Please wait a moment and try again.';
+        } else if (err.message.includes('403')) {
+          errorMessage = 'API key issue. Please check your configuration.';
+        } else if (err.message.includes('network') || err.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your connection.';
+        }
+      }
+      
+      setError(errorMessage);
       
       // Remove the empty assistant message on error
-      setMessages(prev => prev.filter(msg => msg.content !== '' || msg.role !== 'assistant'));
+      setMessages(prev => prev.filter(msg => !(msg.content === '' && msg.role === 'assistant')));
       setIsTyping(false);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const retryLastMessage = () => {
+    const lastUserMessage = messages.filter(msg => msg.role === 'user').pop();
+    if (lastUserMessage) {
+      setInputMessage(lastUserMessage.content);
+      setError(null);
     }
   };
 
@@ -169,6 +235,7 @@ export default function JKT48ChatBot() {
       sessionStartTime: new Date()
     });
     setError(null);
+    setRetryCount(0);
   };
 
   const formatTime = (date: Date) => {
@@ -200,10 +267,9 @@ export default function JKT48ChatBot() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="relative">
               <Avatar
-                src="/gemini-icon.png"
                 alt="Gemini AI"
                 size="lg"
-                className="ring-4 ring-primary-100"
+                className="ring-4 ring-primary-100 bg-gradient-to-r from-blue-500 to-purple-600"
               />
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-success rounded-full border-2 border-white animate-pulse" />
             </div>
@@ -224,7 +290,7 @@ export default function JKT48ChatBot() {
               <CardHeader className="flex-shrink-0">
                 <div className="flex justify-between items-center w-full">
                   <div className="flex items-center gap-2">
-                    <Avatar size="sm" src="/gemini-icon.png" />
+                    <Avatar size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600" />
                     <div>
                       <h3 className="font-semibold">AI Assistant</h3>
                       <div className="flex items-center gap-2">
@@ -262,8 +328,10 @@ export default function JKT48ChatBot() {
                     >
                       <Avatar
                         size="sm"
-                        src={message.role === 'user' ? '/user-avatar.png' : '/gemini-icon.png'}
-                        className="flex-shrink-0"
+                        className={message.role === 'user' 
+                          ? 'bg-gradient-to-r from-green-400 to-blue-500' 
+                          : 'bg-gradient-to-r from-blue-500 to-purple-600'
+                        }
                       />
                       <div className={`flex flex-col gap-1 max-w-[80%] ${
                         message.role === 'user' ? 'items-end' : 'items-start'
@@ -272,6 +340,8 @@ export default function JKT48ChatBot() {
                           className={`px-4 py-3 rounded-2xl relative transition-all duration-200 hover:scale-[1.02] ${
                             message.role === 'user'
                               ? 'bg-primary text-primary-foreground rounded-br-md'
+                              : message.error
+                              ? 'bg-danger-50 border border-danger-200 text-danger-700 rounded-bl-md'
                               : 'bg-default-100 text-default-900 rounded-bl-md'
                           }`}
                         >
@@ -291,7 +361,7 @@ export default function JKT48ChatBot() {
                   
                   {isLoading && !isTyping && (
                     <div className="flex gap-3 animate-fadeIn">
-                      <Avatar size="sm" src="/gemini-icon.png" />
+                      <Avatar size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600" />
                       <div className="bg-default-100 px-4 py-3 rounded-2xl rounded-bl-md">
                         <div className="flex items-center gap-2">
                           <Spinner size="sm" />
@@ -307,8 +377,18 @@ export default function JKT48ChatBot() {
                 {/* Input Area */}
                 <div className="border-t p-4">
                   {error && (
-                    <div className="mb-3 p-2 bg-danger-50 border border-danger-200 rounded-lg text-danger-600 text-sm animate-slideDown">
-                      {error}
+                    <div className="mb-3 p-3 bg-danger-50 border border-danger-200 rounded-lg text-danger-600 text-sm animate-slideDown">
+                      <div className="flex justify-between items-center">
+                        <span>{error}</span>
+                        <Button
+                          size="sm"
+                          color="danger"
+                          variant="light"
+                          onPress={retryLastMessage}
+                        >
+                          Retry
+                        </Button>
+                      </div>
                     </div>
                   )}
                   
@@ -328,6 +408,7 @@ export default function JKT48ChatBot() {
                       variant="bordered"
                       className="flex-1"
                       isDisabled={isLoading}
+                      maxLength={1000}
                       endContent={
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-default-400">
@@ -386,6 +467,15 @@ export default function JKT48ChatBot() {
                       {getSessionDuration()}
                     </Chip>
                   </div>
+
+                  {retryCount > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-default-600">Retries</span>
+                      <Chip size="sm" variant="flat" color="warning">
+                        {retryCount}
+                      </Chip>
+                    </div>
+                  )}
                 </div>
               </CardBody>
             </Card>
@@ -401,6 +491,7 @@ export default function JKT48ChatBot() {
                   size="sm"
                   className="w-full justify-start"
                   onPress={() => setInputMessage("Explain quantum physics in simple terms")}
+                  isDisabled={isLoading}
                 >
                   🔬 Explain Science
                 </Button>
@@ -409,6 +500,7 @@ export default function JKT48ChatBot() {
                   size="sm"
                   className="w-full justify-start"
                   onPress={() => setInputMessage("Write a creative story")}
+                  isDisabled={isLoading}
                 >
                   ✍️ Creative Writing
                 </Button>
@@ -417,6 +509,7 @@ export default function JKT48ChatBot() {
                   size="sm"
                   className="w-full justify-start"
                   onPress={() => setInputMessage("Help me with coding")}
+                  isDisabled={isLoading}
                 >
                   💻 Coding Help
                 </Button>
@@ -425,6 +518,7 @@ export default function JKT48ChatBot() {
                   size="sm"
                   className="w-full justify-start"
                   onPress={() => setInputMessage("Give me productivity tips")}
+                  isDisabled={isLoading}
                 >
                   📈 Productivity Tips
                 </Button>
@@ -452,6 +546,10 @@ export default function JKT48ChatBot() {
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-2 h-2 bg-warning rounded-full" />
                   <span>Creative writing</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-2 h-2 bg-danger rounded-full" />
+                  <span>Auto retry on errors</span>
                 </div>
               </CardBody>
             </Card>
