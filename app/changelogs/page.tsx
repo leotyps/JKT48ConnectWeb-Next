@@ -1,4 +1,6 @@
 // src/components/Changelogs.js
+"use client"
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardBody, CardFooter, CardHeader, Image, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, Link, Input, Select, SelectItem, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Avatar, Divider, Tabs, Tab, Progress, Textarea, Badge } from "@heroui/react";
 import { Calendar, Tag, User, Plus, Edit, Trash2, Eye, EyeOff, Upload, X } from "lucide-react";
