@@ -1,8 +1,8 @@
-"use client"
-
-import { useState, useEffect } from "react";
+// src/components/Changelogs.js
+import React, { useState, useEffect } from 'react';
 import { Card, CardBody, CardFooter, CardHeader, Image, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, Link, Input, Select, SelectItem, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Avatar, Divider, Tabs, Tab, Progress, Textarea, Badge } from "@heroui/react";
 import { Calendar, Tag, User, Plus, Edit, Trash2, Eye, EyeOff, Upload, X } from "lucide-react";
+import axios from 'axios';
 
 interface Changelog {
   id: string;
@@ -37,66 +37,9 @@ const VERSION_TYPES = {
   hotfix: { label: 'Hotfix', color: 'warning' as const }
 };
 
-// Sample changelog data
-const SAMPLE_CHANGELOGS: Changelog[] = [
-  {
-    id: '1',
-    version: '2.1.0',
-    title: 'New Features and Improvements',
-    description: 'Major update with new member features and performance improvements',
-    date: '2025-06-10',
-    type: 'minor',
-    author: 'Development Team',
-    badges: ['New Feature', 'Performance'],
-    image: 'https://via.placeholder.com/400x200?text=Version+2.1.0',
-    published: true,
-    changes: [
-      { type: 'added', description: 'New member profile API endpoint' },
-      { type: 'added', description: 'Enhanced search functionality' },
-      { type: 'changed', description: 'Improved response time by 40%' },
-      { type: 'fixed', description: 'Fixed issue with member data caching' }
-    ]
-  },
-  {
-    id: '2',
-    version: '2.0.1',
-    title: 'Bug Fixes and Security Updates',
-    description: 'Critical security patches and bug fixes',
-    date: '2025-06-05',
-    type: 'patch',
-    author: 'Security Team',
-    badges: ['Security', 'Bug Fix'],
-    published: true,
-    changes: [
-      { type: 'security', description: 'Fixed authentication vulnerability' },
-      { type: 'fixed', description: 'Resolved API key validation issues' },
-      { type: 'fixed', description: 'Fixed memory leak in data processing' }
-    ]
-  },
-  {
-    id: '3',
-    version: '2.0.0',
-    title: 'Major Release - Complete Redesign',
-    description: 'Complete overhaul of the API system with breaking changes',
-    date: '2025-06-01',
-    type: 'major',
-    author: 'Development Team',
-    badges: ['Breaking Change', 'Redesign'],
-    image: 'https://via.placeholder.com/400x200?text=Version+2.0.0',
-    published: true,
-    changes: [
-      { type: 'added', description: 'New REST API architecture' },
-      { type: 'added', description: 'Real-time websocket support' },
-      { type: 'changed', description: 'Updated authentication system' },
-      { type: 'removed', description: 'Deprecated v1 endpoints' },
-      { type: 'changed', description: 'New response format structure' }
-    ]
-  }
-];
-
-export default function JKT48Changelogs() {
-  const [changelogs, setChangelogs] = useState<Changelog[]>(SAMPLE_CHANGELOGS);
-  const [filteredChangelogs, setFilteredChangelogs] = useState<Changelog[]>(SAMPLE_CHANGELOGS);
+export default function Changelogs() {
+  const [changelogs, setChangelogs] = useState<Changelog[]>([]);
+  const [filteredChangelogs, setFilteredChangelogs] = useState<Changelog[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -123,8 +66,8 @@ export default function JKT48Changelogs() {
   const [imageLoadError, setImageLoadError] = useState<boolean>(false);
 
   // Modal states
-  const {isOpen: isFormOpen, onOpen: onFormOpen, onOpenChange: onFormOpenChange} = useDisclosure();
-  const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange} = useDisclosure();
+  const { isOpen: isFormOpen, onOpen: onFormOpen, onOpenChange: onFormOpenChange } = useDisclosure();
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
   const [deleteTarget, setDeleteTarget] = useState<string>('');
 
   // Check admin status from URL
@@ -133,56 +76,84 @@ export default function JKT48Changelogs() {
     setIsAdmin(urlParams.get('admin') === 'true');
   }, []);
 
+  // Fetch changelogs from backend
+  useEffect(() => {
+    const fetchChangelogs = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get('https://v2.jkt48connect.my.id/api/database/changelogs?username=vzy&password=vzy&apikey=JKTCONNECT');
+        setChangelogs(response.data.data);
+        setFilteredChangelogs(response.data.data);
+      } catch (error) {
+        console.error('Error fetching changelogs:', error);
+      }
+      setLoading(false);
+    };
+
+    fetchChangelogs();
+  }, []);
+
   // Filter changelogs
   useEffect(() => {
     let filtered = changelogs.filter(log => {
       if (!showUnpublished && !log.published && !isAdmin) return false;
-      
-      const matchesSearch = searchTerm === '' || 
+
+      const matchesSearch = searchTerm === '' ||
         log.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.version.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.description.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       const matchesType = filterType === 'all' || log.type === filterType;
-      
+
       return matchesSearch && matchesType;
     });
 
     // Sort by date (newest first)
     filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    
+
     setFilteredChangelogs(filtered);
   }, [changelogs, searchTerm, filterType, showUnpublished, isAdmin]);
 
   // Handle form submission
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.version || !formData.title || !formData.description) {
       alert('Please fill in all required fields');
       return;
     }
 
-    const changelog: Changelog = {
-      id: editingLog ? editingLog.id : Date.now().toString(),
-      version: formData.version!,
-      title: formData.title!,
-      description: formData.description!,
-      date: editingLog ? editingLog.date : new Date().toISOString().split('T')[0],
-      type: formData.type as Changelog['type'],
-      author: formData.author || 'Admin',
-      badges: formData.badges || [],
-      image: formData.image,
-      published: formData.published || false,
-      changes: formData.changes || []
-    };
+    const formDataToSend = new FormData();
+    formDataToSend.append('version', formData.version);
+    formDataToSend.append('title', formData.title);
+    formDataToSend.append('description', formData.description);
+    formDataToSend.append('type', formData.type);
+    formDataToSend.append('author', formData.author);
+    formDataToSend.append('badges', JSON.stringify(formData.badges));
+    formDataToSend.append('published', JSON.stringify(formData.published));
+    formDataToSend.append('changes', JSON.stringify(formData.changes));
 
-    if (editingLog) {
-      setChangelogs(prev => prev.map(log => log.id === editingLog.id ? changelog : log));
-    } else {
-      setChangelogs(prev => [changelog, ...prev]);
+    if (imageFile) {
+      formDataToSend.append('image', imageFile);
     }
 
-    resetForm();
-    onFormOpenChange();
+    try {
+      const response = await axios.post('https://v2.jkt48connect.my.id/api/database/create-changelog?username=vzy&password=vzy&apikey=JKTCONNECT', formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.status === 201) {
+        alert('Changelog created/updated successfully');
+        resetForm();
+        onFormOpenChange();
+        fetchChangelogs();
+      } else {
+        alert('Failed to create/update changelog');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Error submitting form');
+    }
   };
 
   // Reset form
@@ -221,8 +192,19 @@ export default function JKT48Changelogs() {
     onDeleteOpen();
   };
 
-  const confirmDelete = () => {
-    setChangelogs(prev => prev.filter(log => log.id !== deleteTarget));
+  const confirmDelete = async () => {
+    try {
+      const response = await axios.delete(`https://v2.jkt48connect.my.id/api/database/changelog/${deleteTarget}?username=vzy&password=vzy&apikey=JKTCONNECT`);
+      if (response.status === 200) {
+        alert('Changelog deleted successfully');
+        fetchChangelogs();
+      } else {
+        alert('Failed to delete changelog');
+      }
+    } catch (error) {
+      console.error('Error deleting changelog:', error);
+      alert('Error deleting changelog');
+    }
     onDeleteOpenChange();
     setDeleteTarget('');
   };
@@ -230,7 +212,7 @@ export default function JKT48Changelogs() {
   // Add change to form
   const addChange = () => {
     if (!newChange.description.trim()) return;
-    
+
     setFormData(prev => ({
       ...prev,
       changes: [...(prev.changes || []), newChange]
@@ -249,7 +231,7 @@ export default function JKT48Changelogs() {
   // Add badge to form
   const addBadge = () => {
     if (!newBadge.trim()) return;
-    
+
     setFormData(prev => ({
       ...prev,
       badges: [...(prev.badges || []), newBadge.trim()]
@@ -266,16 +248,24 @@ export default function JKT48Changelogs() {
   };
 
   // Toggle published status
-  const togglePublished = (id: string) => {
-    setChangelogs(prev => prev.map(log => 
-      log.id === id ? { ...log, published: !log.published } : log
-    ));
+  const togglePublished = async (id: string) => {
+    try {
+      const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}?username=vzy&password=vzy&apikey=JKTCONNECT`, { published: !changelogs.find(log => log.id === id).published });
+      if (response.status === 200) {
+        alert('Published status updated successfully');
+        fetchChangelogs();
+      } else {
+        alert('Failed to update published status');
+      }
+    } catch (error) {
+      console.error('Error toggling published status:', error);
+      alert('Error toggling published status');
+    }
   };
 
   // Handle image upload
-  const handleImageUpload = (e: Event) => {
-    const target = e.target as HTMLInputElement;
-    const file = target.files?.[0];
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       // Check file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
@@ -290,7 +280,7 @@ export default function JKT48Changelogs() {
       }
 
       setImageFile(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -345,7 +335,7 @@ export default function JKT48Changelogs() {
             className="flex-1"
             startContent={<Tag className="w-4 h-4" />}
           />
-          
+
           <Select
             placeholder="Filter by type"
             selectedKeys={filterType === 'all' ? [] : [filterType]}
@@ -374,7 +364,7 @@ export default function JKT48Changelogs() {
               >
                 Add Changelog
               </Button>
-              
+
               <Button
                 color={showUnpublished ? "warning" : "default"}
                 variant={showUnpublished ? "solid" : "bordered"}
@@ -395,9 +385,9 @@ export default function JKT48Changelogs() {
                 <div className="flex justify-between items-start w-full">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <Chip 
-                        color={VERSION_TYPES[changelog.type].color} 
-                        variant="flat" 
+                      <Chip
+                        color={VERSION_TYPES[changelog.type].color}
+                        variant="flat"
                         size="sm"
                       >
                         v{changelog.version}
@@ -411,7 +401,7 @@ export default function JKT48Changelogs() {
                     </div>
                     <h3 className="text-xl font-bold mb-1">{changelog.title}</h3>
                     <p className="text-default-600 text-sm mb-2">{changelog.description}</p>
-                    
+
                     <div className="flex items-center gap-4 text-sm text-default-500">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
@@ -468,7 +458,7 @@ export default function JKT48Changelogs() {
                   )}
                 </div>
               </CardHeader>
-              
+
               <CardBody className="pt-0">
                 {changelog.image && (
                   <div className="w-full max-w-md mx-auto mb-4">
@@ -512,8 +502,8 @@ export default function JKT48Changelogs() {
 
       {/* Admin Form Modal */}
       {isAdmin && (
-        <Modal 
-          isOpen={isFormOpen} 
+        <Modal
+          isOpen={isFormOpen}
           onOpenChange={onFormOpenChange}
           size="3xl"
           scrollBehavior="inside"
@@ -600,7 +590,7 @@ export default function JKT48Changelogs() {
                           const input = document.createElement('input');
                           input.type = 'file';
                           input.accept = 'image/*';
-                          input.onchange = handleImageUpload;
+                          input.onchange = (e) => handleImageUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
                           input.click();
                         }}
                       >
@@ -626,7 +616,7 @@ export default function JKT48Changelogs() {
                             src={imagePreview || formData.image}
                             alt="Image preview"
                             className="w-full max-w-sm mx-auto rounded-lg"
-                            onError={() => setImageLoadError(true)}
+                            onError={handleImageError}
                           />
                         ) : (
                           <div className="w-full max-w-sm mx-auto h-48 bg-default-200 rounded-lg flex items-center justify-center">
