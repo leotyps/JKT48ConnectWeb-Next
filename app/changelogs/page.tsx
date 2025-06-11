@@ -911,4 +911,3 @@ const handleSubmit = async () => {
   );
 };
 
-export default ChangelogsPage;
