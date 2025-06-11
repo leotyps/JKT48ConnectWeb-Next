@@ -52,6 +52,12 @@ interface Changelog {
   published: boolean;
 }
 
+interface ApiResponse {
+  status: boolean;
+  count: number;
+  data: ChangelogEntry[];
+}
+
 interface ChangelogEntry {
   id: string;
   version: string;
@@ -129,44 +135,49 @@ const ChangelogsPage = () => {
 
 // Fetch changelogs from backend
 useEffect(() => {
- const fetchChangelogs = async () => {
-      setLoading(true);
-      try {
-        const response = await apiFetchChangelogs();
-        const data = response;
-        if (data.status && data.data) {
-          setChangelogs(data.data.map((item): ChangelogEntry => ({
+  const fetchChangelogs = async () => {
+    setLoading(true);
+    try {
+      const response = await apiFetchChangelogs();
+      const data: ApiResponse = response;
+      if (data.status && data.data) {
+        setChangelogs(
+          data.data.map((item) => ({
             ...item,
             badges: item.badges === "[]" ? [] : JSON.parse(item.badges),
             image: item.image === null ? "" : item.image,
-            published: item.published === true,
+            published: item.published,
             changes: item.changes.map((change) => ({
               type: change.type,
               description: change.description,
             })),
-          })));
-          setFilteredChangelogs(data.data.map((item): ChangelogEntry => ({
+          }))
+        );
+        setFilteredChangelogs(
+          data.data.map((item) => ({
             ...item,
             badges: item.badges === "[]" ? [] : JSON.parse(item.badges),
             image: item.image === null ? "" : item.image,
-            published: item.published === true,
+            published: item.published,
             changes: item.changes.map((change) => ({
               type: change.type,
               description: change.description,
             })),
-          })));
-        } else {
-          throw new Error('Invalid data received');
-        }
-      } catch (error) {
-        console.error("Error fetching changelogs:", error);
-        alert("Failed to fetch changelogs. Please check your network connection and try again.");
+          }))
+        );
+      } else {
+        throw new Error('Invalid data received');
       }
-      setLoading(false);
-    };
+    } catch (error) {
+      console.error("Error fetching changelogs:", error);
+      alert("Failed to fetch changelogs. Please check your network connection and try again.");
+    }
+    setLoading(false);
+  };
 
-    fetchChangelogs();
-  }, []);
+  fetchChangelogs();
+}, []);
+
 
 
 
@@ -216,9 +227,9 @@ const handleSubmit = async () => {
     const response = await axios.post('https://v2.jkt48connect.my.id/api/database/create-changelog', formDataToSend, {
       headers: {
         'Content-Type': 'multipart/form-data',
-        'username': 'vzy',
-        'password': 'vzy',
-        'apikey': 'JKTCONNECT'
+        'username': process.env.REACT_APP_USERNAME,
+        'password': process.env.REACT_APP_PASSWORD,
+        'apikey': process.env.REACT_APP_APIKEY
       }
     });
 
@@ -289,21 +300,27 @@ const handleSubmit = async () => {
   };
 
   const confirmDelete = async () => {
-    try {
-      const response = await axios.delete(`https://v2.jkt48connect.my.id/api/database/changelog/${deleteTarget}?username=vzy&password=vzy&apikey=JKTCONNECT`);
-      if (response.status === 200) {
-        alert("Changelog deleted successfully");
-        fetchChangelogs();
-      } else {
-        alert("Failed to delete changelog");
+  try {
+    const response = await axios.delete(`https://v2.jkt48connect.my.id/api/database/changelog/${deleteTarget}`, {
+      headers: {
+        'username': process.env.REACT_APP_USERNAME,
+        'password': process.env.REACT_APP_PASSWORD,
+        'apikey': process.env.REACT_APP_APIKEY
       }
-    } catch (error) {
-      console.error("Error deleting changelog:", error);
-      alert("Error deleting changelog");
+    });
+    if (response.status === 200) {
+      alert("Changelog deleted successfully");
+      fetchChangelogs();
+    } else {
+      alert("Failed to delete changelog");
     }
-    onDeleteOpenChange();
-    setDeleteTarget("");
-  };
+  } catch (error) {
+    console.error("Error deleting changelog:", error);
+    alert("Error deleting changelog");
+  }
+  onDeleteOpenChange();
+  setDeleteTarget("");
+};
 
   // Add change to form
   const addChange = () => {
@@ -345,21 +362,29 @@ const handleSubmit = async () => {
 
   // Toggle published status
   const togglePublished = async (id: string) => {
-    try {
-      const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}?username=vzy&password=vzy&apikey=JKTCONNECT`, {
-        published: !changelogs.find((log) => log.id === id)?.published,
-      });
-      if (response.status === 200) {
-        alert("Published status updated successfully");
-        fetchChangelogs();
-      } else {
-        alert("Failed to update published status");
+  const togglePublished = async (id: string) => {
+  try {
+    const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}`, {
+      published: !changelogs.find((log) => log.id === id)?.published,
+    }, {
+      headers: {
+        'username': process.env.REACT_APP_USERNAME,
+        'password': process.env.REACT_APP_PASSWORD,
+        'apikey': process.env.REACT_APP_APIKEY
       }
-    } catch (error) {
-      console.error("Error toggling published status:", error);
-      alert("Error toggling published status");
+    });
+    if (response.status === 200) {
+      alert("Published status updated successfully");
+      fetchChangelogs();
+    } else {
+      alert("Failed to update published status");
     }
-  };
+  } catch (error) {
+    console.error("Error toggling published status:", error);
+    alert("Error toggling published status");
+  }
+};
+
 
   // Handle image upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
