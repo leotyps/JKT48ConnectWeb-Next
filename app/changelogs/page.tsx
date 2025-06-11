@@ -143,9 +143,6 @@ const ChangelogsPage = () => {
   setLoading(false);
 };
 
-    fetchChangelogs();
-  }, []);
-
   // Filter changelogs
   useEffect(() => {
     let filtered = changelogs.filter((log) => {
