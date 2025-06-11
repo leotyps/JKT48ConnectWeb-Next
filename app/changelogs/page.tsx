@@ -202,57 +202,44 @@ const ChangelogsPage = () => {
       return;
     }
 
-    const formDataToSend = new FormData();
-    formDataToSend.append("version", formData.version || "");
-    formDataToSend.append("title", formData.title || "");
-    formDataToSend.append("description", formData.description || "");
-    formDataToSend.append("type", formData.type || "patch");
-    formDataToSend.append("author", formData.author || "");
-    formDataToSend.append("badges", JSON.stringify(formData.badges || []));
-    formDataToSend.append("published", JSON.stringify(formData.published || false));
-    formDataToSend.append("changes", JSON.stringify(formData.changes || []));
-
-    if (imageFile) {
-      formDataToSend.append("image", imageFile);
-    }
-
     try {
-      const response = await axios.post("https://v2.jkt48connect.my.id/api/database/create-changelog?username=vzy&password=vzy&apikey=JKTCONNECT", formDataToSend, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const changelogData = {
+        version: formData.version || "",
+        title: formData.title || "",
+        description: formData.description || "",
+        type: formData.type || "patch",
+        author: formData.author || "",
+        badges: JSON.stringify(formData.badges || []),
+        published: JSON.stringify(formData.published || false),
+        changes: JSON.stringify(formData.changes || []),
+      };
 
-      if (response.status === 201) {
-        alert("Changelog created/updated successfully");
+      let response;
+      if (editingLog) {
+        // Update existing changelog
+        response = await jkt48Api.database.updateChangelog(editingLog.id, changelogData, imageFile);
+      } else {
+        // Create new changelog
+        response = await jkt48Api.database.createChangelog(changelogData, imageFile);
+      }
+
+      if (response.status || response.success) {
+        alert(`Changelog ${editingLog ? 'updated' : 'created'} successfully`);
         resetForm();
         onFormOpenChange();
-        fetchChangelogs();
+        await fetchChangelogs();
       } else {
-        alert("Failed to create/update changelog");
+        alert(`Failed to ${editingLog ? 'update' : 'create'} changelog: ${response.message || 'Unknown error'}`);
       }
     } catch (error) {
+      console.error("Error submitting form:", error);
       if (error instanceof Error) {
-        console.error("Error submitting form:", error.message);
         alert(`Error submitting form: ${error.message}`);
-      } else if (axios.isAxiosError(error)) {
-        if (error.response) {
-          console.error("Error response from server:", error.response.data);
-          alert(`Error submitting form: ${error.response.data.message}`);
-        } else if (error.request) {
-          console.error("No response received from server:", error.request);
-          alert("No response received from server. Please check your network connection.");
-        } else {
-          console.error("Error setting up the request:", error.message);
-          alert(`Error submitting form: ${error.message}`);
-        }
       } else {
-        console.error("Unknown error:", error);
         alert("An unknown error occurred. Please try again.");
       }
     }
   };
-
   
   // Reset form
   const resetForm = () => {
@@ -292,23 +279,21 @@ const ChangelogsPage = () => {
 
   // Confirm delete using @jkt48/core
   const confirmDelete = async () => {
-  const confirmDelete = async () => {
     try {
       const response = await axios.delete(`https://v2.jkt48connect.my.id/api/database/changelog/${deleteTarget}?username=vzy&password=vzy&apikey=JKTCONNECT`);
       if (response.status === 200) {
-        alert('Changelog deleted successfully');
+        alert("Changelog deleted successfully");
         fetchChangelogs();
       } else {
-        alert('Failed to delete changelog');
+        alert("Failed to delete changelog");
       }
     } catch (error) {
-      console.error('Error deleting changelog:', error);
-      alert('Error deleting changelog');
+      console.error("Error deleting changelog:", error);
+      alert("Error deleting changelog");
     }
     onDeleteOpenChange();
-    setDeleteTarget('');
+    setDeleteTarget("");
   };
-
 
   // Add change to form
   const addChange = () => {
@@ -351,16 +336,18 @@ const ChangelogsPage = () => {
   // Toggle published status using @jkt48/core
   const togglePublished = async (id: string) => {
     try {
-      const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}?username=vzy&password=vzy&apikey=JKTCONNECT`, { published: !changelogs.find(log => log.id === id).published });
+      const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}?username=vzy&password=vzy&apikey=JKTCONNECT`, {
+        published: !changelogs.find((log) => log.id === id)?.published,
+      });
       if (response.status === 200) {
-        alert('Published status updated successfully');
+        alert("Published status updated successfully");
         fetchChangelogs();
       } else {
-        alert('Failed to update published status');
+        alert("Failed to update published status");
       }
     } catch (error) {
-      console.error('Error toggling published status:', error);
-      alert('Error toggling published status');
+      console.error("Error toggling published status:", error);
+      alert("Error toggling published status");
     }
   };
 
@@ -901,4 +888,3 @@ const ChangelogsPage = () => {
 };
 
 export default ChangelogsPage;
-
