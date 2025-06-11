@@ -1,7 +1,8 @@
-'use client'
+// Use client
 
 import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, CardHeader, Avatar, Button, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, ScrollShadow, Divider } from "@heroui/react";
+import Plyr from "plyr-react";
 
 interface LiveData {
   name: string;
@@ -429,28 +430,30 @@ export default function JKT48LivePlayer() {
               <CardBody className="p-0">
                 <div className="relative w-full bg-black flex items-center justify-center" 
                      style={getVideoContainerStyle()}>
-                  <video
+                  <Plyr
                     ref={videoRef}
-                    className={`absolute top-0 left-0 w-full h-full ${
-                      videoAspectRatio === 'portrait' 
-                        ? 'object-contain' 
-                        : 'object-cover'
-                    }`}
-                    controls
-                    autoPlay
-                    muted
-                    poster={liveData.img}
-                    onLoadedMetadata={handleVideoLoad}
-                  >
-                    {liveData.streaming_url_list.map((stream, index) => (
-                      <source
-                        key={index}
-                        src={stream.url}
-                        type="application/x-mpegURL"
-                      />
-                    ))}
-                    Your browser does not support the video tag.
-                  </video>
+                    source={{
+                      type: 'video',
+                      sources: liveData.streaming_url_list.map(stream => ({
+                        src: stream.url,
+                        type: 'application/x-mpegURL',
+                      })),
+                    }}
+                    options={{
+                      controls: [
+                        'play-large',
+                        'play',
+                        'progress',
+                        'current-time',
+                        'mute',
+                        'volume',
+                        'captions',
+                        'settings',
+                        'fullscreen',
+                      ],
+                      tooltips: { controls: true },
+                    }}
+                  />
                 </div>
               </CardBody>
             </Card>
