@@ -1,5 +1,5 @@
 // src/app/changelogs/page.tsx
-"use client";
+"use client"
 import React, { useEffect, useState } from "react";
 import {
   Card,
@@ -25,7 +25,7 @@ import {
 import { Calendar, Tag, User, Plus, Edit, Trash2, Eye, EyeOff, Upload, X } from "lucide-react";
 
 // Import the JKT48 core module
-const jkt48Api = require("@jkt48/core");
+const jkt48Api = require('@jkt48/core');
 
 interface Changelog {
   id: string;
@@ -75,7 +75,7 @@ const VERSION_TYPES = {
   major: { label: "Major", color: "danger" },
   minor: { label: "Minor", color: "primary" },
   patch: { label: "Patch", color: "success" },
-  hotfix: { label: "Hotfix", color: "warning" },
+  hotfix: { label: "Hotfix", color: "warning" }
 } as const;
 
 const ChangelogsPage = () => {
@@ -196,50 +196,64 @@ const ChangelogsPage = () => {
 
   // Handle form submission using @jkt48/core
   const handleSubmit = async () => {
-    if (!formData.version || !formData.title || !formData.description) {
-      alert("Please fill in all required fields");
-      return;
+  if (!formData.version || !formData.title || !formData.description) {
+    alert("Please fill in all required fields");
+    return;
+  }
+
+  const formDataToSend = new FormData();
+  formDataToSend.append("version", formData.version || "");
+  formDataToSend.append("title", formData.title || "");
+  formDataToSend.append("description", formData.description || "");
+  formDataToSend.append("type", formData.type || "patch");
+  formDataToSend.append("author", formData.author || "");
+  formDataToSend.append("badges", JSON.stringify(formData.badges || []));
+  formDataToSend.append("published", JSON.stringify(formData.published || false));
+  formDataToSend.append("changes", JSON.stringify(formData.changes || []));
+
+  if (imageFile) {
+    formDataToSend.append("image", imageFile);
+  }
+
+  try {
+    const response = await axios.post('https://v2.jkt48connect.my.id/api/database/create-changelog', formDataToSend, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'username': process.env.REACT_APP_USERNAME,
+        'password': process.env.REACT_APP_PASSWORD,
+        'apikey': process.env.REACT_APP_APIKEY
+      }
+    });
+
+    if (response.status === 201) {
+      alert("Changelog created/updated successfully");
+      resetForm();
+      onFormOpenChange();
+      fetchChangelogs();
+    } else {
+      alert(`Failed to create/update changelog: ${response.data.message}`);
     }
-
-    try {
-      const changelogData = {
-        version: formData.version || "",
-        title: formData.title || "",
-        description: formData.description || "",
-        type: formData.type || "patch",
-        author: formData.author || "",
-        badges: JSON.stringify(formData.badges || []),
-        published: JSON.stringify(formData.published || false),
-        changes: JSON.stringify(formData.changes || []),
-      };
-
-      let response;
-      if (editingLog) {
-        // Update existing changelog
-        response = await jkt48Api.database.updateChangelog(editingLog.id, changelogData, imageFile);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error submitting form:", error.message);
+      alert(`Error submitting form: ${error.message}`);
+    } else if (axios.isAxiosError(error)) {
+      if (error.response) {
+        console.error("Error response from server:", error.response.data);
+        alert(`Error submitting form: ${error.response.data.message}`);
+      } else if (error.request) {
+        console.error("No response received from server:", error.request);
+        alert("No response received from server. Please check your network connection.");
       } else {
-        // Create new changelog
-        response = await jkt48Api.database.createChangelog(changelogData, imageFile);
-      }
-
-      if (response.status || response.success) {
-        alert(`Changelog ${editingLog ? 'updated' : 'created'} successfully`);
-        resetForm();
-        onFormOpenChange();
-        await fetchChangelogs();
-      } else {
-        alert(`Failed to ${editingLog ? 'update' : 'create'} changelog: ${response.message || 'Unknown error'}`);
-      }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      if (error instanceof Error) {
+        console.error("Error setting up the request:", error.message);
         alert(`Error submitting form: ${error.message}`);
-      } else {
-        alert("An unknown error occurred. Please try again.");
       }
+    } else {
+      console.error("Unknown error:", error);
+      alert("An unknown error occurred. Please try again.");
     }
-  };
-
+  }
+};
   // Reset form
   const resetForm = () => {
     setFormData({
@@ -320,7 +334,7 @@ const ChangelogsPage = () => {
     setFormData((prev) => ({
       ...prev,
       badges: [...(prev.badges || []), newBadge.trim()],
-    });
+    }));
     setNewBadge("");
   };
 
@@ -341,7 +355,7 @@ const ChangelogsPage = () => {
       const response = await jkt48Api.database.updateChangelog(id, {
         published: !currentLog.published,
       });
-
+      
       if (response.status || response.success) {
         alert("Published status updated successfully");
         await fetchChangelogs();
@@ -891,3 +905,4 @@ const ChangelogsPage = () => {
 };
 
 export default ChangelogsPage;
+
