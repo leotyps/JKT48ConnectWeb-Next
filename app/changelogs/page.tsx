@@ -110,22 +110,31 @@ const ChangelogsPage = () => {
     setIsAdmin(urlParams.get("admin") === "true");
   }, []);
 
-  // Fetch changelogs from backend
-  useEffect(() => {
-    const fetchChangelogs = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get("https://v2.jkt48connect.my.id/api/database/changelogs?username=vzy&password=vzy&apikey=JKTCONNECT");
-        setChangelogs(response.data.data);
-        setFilteredChangelogs(response.data.data);
-      } catch (error) {
-        console.error("Error fetching changelogs:", error);
-      }
-      setLoading(false);
-    };
+// Fetch changelogs from backend
+useEffect(() => {
+  const fetchChangelogs = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('https://v2.jkt48connect.my.id/api/database/changelogs', {
+        headers: {
+          'username': 'vzy',
+          'password': 'vzy',
+          'apikey': 'JKTCONNECT'
+        }
+      });
+      setChangelogs(response.data.data);
+      setFilteredChangelogs(response.data.data);
+    } catch (error) {
+      console.error("Error fetching changelogs:", error);
+      alert("Failed to fetch changelogs. Please check your network connection and try again.");
+    }
+    setLoading(false);
+  };
 
-    fetchChangelogs();
-  }, []);
+  fetchChangelogs();
+}, []);
+
+
 
   // Filter changelogs
   useEffect(() => {
@@ -148,7 +157,7 @@ const ChangelogsPage = () => {
     setFilteredChangelogs(filtered);
   }, [changelogs, searchTerm, filterType, showUnpublished, isAdmin]);
 
-  // Handle form submission
+// Handle form submission
 const handleSubmit = async () => {
   if (!formData.version || !formData.title || !formData.description) {
     alert("Please fill in all required fields");
@@ -172,12 +181,10 @@ const handleSubmit = async () => {
   try {
     const response = await axios.post('https://v2.jkt48connect.my.id/api/database/create-changelog', formDataToSend, {
       headers: {
-        "Content-Type": "multipart/form-data",
-        params: {
-          username: 'vzy',
-          password: 'vzy',
-          apikey: 'JKTCONNECT'
-        }
+        'Content-Type': 'multipart/form-data',
+        'username': 'vzy',
+        'password': 'vzy',
+        'apikey': 'JKTCONNECT'
       }
     });
 
