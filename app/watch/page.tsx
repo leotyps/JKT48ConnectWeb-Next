@@ -1,9 +1,10 @@
 // Use client
-"use client"
+"use client" 
 
 import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, CardHeader, Avatar, Button, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, ScrollShadow, Divider } from "@heroui/react";
 import Plyr from "plyr-react";
+import { Plyr as PlyrType } from "plyr";
 
 interface LiveData {
   name: string;
@@ -58,7 +59,7 @@ export default function JKT48LivePlayer() {
   const [chatConnected, setChatConnected] = useState(false);
   const [error, setError] = useState<string>("");
 
-  const plyrRef = useRef<APITypes>(null); // Ref for Plyr instance
+  const plyrRef = useRef<PlyrType>(null); // Ref for Plyr instance
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const webSocketRef = useRef<WebSocket | null>(null);
   const showroomIntervalRef = useRef<NodeJS.Timeout>();
