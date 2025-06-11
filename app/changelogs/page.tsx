@@ -1,5 +1,5 @@
 // src/app/changelogs/page.tsx
-"use client"
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -8,11 +8,9 @@ import {
   CardFooter,
   CardHeader,
   Image,
-  Skeleton,
   Breadcrumbs,
   BreadcrumbItem,
   Chip,
-  Link,
   Input,
   Select,
   SelectItem,
@@ -23,16 +21,9 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-  Avatar,
-  Divider,
-  Tabs,
-  Tab,
-  Progress,
-  Textarea,
-  Badge,
 } from "@heroui/react";
 import { Calendar, Tag, User, Plus, Edit, Trash2, Eye, EyeOff, Upload, X } from "lucide-react";
-import { fetchChangelogs as apiFetchChangelogs } from './api'; // Pastikan path yang benar
+import { fetchChangelogs as apiFetchChangelogs } from './api'; // Ensure the path is correct
 
 interface Changelog {
   id: string;
@@ -51,26 +42,20 @@ interface Changelog {
   published: boolean;
 }
 
-interface ApiResponse {
-  status: boolean;
-  count: number;
-  data: Changelog[];
-}
-
 const CHANGE_TYPES = {
-  added: { label: "Added", color: "success" as const, icon: "✨" },
-  changed: { label: "Changed", color: "primary" as const, icon: "🔄" },
-  deprecated: { label: "Deprecated", color: "warning" as const, icon: "⚠️" },
-  removed: { label: "Removed", color: "danger" as const, icon: "🗑️" },
-  fixed: { label: "Fixed", color: "secondary" as const, icon: "🐛" },
-  security: { label: "Security", color: "danger" as const, icon: "🔒" },
+  added: { label: "Added", color: "success", icon: "✨" },
+  changed: { label: "Changed", color: "primary", icon: "🔄" },
+  deprecated: { label: "Deprecated", color: "warning", icon: "⚠️" },
+  removed: { label: "Removed", color: "danger", icon: "🗑️" },
+  fixed: { label: "Fixed", color: "secondary", icon: "🐛" },
+  security: { label: "Security", color: "danger", icon: "🔒" },
 } as const;
 
 const VERSION_TYPES = {
-  major: { label: "Major", color: "danger" as const },
-  minor: { label: "Minor", color: "primary" as const },
-  patch: { label: "Patch", color: "success" as const },
-  hotfix: { label: "Hotfix", color: "warning" as const }
+  major: { label: "Major", color: "danger" },
+  minor: { label: "Minor", color: "primary" },
+  patch: { label: "Patch", color: "success" },
+  hotfix: { label: "Hotfix", color: "warning" }
 } as const;
 
 const ChangelogsPage = () => {
@@ -115,132 +100,132 @@ const ChangelogsPage = () => {
     setIsAdmin(urlParams.get("admin") === "true");
   }, []);
 
-// Fetch changelogs from backend
-useEffect(() => {
-  const fetchChangelogs = async () => {
-    setLoading(true);
-    try {
-      const response = await apiFetchChangelogs();
-      const data: ApiResponse = response;
-      if (data.status && data.data) {
-        setChangelogs(
-          data.data.map((item) => ({
-            ...item,
-             badges: item.badges === "[]" ? [] : JSON.parse(item.badges),
-             image: item.image === null ? "" : item.image,
-             published: item.published,
-             changes: item.changes.map((change) => ({
+  // Fetch changelogs from backend
+  useEffect(() => {
+    const fetchChangelogs = async () => {
+      setLoading(true);
+      try {
+        const response = await apiFetchChangelogs();
+        const data: { status: boolean; count: number; data: Changelog[] } = response;
+       if (data.status && data.data) {
+          setChangelogs(
+            data.data.map((item) => ({
+              ...item,
+              badges: item.badges === "[]" ? [] : JSON.parse(item.badges || "[]"),
+              image: item.image === null ? "" : item.image,
+              published: item.published,
+              changes: item.changes.map((change) => ({
                 type: change.type,
                 description: change.description,
               })),
-          }))
-        );
-        setFilteredChangelogs(
-          data.data.map((item) => ({
-            ...item,
-             badges: item.badges === "[]" ? [] : JSON.parse(item.badges),
-             image: item.image === null ? "" : item.image,
-             published: item.published,
-             changes: item.changes.map((change) => ({
+            }))
+          );
+          setFilteredChangelogs(
+            data.data.map((item) => ({
+              ...item,
+              badges: item.badges === "[]" ? [] : JSON.parse(item.badges || "[]"),
+              image: item.image === null ? "" : item.image,
+              published: item.published,
+              changes: item.changes.map((change) => ({
                 type: change.type,
                 description: change.description,
               })),
-          }))
-        );
-      } else {
-        throw new Error('Invalid data received');
+            }))
+          );
+        } else {
+          throw new Error('Invalid data received');
+        }
+      } catch (error) {
+        console.error("Error fetching changelogs:", error);
+        alert("Failed to fetch changelogs. Please check your network connection and try again.");
       }
-    } catch (error) {
-      console.error("Error fetching changelogs:", error);
-      alert("Failed to fetch changelogs. Please check your network connection and try again.");
-    }
-    setLoading(false);
-  };
+      setLoading(false);
+    };
 
-  fetchChangelogs();
-}, []);
+    fetchChangelogs();
+  }, []);
 
   // Filter changelogs
   useEffect(() => {
     let filtered = changelogs.filter((log) => {
       if (!showUnpublished && !log.published && !isAdmin) return false;
 
-     const matchesSearch = searchTerm === "" ||
-      log.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.version.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = searchTerm === "" ||
+        log.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        log.version.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        log.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-     const matchesType = filterType === "all" || log.type === filterType;
+      const matchesType = filterType === "all" || log.type === filterType;
 
-     return matchesSearch && matchesType;
-   });
-
-   // Sort by date (newest first)
-   filtered.sort(((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-
-   setFilteredChangelogs(filtered);
- }, [changelogs, searchTerm, filterType, showUnpublished, isAdmin]);
-
-// Handle form submission
-const handleSubmit = async () => {
-  if (!formData.version || !formData.title || !formData.description) {
-    alert("Please fill in all required fields");
-    return;
-  }
-
-  const formDataToSend = new FormData();
-  formDataToSend.append("version", formData.version || "");
-  formDataToSend.append("title", formData.title || "");
-  formDataToSend.append("description", formData.description || "");
-  formDataToSend.append("type", formData.type || "patch");
-  formDataToSend.append("author", formData.author || "");
-  formDataToSend.append("badges", JSON.stringify(formData.badges || []));
-  formDataToSend.append("published", JSON.stringify(formData.published || false));
-  formDataToSend.append("changes", JSON.stringify(formData.changes || []));
-
-  if (imageFile) {
-    formDataToSend.append("image", imageFile);
-  }
-
-  try {
-    const response = await axios.post(`https://v2.jkt48connect.my.id/api/database/create-changelog`, formDataToSend, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'username': process.env.REACT_APP_USERNAME,
-        'password': process.env.REACT_APP_PASSWORD,
-        'apikey': process.env.REACT_APP_APIKEY
-      }
+      return matchesSearch && matchesType;
     });
 
-    if (response.status === 201) {
-      alert("Changelog created/updated successfully");
-      resetForm();
-      onFormOpenChange();
-      fetchChangelogs();
-    } else {
-      alert(`Failed to create/update changelog: ${response.data.message}`);
+    // Sort by date (newest first)
+    filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    setFilteredChangelogs(filtered);
+  }, [changelogs, searchTerm, filterType, showUnpublished, isAdmin]);
+
+  // Handle form submission
+  const handleSubmit = async () => {
+    if (!formData.version || !formData.title || !formData.description) {
+      alert("Please fill in all required fields");
+      return;
     }
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error submitting form:", error.message);
-      alert(`Error submitting form: ${error.message}`);
-    } else if (axios.isAxiosError(error)) {
-      if (error.response) {
-        console.error("Error response from server:", error.response.data);
-        alert(`Error submitting form: ${error.response.data.message}`);
-      } else if (error.request) {
-        console.error("No response received from server:", error.request);
-        alert("No response received from server. Please check your network connection.");
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("version", formData.version || "");
+    formDataToSend.append("title", formData.title || "");
+    formDataToSend.append("description", formData.description || "");
+    formDataToSend.append("type", formData.type || "patch");
+    formDataToSend.append("author", formData.author || "");
+    formDataToSend.append("badges", JSON.stringify(formData.badges || []));
+    formDataToSend.append("published", JSON.stringify(formData.published || false));
+    formDataToSend.append("changes", JSON.stringify(formData.changes || []));
+
+    if (imageFile) {
+      formDataToSend.append("image", imageFile);
+    }
+
+    try {
+      const response = await axios.post(`https://v2.jkt48connect.my.id/api/database/create-changelog`, formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'username': process.env.REACT_APP_USERNAME,
+          'password': process.env.REACT_APP_PASSWORD,
+          'apikey': process.env.REACT_APP_APIKEY,
+        }
+      });
+
+      if (response.status === 201) {
+        alert("Changelog created/updated successfully");
+        resetForm();
+        onFormOpenChange();
+        fetchChangelogs();
       } else {
-        console.error("Error setting up the request:", error.message);
-        alert(`Error submitting form: ${error.message}`);
+        alert(`Failed to create/update changelog: ${response.data.message}`);
       }
-    } else {
-      console.error("Unknown error:", error);
-      alert("An unknown error occurred. Please try again.");
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error submitting form:", error.message);
+        alert(`Error submitting form: ${error.message}`);
+      } else if (axios.isAxiosError(error)) {
+        if (error.response) {
+          console.error("Error response from server:", error.response.data);
+          alert(`Error submitting form: ${error.response.data.message}`);
+        } else if (error.request) {
+          console.error("No response received from server:", error.request);
+          alert("No response received from server. Please check your network connection.");
+        } else {
+          console.error("Error setting up the request:", error.message);
+          alert(`Error submitting form: ${error.message}`);
+        }
+      } else {
+        console.error("Unknown error:", error);
+        alert("An unknown error occurred. Please try again.");
+      }
     }
-  }
-};
+  };
 
   // Reset form
   const resetForm = () => {
@@ -303,13 +288,13 @@ const handleSubmit = async () => {
 
   // Add change to form
   const addChange = () => {
-     if (!newChange.description.trim()) return;
+    if (!newChange.description.trim()) return;
 
-     setFormData((prev) => ({
-       ...prev,
-        changes: [...(prev.changes || []), newChange],
-      }));
-     setNewChange({ type: "added", description: "" });
+    setFormData((prev) => ({
+      ...prev,
+      changes: [...(prev.changes || []), newChange],
+    }));
+    setNewChange({ type: "added", description: "" });
   };
 
   // Remove change from form
@@ -322,13 +307,13 @@ const handleSubmit = async () => {
 
   // Add badge to form
   const addBadge = () => {
-     if (!newBadge.trim()) return;
+    if (!newBadge.trim()) return;
 
-     setFormData((prev) => ({
-       ...prev,
-        badges: [...(prev.badges || []), newBadge.trim()],
-      }));
-     setNewBadge("");
+    setFormData((prev) => ({
+      ...prev,
+      badges: [...(prev.badges || []), newBadge.trim()],
+    }));
+    setNewBadge("");
   };
 
   // Remove badge from form
