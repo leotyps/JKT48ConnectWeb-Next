@@ -332,12 +332,14 @@ export default function JKT48Changelogs() {
             }}
             className="min-w-48"
           >
-            <SelectItem key="all">All Types</SelectItem>
-            {Object.entries(VERSION_TYPES).map(([key, type]) => (
-              <SelectItem key={key} value={key}>
-                {type.label}
-              </SelectItem>
-            ))}
+            {React.Children.toArray([
+              <SelectItem key="all">All Types</SelectItem>,
+              ...Object.entries(VERSION_TYPES).map(([key, type]) => (
+                <SelectItem key={key} value={key}>
+                  {type.label}
+                </SelectItem>
+              )),
+            ])}
           </Select>
 
           {isAdmin && (
@@ -519,9 +521,11 @@ export default function JKT48Changelogs() {
                       setFormData(prev => ({ ...prev, type: key }));
                     }}
                   >
-                    {Object.entries(VERSION_TYPES).map(([key, type]) => (
-                      <SelectItem key={key}>{type.label}</SelectItem>
-                    ))}
+                    {React.Children.toArray(
+                      Object.entries(VERSION_TYPES).map(([key, type]) => (
+                        <SelectItem key={key}>{type.label}</SelectItem>
+                      ))
+                    )}
                   </Select>
                 </div>
 
@@ -602,9 +606,11 @@ export default function JKT48Changelogs() {
                       }}
                       className="w-40"
                     >
-                      {Object.entries(CHANGE_TYPES).map(([key, type]) => (
-                        <SelectItem key={key}>{type.label}</SelectItem>
-                      ))}
+                      {React.Children.toArray(
+                        Object.entries(CHANGE_TYPES).map(([key, type]) => (
+                          <SelectItem key={key}>{type.label}</SelectItem>
+                        ))
+                      )}
                     </Select>
                     <Input
                       placeholder="Change description"
