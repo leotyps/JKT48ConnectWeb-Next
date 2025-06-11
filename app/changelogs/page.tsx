@@ -197,64 +197,62 @@ const ChangelogsPage = () => {
 
   // Handle form submission using @jkt48/core
   const handleSubmit = async () => {
-  if (!formData.version || !formData.title || !formData.description) {
-    alert("Please fill in all required fields");
-    return;
-  }
-
-  const formDataToSend = new FormData();
-  formDataToSend.append("version", formData.version || "");
-  formDataToSend.append("title", formData.title || "");
-  formDataToSend.append("description", formData.description || "");
-  formDataToSend.append("type", formData.type || "patch");
-  formDataToSend.append("author", formData.author || "");
-  formDataToSend.append("badges", JSON.stringify(formData.badges || []));
-  formDataToSend.append("published", JSON.stringify(formData.published || false));
-  formDataToSend.append("changes", JSON.stringify(formData.changes || []));
-
-  if (imageFile) {
-    formDataToSend.append("image", imageFile);
-  }
-
-  try {
-    const response = await axios.post('https://v2.jkt48connect.my.id/api/database/create-changelog', formDataToSend, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'username': process.env.REACT_APP_USERNAME,
-        'password': process.env.REACT_APP_PASSWORD,
-        'apikey': process.env.REACT_APP_APIKEY
-      }
-    });
-
-    if (response.status === 201) {
-      alert("Changelog created/updated successfully");
-      resetForm();
-      onFormOpenChange();
-      fetchChangelogs();
-    } else {
-      alert(`Failed to create/update changelog: ${response.data.message}`);
+    if (!formData.version || !formData.title || !formData.description) {
+      alert("Please fill in all required fields");
+      return;
     }
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error submitting form:", error.message);
-      alert(`Error submitting form: ${error.message}`);
-    } else if (axios.isAxiosError(error)) {
-      if (error.response) {
-        console.error("Error response from server:", error.response.data);
-        alert(`Error submitting form: ${error.response.data.message}`);
-      } else if (error.request) {
-        console.error("No response received from server:", error.request);
-        alert("No response received from server. Please check your network connection.");
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("version", formData.version || "");
+    formDataToSend.append("title", formData.title || "");
+    formDataToSend.append("description", formData.description || "");
+    formDataToSend.append("type", formData.type || "patch");
+    formDataToSend.append("author", formData.author || "");
+    formDataToSend.append("badges", JSON.stringify(formData.badges || []));
+    formDataToSend.append("published", JSON.stringify(formData.published || false));
+    formDataToSend.append("changes", JSON.stringify(formData.changes || []));
+
+    if (imageFile) {
+      formDataToSend.append("image", imageFile);
+    }
+
+    try {
+      const response = await axios.post("https://v2.jkt48connect.my.id/api/database/create-changelog?username=vzy&password=vzy&apikey=JKTCONNECT", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 201) {
+        alert("Changelog created/updated successfully");
+        resetForm();
+        onFormOpenChange();
+        fetchChangelogs();
       } else {
-        console.error("Error setting up the request:", error.message);
-        alert(`Error submitting form: ${error.message}`);
+        alert("Failed to create/update changelog");
       }
-    } else {
-      console.error("Unknown error:", error);
-      alert("An unknown error occurred. Please try again.");
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error submitting form:", error.message);
+        alert(`Error submitting form: ${error.message}`);
+      } else if (axios.isAxiosError(error)) {
+        if (error.response) {
+          console.error("Error response from server:", error.response.data);
+          alert(`Error submitting form: ${error.response.data.message}`);
+        } else if (error.request) {
+          console.error("No response received from server:", error.request);
+          alert("No response received from server. Please check your network connection.");
+        } else {
+          console.error("Error setting up the request:", error.message);
+          alert(`Error submitting form: ${error.message}`);
+        }
+      } else {
+        console.error("Unknown error:", error);
+        alert("An unknown error occurred. Please try again.");
+      }
     }
-  }
-};
+  };
+  
   // Reset form
   const resetForm = () => {
     setFormData({
