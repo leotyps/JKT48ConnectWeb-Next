@@ -154,7 +154,7 @@ const ChangelogsPage = () => {
   const fetchChangelogs = async () => {
     setLoading(true);
     try {
-      const response = await jkt48Api.getChangelogs();
+      const response = await jkt48Api.database.getChangelogs();
       if (response.status && response.data) {
         const transformedData = transformApiData(response.data);
         setChangelogs(transformedData);
@@ -216,10 +216,10 @@ const ChangelogsPage = () => {
       let response;
       if (editingLog) {
         // Update existing changelog
-        response = await jkt48Api.updateChangelog(editingLog.id, changelogData, imageFile);
+        response = await jkt48Api.database.updateChangelog(editingLog.id, changelogData, imageFile);
       } else {
         // Create new changelog
-        response = await jkt48Api.createChangelog(changelogData, imageFile);
+        response = await jkt48Api.database.createChangelog(changelogData, imageFile);
       }
 
       if (response.status || response.success) {
@@ -279,7 +279,7 @@ const ChangelogsPage = () => {
   // Confirm delete using @jkt48/core
   const confirmDelete = async () => {
     try {
-      const response = await jkt48Api.deleteChangelog(deleteTarget);
+      const response = await jkt48Api.database.deleteChangelog(deleteTarget);
       if (response.status || response.success) {
         alert("Changelog deleted successfully");
         await fetchChangelogs();
@@ -338,7 +338,7 @@ const ChangelogsPage = () => {
       const currentLog = changelogs.find((log) => log.id === id);
       if (!currentLog) return;
 
-      const response = await jkt48Api.updateChangelog(id, {
+      const response = await jkt48Api.database.updateChangelog(id, {
         published: !currentLog.published,
       });
       
