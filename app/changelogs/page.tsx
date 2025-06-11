@@ -111,7 +111,7 @@ const ChangelogsPage = () => {
         setChangelogs(
           data.data.map((item) => ({
             ...item,
-            badges: item.badges ? JSON.parse(item.badges) : [],
+            badges: item.badges ? JSON.parse(item.badges) : [], // Ensure badges is an array
             image: item.image || "",
             published: item.published,
             changes: item.changes.map((change) => ({
@@ -123,7 +123,7 @@ const ChangelogsPage = () => {
         setFilteredChangelogs(
           data.data.map((item) => ({
             ...item,
-            badges: item.badges ? JSON.parse(item.badges) : [],
+            badges: item.badges ? JSON.parse(item.badges) : [], // Ensure badges is an array
             image: item.image || "",
             published: item.published,
             changes: item.changes.map((change) => ({
