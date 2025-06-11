@@ -1,7 +1,6 @@
 // src/app/changelogs/page.tsx
 "use client"
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Card,
   CardBody,
@@ -24,7 +23,9 @@ import {
   Textarea,
 } from "@heroui/react";
 import { Calendar, Tag, User, Plus, Edit, Trash2, Eye, EyeOff, Upload, X } from "lucide-react";
-import { fetchChangelogs as apiFetchChangelogs } from './api'; // Ensure the path is correct
+
+// Import the JKT48 core module
+const jkt48Api = require('@jkt48/core');
 
 interface Changelog {
   id: string;
@@ -149,14 +150,13 @@ const ChangelogsPage = () => {
     setIsAdmin(urlParams.get("admin") === "true");
   }, []);
 
-  // Fetch changelogs from backend
+  // Fetch changelogs using @jkt48/core
   const fetchChangelogs = async () => {
     setLoading(true);
     try {
-      const response = await apiFetchChangelogs();
-      const data: { status: boolean; count: number; data: ApiChangelog[] } = response;
-      if (data.status && data.data) {
-        const transformedData = transformApiData(data.data);
+      const response = await jkt48Api.getChangelogs();
+      if (response.status && response.data) {
+        const transformedData = transformApiData(response.data);
         setChangelogs(transformedData);
         setFilteredChangelogs(transformedData);
       } else {
@@ -194,62 +194,47 @@ const ChangelogsPage = () => {
     setFilteredChangelogs(filtered);
   }, [changelogs, searchTerm, filterType, showUnpublished, isAdmin]);
 
-  // Handle form submission
+  // Handle form submission using @jkt48/core
   const handleSubmit = async () => {
     if (!formData.version || !formData.title || !formData.description) {
       alert("Please fill in all required fields");
       return;
     }
 
-    const formDataToSend = new FormData();
-    formDataToSend.append("version", formData.version || "");
-    formDataToSend.append("title", formData.title || "");
-    formDataToSend.append("description", formData.description || "");
-    formDataToSend.append("type", formData.type || "patch");
-    formDataToSend.append("author", formData.author || "");
-    formDataToSend.append("badges", JSON.stringify(formData.badges || []));
-    formDataToSend.append("published", JSON.stringify(formData.published || false));
-    formDataToSend.append("changes", JSON.stringify(formData.changes || []));
-
-    if (imageFile) {
-      formDataToSend.append("image", imageFile);
-    }
-
     try {
-      const response = await axios.post(`https://v2.jkt48connect.my.id/api/database/create-changelog`, formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'username': process.env.REACT_APP_USERNAME,
-          'password': process.env.REACT_APP_PASSWORD,
-          'apikey': process.env.REACT_APP_APIKEY,
-        }
-      });
+      const changelogData = {
+        version: formData.version || "",
+        title: formData.title || "",
+        description: formData.description || "",
+        type: formData.type || "patch",
+        author: formData.author || "",
+        badges: JSON.stringify(formData.badges || []),
+        published: JSON.stringify(formData.published || false),
+        changes: JSON.stringify(formData.changes || []),
+      };
 
-      if (response.status === 201) {
-        alert("Changelog created/updated successfully");
+      let response;
+      if (editingLog) {
+        // Update existing changelog
+        response = await jkt48Api.updateChangelog(editingLog.id, changelogData, imageFile);
+      } else {
+        // Create new changelog
+        response = await jkt48Api.createChangelog(changelogData, imageFile);
+      }
+
+      if (response.status || response.success) {
+        alert(`Changelog ${editingLog ? 'updated' : 'created'} successfully`);
         resetForm();
         onFormOpenChange();
         await fetchChangelogs();
       } else {
-        alert(`Failed to create/update changelog: ${response.data.message}`);
+        alert(`Failed to ${editingLog ? 'update' : 'create'} changelog: ${response.message || 'Unknown error'}`);
       }
     } catch (error) {
+      console.error("Error submitting form:", error);
       if (error instanceof Error) {
-        console.error("Error submitting form:", error.message);
         alert(`Error submitting form: ${error.message}`);
-      } else if (axios.isAxiosError(error)) {
-        if (error.response) {
-          console.error("Error response from server:", error.response.data);
-          alert(`Error submitting form: ${error.response.data.message}`);
-        } else if (error.request) {
-          console.error("No response received from server:", error.request);
-          alert("No response received from server. Please check your network connection.");
-        } else {
-          console.error("Error setting up the request:", error.message);
-          alert(`Error submitting form: ${error.message}`);
-        }
       } else {
-        console.error("Unknown error:", error);
         alert("An unknown error occurred. Please try again.");
       }
     }
@@ -291,16 +276,11 @@ const ChangelogsPage = () => {
     onDeleteOpen();
   };
 
+  // Confirm delete using @jkt48/core
   const confirmDelete = async () => {
     try {
-      const response = await axios.delete(`https://v2.jkt48connect.my.id/api/database/changelog/${deleteTarget}`, {
-        headers: {
-          'username': process.env.REACT_APP_USERNAME,
-          'password': process.env.REACT_APP_PASSWORD,
-          'apikey': process.env.REACT_APP_APIKEY
-        }
-      });
-      if (response.status === 200) {
+      const response = await jkt48Api.deleteChangelog(deleteTarget);
+      if (response.status || response.success) {
         alert("Changelog deleted successfully");
         await fetchChangelogs();
       } else {
@@ -352,19 +332,17 @@ const ChangelogsPage = () => {
     }));
   };
 
-  // Toggle published status
+  // Toggle published status using @jkt48/core
   const togglePublished = async (id: string) => {
     try {
-      const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}`, {
-        published: !changelogs.find((log) => log.id === id)?.published,
-      }, {
-        headers: {
-          'username': process.env.REACT_APP_USERNAME,
-          'password': process.env.REACT_APP_PASSWORD,
-          'apikey': process.env.REACT_APP_APIKEY
-        }
+      const currentLog = changelogs.find((log) => log.id === id);
+      if (!currentLog) return;
+
+      const response = await jkt48Api.updateChangelog(id, {
+        published: !currentLog.published,
       });
-      if (response.status === 200) {
+      
+      if (response.status || response.success) {
         alert("Published status updated successfully");
         await fetchChangelogs();
       } else {
