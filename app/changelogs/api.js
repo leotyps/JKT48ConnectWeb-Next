@@ -2,22 +2,15 @@
 import axios from 'axios';
 
 export const fetchChangelogs = async () => {
-  const username = process.env.REACT_APP_USERNAME;
-  const password = process.env.REACT_APP_PASSWORD;
-  const apiKey = process.env.REACT_APP_APIKEY;
-  const apiUrl = process.env.REACT_APP_API_URL;
-
   try {
-    // Pastikan header authorization diatur dengan benar sesuai dengan kebutuhan API Anda
-    const response = await axios.get(`${apiUrl}/changelogs`, {
+    const response = await axios.get('https://v2.jkt48connect.my.id/api/database/changelogs', {
       headers: {
-        'Content-Type': 'application/json',
-        'username': username,
-        'password': password,
-        'apikey': apiKey
+        'username': process.env.REACT_APP_USERNAME,
+        'password': process.env.REACT_APP_PASSWORD,
+        'apikey': process.env.REACT_APP_APIKEY
       }
     });
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error('Error fetching changelogs:', error);
     throw error;
