@@ -252,6 +252,7 @@ const ChangelogsPage = () => {
       }
     }
   };
+
   
   // Reset form
   const resetForm = () => {
@@ -291,21 +292,23 @@ const ChangelogsPage = () => {
 
   // Confirm delete using @jkt48/core
   const confirmDelete = async () => {
+  const confirmDelete = async () => {
     try {
       const response = await axios.delete(`https://v2.jkt48connect.my.id/api/database/changelog/${deleteTarget}?username=vzy&password=vzy&apikey=JKTCONNECT`);
       if (response.status === 200) {
-        alert("Changelog deleted successfully");
+        alert('Changelog deleted successfully');
         fetchChangelogs();
       } else {
-        alert("Failed to delete changelog");
+        alert('Failed to delete changelog');
       }
     } catch (error) {
-      console.error("Error deleting changelog:", error);
-      alert("Error deleting changelog");
+      console.error('Error deleting changelog:', error);
+      alert('Error deleting changelog');
     }
     onDeleteOpenChange();
-    setDeleteTarget("");
+    setDeleteTarget('');
   };
+
 
   // Add change to form
   const addChange = () => {
@@ -348,18 +351,16 @@ const ChangelogsPage = () => {
   // Toggle published status using @jkt48/core
   const togglePublished = async (id: string) => {
     try {
-      const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}?username=vzy&password=vzy&apikey=JKTCONNECT`, {
-        published: !changelogs.find((log) => log.id === id)?.published,
-      });
+      const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}?username=vzy&password=vzy&apikey=JKTCONNECT`, { published: !changelogs.find(log => log.id === id).published });
       if (response.status === 200) {
-        alert("Published status updated successfully");
+        alert('Published status updated successfully');
         fetchChangelogs();
       } else {
-        alert("Failed to update published status");
+        alert('Failed to update published status');
       }
     } catch (error) {
-      console.error("Error toggling published status:", error);
-      alert("Error toggling published status");
+      console.error('Error toggling published status:', error);
+      alert('Error toggling published status');
     }
   };
 
