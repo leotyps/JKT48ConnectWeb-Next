@@ -1,5 +1,7 @@
 // Use client
 
+"use client"
+
 import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, CardHeader, Avatar, Button, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, ScrollShadow, Divider } from "@heroui/react";
 import Plyr from "plyr-react";
