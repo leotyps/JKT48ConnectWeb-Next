@@ -1,7 +1,36 @@
+// @/app/changelogs/page.tsx
+
 "use client"
 
 import { useState, useEffect } from "react";
-import { Card, CardBody, CardFooter, CardHeader, Image, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, Link, Input, Select, SelectItem, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Avatar, Divider, Tabs, Tab, Progress, Textarea, Badge } from "@heroui/react";
+import { 
+  Card, 
+  CardBody, 
+  CardHeader, 
+  Image, 
+  Skeleton, 
+  Breadcrumbs, 
+  BreadcrumbItem, 
+  Chip, 
+  Link, 
+  Input, 
+  Select, 
+  SelectItem, 
+  Button, 
+  Modal, 
+  ModalContent, 
+  ModalHeader, 
+  ModalBody, 
+  ModalFooter, 
+  useDisclosure, 
+  Avatar, 
+  Divider, 
+  Tabs, 
+  Tab, 
+  Progress, 
+  Textarea, 
+  Badge 
+} from "@heroui/react";
 import { Calendar, Tag, User, Plus, Edit, Trash2, Eye, EyeOff, Upload, X } from "lucide-react";
 
 interface Changelog {
@@ -295,24 +324,21 @@ export default function JKT48Changelogs() {
           />
           
           <Select
-  placeholder="Filter by type"
-  selectedKeys={filterType === 'all' ? [] : [filterType]}
-  onSelectionChange={(keys) => {
-    const key = Array.from(keys)[0] as string;
-    setFilterType(key || 'all');
-  }}
-  className="min-w-48"
->
-  {React.Children.toArray([
-    <SelectItem key="all">All Types</SelectItem>,
-    ...Object.entries(VERSION_TYPES).map(([key, type]) => (
-      <SelectItem key={key} value={key}>
-        {type.label}
-      </SelectItem>
-    )),
-  ])}
-</Select>
-
+            placeholder="Filter by type"
+            selectedKeys={filterType === 'all' ? [] : [filterType]}
+            onSelectionChange={(keys) => {
+              const key = Array.from(keys)[0] as string;
+              setFilterType(key || 'all');
+            }}
+            className="min-w-48"
+          >
+            <SelectItem key="all">All Types</SelectItem>
+            {Object.entries(VERSION_TYPES).map(([key, type]) => (
+              <SelectItem key={key} value={key}>
+                {type.label}
+              </SelectItem>
+            ))}
+          </Select>
 
           {isAdmin && (
             <>
