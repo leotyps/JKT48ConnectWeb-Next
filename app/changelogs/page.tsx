@@ -295,19 +295,24 @@ export default function JKT48Changelogs() {
           />
           
           <Select
-            placeholder="Filter by type"
-            selectedKeys={filterType === 'all' ? [] : [filterType]}
-            onSelectionChange={(keys) => {
-              const key = Array.from(keys)[0] as string;
-              setFilterType(key || 'all');
-            }}
-            className="min-w-48"
-          >
-            <SelectItem key="all">All Types</SelectItem>
-            {Object.entries(VERSION_TYPES).map(([key, type]) => (
-  <SelectItem key={key} value={key}>{type.label}</SelectItem>
-))}
-          </Select>
+  placeholder="Filter by type"
+  selectedKeys={filterType === 'all' ? [] : [filterType]}
+  onSelectionChange={(keys) => {
+    const key = Array.from(keys)[0] as string;
+    setFilterType(key || 'all');
+  }}
+  className="min-w-48"
+>
+  {React.Children.toArray([
+    <SelectItem key="all">All Types</SelectItem>,
+    ...Object.entries(VERSION_TYPES).map(([key, type]) => (
+      <SelectItem key={key} value={key}>
+        {type.label}
+      </SelectItem>
+    )),
+  ])}
+</Select>
+
 
           {isAdmin && (
             <>
