@@ -40,7 +40,7 @@ interface Changelog {
   title: string;
   description: string;
   date: string;
-  type: "major" | "minor" | "patch"hotfix";
+  type: "major" | "minor" | "patch" | "hotfix";
   changes: {
     type: "added" | "changed" | "deprecated" | "removed" | "fixed" | "security";
     description: string;
