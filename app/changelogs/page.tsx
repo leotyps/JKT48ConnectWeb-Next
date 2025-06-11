@@ -132,26 +132,28 @@ useEffect(() => {
  const fetchChangelogs = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/changelogs`, {
-          headers: {
-            'username': process.env.REACT_APP_USERNAME,
-            'password': process.env.REACT_APP_PASSWORD,
-            'apikey': process.env.REACT_APP_APIKEY
-          }
-        });
-        const data = response.data;
+        const response = await apiFetchChangelogs();
+        const data = response;
         if (data.status && data.data) {
-          setChangelogs(data.data.map(item => ({
+          setChangelogs(data.data.map((item): ChangelogEntry => ({
             ...item,
             badges: item.badges === "[]" ? [] : JSON.parse(item.badges),
-            image: item.image === null ? "" : item.image.toString(),
-            published: item.published === true
+            image: item.image === null ? "" : item.image,
+            published: item.published === true,
+            changes: item.changes.map((change) => ({
+              type: change.type,
+              description: change.description,
+            })),
           })));
-          setFilteredChangelogs(data.data.map(item => ({
+          setFilteredChangelogs(data.data.map((item): ChangelogEntry => ({
             ...item,
             badges: item.badges === "[]" ? [] : JSON.parse(item.badges),
-            image: item.image === null ? "" : item.image.toString(),
-            published: item.published === true
+            image: item.image === null ? "" : item.image,
+            published: item.published === true,
+            changes: item.changes.map((change) => ({
+              type: change.type,
+              description: change.description,
+            })),
           })));
         } else {
           throw new Error('Invalid data received');
