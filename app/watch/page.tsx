@@ -1,4 +1,4 @@
-"use client"
+// Use client
 
 import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, CardHeader, Avatar, Button, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, ScrollShadow, Divider } from "@heroui/react";
@@ -63,7 +63,6 @@ export default function JKT48LivePlayer() {
   const showroomIntervalRef = useRef<NodeJS.Timeout>();
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Get member name from URL query parameter
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const nameFromQuery = urlParams.get('name');
@@ -73,7 +72,6 @@ export default function JKT48LivePlayer() {
     }
   }, []);
 
-  // Detect video aspect ratio
   const handleVideoLoad = () => {
     if (videoRef.current) {
       const video = videoRef.current;
@@ -89,7 +87,6 @@ export default function JKT48LivePlayer() {
     }
   };
 
-  // Fetch live data
   useEffect(() => {
     async function fetchLiveData() {
       if (!memberName) return;
@@ -99,7 +96,6 @@ export default function JKT48LivePlayer() {
         const apiKey = 'JKTCONNECT';
         const live = await jkt48Api.live(apiKey);
         
-        // Find member data by name
         const memberLive = live.find((item: LiveData) => 
           item.name.toLowerCase() === memberName.toLowerCase()
         );
@@ -107,7 +103,6 @@ export default function JKT48LivePlayer() {
         if (memberLive) {
           setLiveData(memberLive);
           
-          // Start chat stream based on type
           if (memberLive.type === 'idn') {
             connectIdnWebSocket(memberLive.url_key, memberLive.slug);
           } else if (memberLive.type === 'showroom') {
@@ -127,7 +122,6 @@ export default function JKT48LivePlayer() {
     fetchLiveData();
 
     return () => {
-      // Cleanup connections
       if (webSocketRef.current) {
         webSocketRef.current.close();
       }
@@ -140,12 +134,9 @@ export default function JKT48LivePlayer() {
     };
   }, [memberName]);
 
-  // Get channel ID for IDN chat
   const getChannelId = async (username: string, slug: string): Promise<string> => {
     try {
-      const response = await fetch(
-        `https://fskhri.online/api/chat-proxy?username=${username}&slug=${slug}`
-      );
+      const response = await fetch(`https://fskhri.online/api/chat-proxy?username=${username}&slug=${slug}`);
       const data = await response.json();
       if (!data.channelId) {
         throw new Error('Chat ID not found in response');
@@ -157,10 +148,8 @@ export default function JKT48LivePlayer() {
     }
   };
 
-  // Connect to IDN WebSocket
   const connectIdnWebSocket = async (username: string, slug: string) => {
     try {
-      // Close existing connection if any
       if (webSocketRef.current) {
         webSocketRef.current.close();
       }
@@ -183,7 +172,7 @@ export default function JKT48LivePlayer() {
       ws.onmessage = (event) => {
         const message = event.data;
         
-        if (message.startsWith('PING')) {
+                if (message.startsWith('PING')) {
           ws.send('PONG' + message.substring(4));
           return;
         }
@@ -216,7 +205,6 @@ export default function JKT48LivePlayer() {
                 
                 setChatMessages(prev => {
                   const newMessages = [...prev, chatMessage];
-                  // Keep only last 50 messages for performance
                   return newMessages.slice(-50);
                 });
                 scrollToBottom();
@@ -233,7 +221,6 @@ export default function JKT48LivePlayer() {
         setChatConnected(false);
         webSocketRef.current = null;
         
-        // Reconnect after 5 seconds if not manually closed
         if (event.code !== 1000) {
           reconnectTimeoutRef.current = setTimeout(() => {
             console.log('Attempting to reconnect...');
@@ -251,14 +238,12 @@ export default function JKT48LivePlayer() {
       console.error('Failed to set up WebSocket:', error);
       setChatConnected(false);
       
-      // Retry connection after 5 seconds
       reconnectTimeoutRef.current = setTimeout(() => {
         connectIdnWebSocket(username, slug);
       }, 5000);
     }
   };
 
-  // Start Showroom polling (keep as is since Showroom doesn't have WebSocket)
   const startShowroomPolling = async (roomId: number) => {
     try {
       const pollComments = async () => {
@@ -272,7 +257,7 @@ export default function JKT48LivePlayer() {
           const data = await response.json();
           
           if (data && data.comment_log) {
-            setShowroomComments(data.comment_log.slice(-50)); // Keep last 50 comments
+            setShowroomComments(data.comment_log.slice(-50));
             scrollToBottom();
           }
           
@@ -283,16 +268,14 @@ export default function JKT48LivePlayer() {
         }
       };
 
-      // Poll every 3 seconds for Showroom
       showroomIntervalRef.current = setInterval(pollComments, 3000);
-      pollComments(); // Initial call
+      pollComments();
       
     } catch (error) {
       console.error("Error starting Showroom polling:", error);
     }
   };
 
-  // Scroll chat to bottom
   const scrollToBottom = () => {
     setTimeout(() => {
       if (chatContainerRef.current) {
@@ -301,7 +284,6 @@ export default function JKT48LivePlayer() {
     }, 100);
   };
 
-  // Format timestamp
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('id-ID', {
@@ -310,7 +292,6 @@ export default function JKT48LivePlayer() {
     });
   };
 
-  // Format started time
   const formatStartedTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString('id-ID', {
@@ -322,32 +303,30 @@ export default function JKT48LivePlayer() {
     });
   };
 
-  // Manual reconnect function
   const handleReconnect = () => {
     if (liveData?.type === 'idn') {
       connectIdnWebSocket(liveData.url_key, liveData.slug);
     }
   };
 
-  // Get video container styles based on aspect ratio
   const getVideoContainerStyle = () => {
     switch (videoAspectRatio) {
       case 'portrait':
-        return { paddingBottom: '177.78%' }; // 9:16 ratio
+        return { paddingBottom: '177.78%' };
       case 'square':
-        return { paddingBottom: '100%' }; // 1:1 ratio
+        return { paddingBottom: '100%' };
       default:
-        return { paddingBottom: '56.25%' }; // 16:9 ratio
+        return { paddingBottom: '56.25%' };
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           <Breadcrumbs className="mb-6">
             <BreadcrumbItem href="/">Home</BreadcrumbItem>
-            <BreadcrumbItem href="/stream">Stream</BreadcrumbItem>
+            <BreadcrumbItem href="/live">Live</BreadcrumbItem>
             <BreadcrumbItem>{memberName || 'Loading...'}</BreadcrumbItem>
           </Breadcrumbs>
           
@@ -588,7 +567,6 @@ export default function JKT48LivePlayer() {
                 >
                   <div className="flex flex-col gap-3">
                     {liveData.type === 'idn' ? (
-                      // IDN Chat Messages
                       chatMessages.length === 0 ? (
                         <div className="text-center text-default-500 py-12 space-y-2">
                           <div className="text-4xl opacity-50">💬</div>
@@ -632,7 +610,6 @@ export default function JKT48LivePlayer() {
                         ))
                       )
                     ) : (
-                      // Showroom Comments
                       showroomComments.length === 0 ? (
                         <div className="text-center text-default-500 py-12 space-y-2">
                           <div className="text-4xl opacity-50">💬</div>
