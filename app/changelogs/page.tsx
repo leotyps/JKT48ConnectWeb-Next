@@ -202,40 +202,52 @@ const ChangelogsPage = () => {
       return;
     }
 
+    const formDataToSend = new FormData();
+    formDataToSend.append("version", formData.version || "");
+    formDataToSend.append("title", formData.title || "");
+    formDataToSend.append("description", formData.description || "");
+    formDataToSend.append("type", formData.type || "patch");
+    formDataToSend.append("author", formData.author || "");
+    formDataToSend.append("badges", JSON.stringify(formData.badges || []));
+    formDataToSend.append("published", JSON.stringify(formData.published || false));
+    formDataToSend.append("changes", JSON.stringify(formData.changes || []));
+
+    if (imageFile) {
+      formDataToSend.append("image", imageFile);
+    }
+
     try {
-      const changelogData = {
-        version: formData.version || "",
-        title: formData.title || "",
-        description: formData.description || "",
-        type: formData.type || "patch",
-        author: formData.author || "",
-        badges: JSON.stringify(formData.badges || []),
-        published: JSON.stringify(formData.published || false),
-        changes: JSON.stringify(formData.changes || []),
-      };
+      const response = await axios.post("https://v2.jkt48connect.my.id/api/database/create-changelog?username=vzy&password=vzy&apikey=JKTCONNECT", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-      let response;
-      if (editingLog) {
-        // Update existing changelog
-        response = await jkt48Api.database.updateChangelog(editingLog.id, changelogData, imageFile);
-      } else {
-        // Create new changelog
-        response = await jkt48Api.database.createChangelog(changelogData, imageFile);
-      }
-
-      if (response.status || response.success) {
-        alert(`Changelog ${editingLog ? 'updated' : 'created'} successfully`);
+      if (response.status === 201) {
+        alert("Changelog created/updated successfully");
         resetForm();
         onFormOpenChange();
-        await fetchChangelogs();
+        fetchChangelogs();
       } else {
-        alert(`Failed to ${editingLog ? 'update' : 'create'} changelog: ${response.message || 'Unknown error'}`);
+        alert("Failed to create/update changelog");
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
       if (error instanceof Error) {
+        console.error("Error submitting form:", error.message);
         alert(`Error submitting form: ${error.message}`);
+      } else if (axios.isAxiosError(error)) {
+        if (error.response) {
+          console.error("Error response from server:", error.response.data);
+          alert(`Error submitting form: ${error.response.data.message}`);
+        } else if (error.request) {
+          console.error("No response received from server:", error.request);
+          alert("No response received from server. Please check your network connection.");
+        } else {
+          console.error("Error setting up the request:", error.message);
+          alert(`Error submitting form: ${error.message}`);
+        }
       } else {
+        console.error("Unknown error:", error);
         alert("An unknown error occurred. Please try again.");
       }
     }
@@ -280,10 +292,10 @@ const ChangelogsPage = () => {
   // Confirm delete using @jkt48/core
   const confirmDelete = async () => {
     try {
-      const response = await axios.delete(`https://v2.jkt48connect.my.id/api/database/changelog/${deleteTarget}?username=vzy&password=vzy&apikey=JKTCONNECT`);
-      if (response.status === 200) {
+      const response = await jkt48Api.database.deleteChangelog(deleteTarget);
+      if (response.status || response.success) {
         alert("Changelog deleted successfully");
-        fetchChangelogs();
+        await fetchChangelogs();
       } else {
         alert("Failed to delete changelog");
       }
@@ -336,12 +348,16 @@ const ChangelogsPage = () => {
   // Toggle published status using @jkt48/core
   const togglePublished = async (id: string) => {
     try {
-      const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}?username=vzy&password=vzy&apikey=JKTCONNECT`, {
-        published: !changelogs.find((log) => log.id === id)?.published,
+      const currentLog = changelogs.find((log) => log.id === id);
+      if (!currentLog) return;
+
+      const response = await jkt48Api.database.updateChangelog(id, {
+        published: !currentLog.published,
       });
-      if (response.status === 200) {
+      
+      if (response.status || response.success) {
         alert("Published status updated successfully");
-        fetchChangelogs();
+        await fetchChangelogs();
       } else {
         alert("Failed to update published status");
       }
