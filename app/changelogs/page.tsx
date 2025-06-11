@@ -1,5 +1,5 @@
 // src/app/changelogs/page.tsx
-"use client"
+"use client";
 import React, { useEffect, useState } from "react";
 import {
   Card,
@@ -25,7 +25,7 @@ import {
 import { Calendar, Tag, User, Plus, Edit, Trash2, Eye, EyeOff, Upload, X } from "lucide-react";
 
 // Import the JKT48 core module
-const jkt48Api = require('@jkt48/core');
+const jkt48Api = require("@jkt48/core");
 
 interface Changelog {
   id: string;
@@ -75,7 +75,7 @@ const VERSION_TYPES = {
   major: { label: "Major", color: "danger" },
   minor: { label: "Minor", color: "primary" },
   patch: { label: "Patch", color: "success" },
-  hotfix: { label: "Hotfix", color: "warning" }
+  hotfix: { label: "Hotfix", color: "warning" },
 } as const;
 
 const ChangelogsPage = () => {
@@ -320,7 +320,7 @@ const ChangelogsPage = () => {
     setFormData((prev) => ({
       ...prev,
       badges: [...(prev.badges || []), newBadge.trim()],
-    }));
+    });
     setNewBadge("");
   };
 
@@ -341,7 +341,7 @@ const ChangelogsPage = () => {
       const response = await jkt48Api.database.updateChangelog(id, {
         published: !currentLog.published,
       });
-      
+
       if (response.status || response.success) {
         alert("Published status updated successfully");
         await fetchChangelogs();
