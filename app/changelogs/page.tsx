@@ -52,6 +52,23 @@ interface Changelog {
   published: boolean;
 }
 
+interface ChangelogEntry {
+  id: string;
+  version: string;
+  title: string;
+  description: string;
+  date: string;
+  type: "major" | "minor" | "patch" | "hotfix";
+  author: string;
+  badges?: string[];
+  image?: string | null;
+  published: boolean;
+  changes: {
+    type: "added" | "changed" | "deprecated" | "removed" | "fixed" | "security";
+    description: string;
+  }[];
+}
+
 const CHANGE_TYPES = {
   added: { label: "Added", color: "success" as const, icon: "✨" },
   changed: { label: "Changed", color: "primary" as const, icon: "🔄" },
