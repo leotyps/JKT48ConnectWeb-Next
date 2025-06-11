@@ -102,7 +102,6 @@ const ChangelogsPage = () => {
 
   // Fetch changelogs from backend
   useEffect(() => {
-  useEffect(() => {
   const fetchChangelogs = async () => {
     setLoading(true);
     try {
