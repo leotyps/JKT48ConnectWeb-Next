@@ -37,10 +37,11 @@ interface Changelog {
     description: string;
   }[];
   author: string;
-  badges?: string[];
+  badges: string[];
   image?: string;
   published: boolean;
 }
+
 
 const CHANGE_TYPES = {
   added: { label: "Added", color: "success", icon: "✨" },
@@ -101,7 +102,7 @@ const ChangelogsPage = () => {
   }, []);
 
   // Fetch changelogs from backend
-  useEffect(() => {
+ useEffect(() => {
   const fetchChangelogs = async () => {
     setLoading(true);
     try {
@@ -111,7 +112,8 @@ const ChangelogsPage = () => {
         setChangelogs(
           data.data.map((item) => ({
             ...item,
-            badges: item.badges ? JSON.parse(item.badges) : [], // Ensure badges is an array
+            // Ensure badges is parsed as an array
+            badges: item.badges ? JSON.parse(item.badges as string) : [],
             image: item.image || "",
             published: item.published,
             changes: item.changes.map((change) => ({
@@ -123,7 +125,8 @@ const ChangelogsPage = () => {
         setFilteredChangelogs(
           data.data.map((item) => ({
             ...item,
-            badges: item.badges ? JSON.parse(item.badges) : [], // Ensure badges is an array
+            // Ensure badges is parsed as an array
+            badges: item.badges ? JSON.parse(item.badges as string) : [],
             image: item.image || "",
             published: item.published,
             changes: item.changes.map((change) => ({
