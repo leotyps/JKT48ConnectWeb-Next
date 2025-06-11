@@ -21,6 +21,7 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
+  Textarea,
 } from "@heroui/react";
 import { Calendar, Tag, User, Plus, Edit, Trash2, Eye, EyeOff, Upload, X } from "lucide-react";
 import { fetchChangelogs as apiFetchChangelogs } from './api'; // Ensure the path is correct
@@ -42,6 +43,23 @@ interface Changelog {
   published: boolean;
 }
 
+// API response type - this represents what comes from the server
+interface ApiChangelog {
+  id: string;
+  version: string;
+  title: string;
+  description: string;
+  date: string;
+  type: "major" | "minor" | "patch" | "hotfix";
+  changes: {
+    type: "added" | "changed" | "deprecated" | "removed" | "fixed" | "security";
+    description: string;
+  }[];
+  author: string;
+  badges: string | string[]; // Could be either string (JSON) or array
+  image?: string;
+  published: boolean;
+}
 
 const CHANGE_TYPES = {
   added: { label: "Added", color: "success", icon: "✨" },
@@ -95,6 +113,36 @@ const ChangelogsPage = () => {
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
   const [deleteTarget, setDeleteTarget] = useState<string>("");
 
+  // Helper function to safely parse badges
+  const parseBadges = (badges: string | string[] | undefined): string[] => {
+    if (!badges) return [];
+    if (Array.isArray(badges)) return badges;
+    if (typeof badges === 'string') {
+      try {
+        const parsed = JSON.parse(badges);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        // If JSON parsing fails, treat as a single badge
+        return [badges];
+      }
+    }
+    return [];
+  };
+
+  // Helper function to transform API data to client format
+  const transformApiData = (apiData: ApiChangelog[]): Changelog[] => {
+    return apiData.map((item) => ({
+      ...item,
+      badges: parseBadges(item.badges),
+      image: item.image || "",
+      published: item.published,
+      changes: item.changes.map((change) => ({
+        type: change.type,
+        description: change.description,
+      })),
+    }));
+  };
+
   // Check admin status from URL
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -102,39 +150,15 @@ const ChangelogsPage = () => {
   }, []);
 
   // Fetch changelogs from backend
- useEffect(() => {
   const fetchChangelogs = async () => {
     setLoading(true);
     try {
       const response = await apiFetchChangelogs();
-      const data: { status: boolean; count: number; data: Changelog[] } = response;
+      const data: { status: boolean; count: number; data: ApiChangelog[] } = response;
       if (data.status && data.data) {
-        setChangelogs(
-          data.data.map((item) => ({
-            ...item,
-            // Ensure badges is parsed as an array
-            badges: item.badges ? JSON.parse(item.badges as string) : [],
-            image: item.image || "",
-            published: item.published,
-            changes: item.changes.map((change) => ({
-              type: change.type,
-              description: change.description,
-            })),
-          }))
-        );
-        setFilteredChangelogs(
-          data.data.map((item) => ({
-            ...item,
-            // Ensure badges is parsed as an array
-            badges: item.badges ? JSON.parse(item.badges as string) : [],
-            image: item.image || "",
-            published: item.published,
-            changes: item.changes.map((change) => ({
-              type: change.type,
-              description: change.description,
-            })),
-          }))
-        );
+        const transformedData = transformApiData(data.data);
+        setChangelogs(transformedData);
+        setFilteredChangelogs(transformedData);
       } else {
         throw new Error('Invalid data received');
       }
@@ -145,9 +169,9 @@ const ChangelogsPage = () => {
     setLoading(false);
   };
 
-  fetchChangelogs();
-}, []);
-
+  useEffect(() => {
+    fetchChangelogs();
+  }, []);
 
   // Filter changelogs
   useEffect(() => {
@@ -205,7 +229,7 @@ const ChangelogsPage = () => {
         alert("Changelog created/updated successfully");
         resetForm();
         onFormOpenChange();
-        fetchChangelogs();
+        await fetchChangelogs();
       } else {
         alert(`Failed to create/update changelog: ${response.data.message}`);
       }
@@ -278,7 +302,7 @@ const ChangelogsPage = () => {
       });
       if (response.status === 200) {
         alert("Changelog deleted successfully");
-        fetchChangelogs();
+        await fetchChangelogs();
       } else {
         alert("Failed to delete changelog");
       }
@@ -342,7 +366,7 @@ const ChangelogsPage = () => {
       });
       if (response.status === 200) {
         alert("Published status updated successfully");
-        fetchChangelogs();
+        await fetchChangelogs();
       } else {
         alert("Failed to update published status");
       }
@@ -466,132 +490,143 @@ const ChangelogsPage = () => {
           )}
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <Card>
+            <CardBody className="text-center py-12">
+              <p className="text-default-500">Loading changelogs...</p>
+            </CardBody>
+          </Card>
+        )}
+
         {/* Changelogs List */}
-        <div className="space-y-6">
-          {filteredChangelogs.map((changelog) => (
-            <Card key={changelog.id} className={`${!changelog.published ? "opacity-60 border-dashed" : ""}`}>
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start w-full">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Chip
-                        color={VERSION_TYPES[changelog.type].color}
-                        variant="flat"
-                        size="sm"
-                      >
-                        v{changelog.version}
-                      </Chip>
-                      <Chip
-                        color={VERSION_TYPES[changelog.type].color}
-                        size="sm"
-                      >
-                        {VERSION_TYPES[changelog.type].label}
-                      </Chip>
-                      {!changelog.published && (
-                        <Chip color="warning" size="sm">
-                          Draft
+        {!loading && (
+          <div className="space-y-6">
+            {filteredChangelogs.map((changelog) => (
+              <Card key={changelog.id} className={`${!changelog.published ? "opacity-60 border-dashed" : ""}`}>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start w-full">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Chip
+                          color={VERSION_TYPES[changelog.type].color as "danger" | "primary" | "success" | "warning"}
+                          variant="flat"
+                          size="sm"
+                        >
+                          v{changelog.version}
                         </Chip>
+                        <Chip
+                          color={VERSION_TYPES[changelog.type].color as "danger" | "primary" | "success" | "warning"}
+                          size="sm"
+                        >
+                          {VERSION_TYPES[changelog.type].label}
+                        </Chip>
+                        {!changelog.published && (
+                          <Chip color="warning" size="sm">
+                            Draft
+                          </Chip>
+                        )}
+                      </div>
+                      <h3 className="text-xl font-bold mb-1">{changelog.title}</h3>
+                      <p className="text-default-600 text-sm mb-2">{changelog.description}</p>
+
+                      <div className="flex items-center gap-4 text-sm text-default-500">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {new Date(changelog.date).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <User className="w-4 h-4" />
+                          {changelog.author}
+                        </div>
+                      </div>
+
+                      {changelog.badges && changelog.badges.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {changelog.badges.map((badge, index) => (
+                            <Chip key={index} size="sm" variant="bordered">
+                              {badge}
+                            </Chip>
+                          ))}
+                        </div>
                       )}
                     </div>
-                    <h3 className="text-xl font-bold mb-1">{changelog.title}</h3>
-                    <p className="text-default-600 text-sm mb-2">{changelog.description}</p>
 
-                    <div className="flex items-center gap-4 text-sm text-default-500">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {new Date(changelog.date).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <User className="w-4 h-4" />
-                        {changelog.author}
-                      </div>
-                    </div>
-
-                    {changelog.badges && changelog.badges.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {changelog.badges.map((badge, index) => (
-                          <Chip key={index} size="sm" variant="bordered">
-                            {badge}
-                          </Chip>
-                        ))}
+                    {isAdmin && (
+                      <div className="flex gap-2 ml-4">
+                        <Button
+                          size="sm"
+                          variant="light"
+                          color={changelog.published ? "warning" : "success"}
+                          onPress={() => togglePublished(changelog.id)}
+                        >
+                          {changelog.published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="light"
+                          color="primary"
+                          onPress={() => handleEdit(changelog)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="light"
+                          color="danger"
+                          onPress={() => handleDelete(changelog.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     )}
                   </div>
+                </CardHeader>
 
-                  {isAdmin && (
-                    <div className="flex gap-2 ml-4">
-                      <Button
-                        size="sm"
-                        variant="light"
-                        color={changelog.published ? "warning" : "success"}
-                        onPress={() => togglePublished(changelog.id)}
-                      >
-                        {changelog.published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="light"
-                        color="primary"
-                        onPress={() => handleEdit(changelog)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="light"
-                        color="danger"
-                        onPress={() => handleDelete(changelog.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                <CardBody className="pt-0">
+                  {changelog.image && (
+                    <div className="w-full max-w-md mx-auto mb-4">
+                      <Image
+                        src={changelog.image}
+                        alt={`${changelog.title} preview`}
+                        className="w-full rounded-lg"
+                        onError={handleImageError}
+                      />
                     </div>
                   )}
-                </div>
-              </CardHeader>
 
-              <CardBody className="pt-0">
-                {changelog.image && (
-                  <div className="w-full max-w-md mx-auto mb-4">
-                    <Image
-                      src={changelog.image}
-                      alt={`${changelog.title} preview`}
-                      className="w-full rounded-lg"
-                      onError={handleImageError}
-                    />
+                  <div className="space-y-3">
+                    {changelog.changes.map((change, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <Chip
+                          size="sm"
+                          color={CHANGE_TYPES[change.type].color as "success" | "primary" | "warning" | "danger" | "secondary"}
+                          variant="flat"
+                          className="mt-0.5"
+                        >
+                          {CHANGE_TYPES[change.type].icon} {CHANGE_TYPES[change.type].label}
+                        </Chip>
+                        <p className="text-sm flex-1">{change.description}</p>
+                      </div>
+                    ))}
                   </div>
-                )}
+                </CardBody>
+              </Card>
+            ))}
 
-                <div className="space-y-3">
-                  {changelog.changes.map((change, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <Chip
-                        size="sm"
-                        color={CHANGE_TYPES[change.type].color}
-                        variant="flat"
-                        className="mt-0.5"
-                      >
-                        {CHANGE_TYPES[change.type].icon} {CHANGE_TYPES[change.type].label}
-                      </Chip>
-                      <p className="text-sm flex-1">{change.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardBody>
-            </Card>
-          ))}
-
-          {filteredChangelogs.length === 0 && (
-            <Card>
-              <CardBody className="text-center py-12">
-                <p className="text-default-500">No changelogs found matching your criteria.</p>
-              </CardBody>
-            </Card>
-          )}
-        </div>
+            {filteredChangelogs.length === 0 && (
+              <Card>
+                <CardBody className="text-center py-12">
+                  <p className="text-default-500">No changelogs found matching your criteria.</p>
+                </CardBody>
+              </Card>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Admin Form Modal */}
