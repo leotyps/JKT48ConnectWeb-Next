@@ -1,4 +1,4 @@
-// Use client
+'use client'
 
 import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, CardHeader, Avatar, Button, Skeleton, Breadcrumbs, BreadcrumbItem, Chip, ScrollShadow, Divider } from "@heroui/react";
@@ -172,7 +172,7 @@ export default function JKT48LivePlayer() {
       ws.onmessage = (event) => {
         const message = event.data;
         
-                if (message.startsWith('PING')) {
+        if (message.startsWith('PING')) {
           ws.send('PONG' + message.substring(4));
           return;
         }
@@ -424,9 +424,7 @@ export default function JKT48LivePlayer() {
         </Breadcrumbs>
 
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-          {/* Video Player Section */}
           <div className="xl:col-span-3 space-y-4">
-            {/* Video Player */}
             <Card className="overflow-hidden shadow-lg border-0">
               <CardBody className="p-0">
                 <div className="relative w-full bg-black flex items-center justify-center" 
@@ -457,7 +455,6 @@ export default function JKT48LivePlayer() {
               </CardBody>
             </Card>
 
-            {/* Stream Information */}
             <Card className="shadow-lg border-0">
               <CardBody className="p-6">
                 <div className="flex items-start gap-6">
@@ -528,7 +525,6 @@ export default function JKT48LivePlayer() {
             </Card>
           </div>
 
-          {/* Chat Section */}
           <div className="xl:col-span-1">
             <Card className="h-[600px] shadow-lg border-0">
               <CardHeader className="pb-3 px-6 pt-6">
