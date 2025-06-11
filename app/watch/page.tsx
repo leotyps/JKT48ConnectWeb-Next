@@ -1,5 +1,4 @@
 // Use client
-
 "use client"
 
 import { useState, useEffect, useRef } from "react";
@@ -58,9 +57,8 @@ export default function JKT48LivePlayer() {
   const [memberName, setMemberName] = useState<string>("");
   const [chatConnected, setChatConnected] = useState(false);
   const [error, setError] = useState<string>("");
-  const [videoAspectRatio, setVideoAspectRatio] = useState<'landscape' | 'portrait' | 'square'>('landscape');
-  
-  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const plyrRef = useRef<APITypes>(null); // Ref for Plyr instance
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const webSocketRef = useRef<WebSocket | null>(null);
   const showroomIntervalRef = useRef<NodeJS.Timeout>();
@@ -76,8 +74,9 @@ export default function JKT48LivePlayer() {
   }, []);
 
   const handleVideoLoad = () => {
-    if (videoRef.current) {
-      const video = videoRef.current;
+    if (plyrRef.current) {
+      const player = plyrRef.current.plyr;
+      const video = player.media;
       const aspectRatio = video.videoWidth / video.videoHeight;
       
       if (aspectRatio > 1.2) {
@@ -433,7 +432,7 @@ export default function JKT48LivePlayer() {
                 <div className="relative w-full bg-black flex items-center justify-center" 
                      style={getVideoContainerStyle()}>
                   <Plyr
-                    ref={videoRef}
+                    ref={plyrRef}
                     source={{
                       type: 'video',
                       sources: liveData.streaming_url_list.map(stream => ({
