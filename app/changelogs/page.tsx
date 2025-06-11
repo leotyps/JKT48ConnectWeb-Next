@@ -33,7 +33,7 @@ import {
   Badge,
 } from "@heroui/react";
 import { Calendar, Tag, User, Plus, Edit, Trash2, Eye, EyeOff, Upload, X } from "lucide-react";
-import { fetchChangelogs } from './api'; // Adjust the path as needed
+import { fetchChangelogs as apiFetchChangelogs } from './api'; // Adjust the path as needed
 
 interface Changelog {
   id: string;
