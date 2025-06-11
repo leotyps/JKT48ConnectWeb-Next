@@ -103,44 +103,45 @@ const ChangelogsPage = () => {
   // Fetch changelogs from backend
   useEffect(() => {
     const fetchChangelogs = async () => {
-      setLoading(true);
-      try {
-        const response = await apiFetchChangelogs();
-        const data: { status: boolean; count: number; data: Changelog[] } = response;
-        if (data.status && data.data) {
-          setChangelogs(
-            data.data.map((item) => ({
-              ...item,
-              badges: item.badges === "[]" ? [] : JSON.parse(item.badges || "[]"),
-              image: item.image === null ? "" : item.image,
-              published: item.published,
-              changes: item.changes.map((change) => ({
-                type: change.type,
-                description: change.description,
-              })),
-            }))
-          );
-          setFilteredChangelogs(
-            data.data.map((item) => ({
-              ...item,
-              badges: item.badges === "[]" ? [] : JSON.parse(item.badges || "[]"),
-              image: item.image === null ? "" : item.image,
-              published: item.published,
-              changes: item.changes.map((change) => ({
-                type: change.type,
-                description: change.description,
-              })),
-            }))
-          );
-        } else {
-          throw new Error('Invalid data received');
-        }
-      } catch (error) {
-        console.error("Error fetching changelogs:", error);
-        alert("Failed to fetch changelogs. Please check your network connection and try again.");
-      }
-      setLoading(false);
-    };
+    const fetchChangelogs = async () => {
+  setLoading(true);
+  try {
+    const response = await apiFetchChangelogs();
+    const data: { status: boolean; count: number; data: Changelog[] } = response;
+    if (data.status && data.data) {
+      setChangelogs(
+        data.data.map((item) => ({
+          ...item,
+          badges: item.badges ? JSON.parse(item.badges) : [],
+          image: item.image || "",
+          published: item.published,
+          changes: item.changes.map((change) => ({
+            type: change.type,
+            description: change.description,
+          })),
+        }))
+      );
+      setFilteredChangelogs(
+        data.data.map((item) => ({
+          ...item,
+          badges: item.badges ? JSON.parse(item.badges) : [],
+          image: item.image || "",
+          published: item.published,
+          changes: item.changes.map((change) => ({
+            type: change.type,
+            description: change.description,
+          })),
+        }))
+      );
+    } else {
+      throw new Error('Invalid data received');
+    }
+  } catch (error) {
+    console.error("Error fetching changelogs:", error);
+    alert("Failed to fetch changelogs. Please check your network connection and try again.");
+  }
+  setLoading(false);
+};
 
     fetchChangelogs();
   }, []);
