@@ -107,7 +107,7 @@ const ChangelogsPage = () => {
       try {
         const response = await apiFetchChangelogs();
         const data: { status: boolean; count: number; data: Changelog[] } = response;
-       if (data.status && data.data) {
+        if (data.status && data.data) {
           setChangelogs(
             data.data.map((item) => ({
               ...item,
@@ -404,7 +404,7 @@ const ChangelogsPage = () => {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">
             JKT48Connect Changelogs
-            {isAdmin && <Badge color="danger" className="ml-2">Admin Mode</Badge>}
+            {isAdmin && <Chip color="danger" className="ml-2">Admin Mode</Chip>}
           </h1>
           <p className="text-lg text-default-600">
             Stay updated with the latest changes, improvements, and new features
