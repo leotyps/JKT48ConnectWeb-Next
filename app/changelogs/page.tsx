@@ -292,10 +292,10 @@ const ChangelogsPage = () => {
   // Confirm delete using @jkt48/core
   const confirmDelete = async () => {
     try {
-      const response = await jkt48Api.database.deleteChangelog(deleteTarget);
-      if (response.status || response.success) {
+      const response = await axios.delete(`https://v2.jkt48connect.my.id/api/database/changelog/${deleteTarget}?username=vzy&password=vzy&apikey=JKTCONNECT`);
+      if (response.status === 200) {
         alert("Changelog deleted successfully");
-        await fetchChangelogs();
+        fetchChangelogs();
       } else {
         alert("Failed to delete changelog");
       }
@@ -348,16 +348,12 @@ const ChangelogsPage = () => {
   // Toggle published status using @jkt48/core
   const togglePublished = async (id: string) => {
     try {
-      const currentLog = changelogs.find((log) => log.id === id);
-      if (!currentLog) return;
-
-      const response = await jkt48Api.database.updateChangelog(id, {
-        published: !currentLog.published,
+      const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}?username=vzy&password=vzy&apikey=JKTCONNECT`, {
+        published: !changelogs.find((log) => log.id === id)?.published,
       });
-      
-      if (response.status || response.success) {
+      if (response.status === 200) {
         alert("Published status updated successfully");
-        await fetchChangelogs();
+        fetchChangelogs();
       } else {
         alert("Failed to update published status");
       }
