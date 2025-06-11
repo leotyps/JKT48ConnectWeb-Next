@@ -252,7 +252,7 @@ const ChangelogsPage = () => {
       }
     }
   };
-  
+
   // Reset form
   const resetForm = () => {
     setFormData({
