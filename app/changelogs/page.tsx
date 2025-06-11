@@ -112,27 +112,42 @@ const ChangelogsPage = () => {
 
 // Fetch changelogs from backend
 useEffect(() => {
-  const fetchChangelogs = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get('https://v2.jkt48connect.my.id/api/database/changelogs', {
-        headers: {
-          'username': 'vzy',
-          'password': 'vzy',
-          'apikey': 'JKTCONNECT'
+ const fetchChangelogs = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/changelogs`, {
+          headers: {
+            'username': process.env.REACT_APP_USERNAME,
+            'password': process.env.REACT_APP_PASSWORD,
+            'apikey': process.env.REACT_APP_APIKEY
+          }
+        });
+        const data = response.data;
+        if (data.status && data.data) {
+          setChangelogs(data.data.map(item => ({
+            ...item,
+            badges: item.badges === "[]" ? [] : JSON.parse(item.badges),
+            image: item.image === null ? "" : item.image.toString(),
+            published: item.published === true
+          })));
+          setFilteredChangelogs(data.data.map(item => ({
+            ...item,
+            badges: item.badges === "[]" ? [] : JSON.parse(item.badges),
+            image: item.image === null ? "" : item.image.toString(),
+            published: item.published === true
+          })));
+        } else {
+          throw new Error('Invalid data received');
         }
-      });
-      setChangelogs(response.data.data);
-      setFilteredChangelogs(response.data.data);
-    } catch (error) {
-      console.error("Error fetching changelogs:", error);
-      alert("Failed to fetch changelogs. Please check your network connection and try again.");
-    }
-    setLoading(false);
-  };
+      } catch (error) {
+        console.error("Error fetching changelogs:", error);
+        alert("Failed to fetch changelogs. Please check your network connection and try again.");
+      }
+      setLoading(false);
+    };
 
-  fetchChangelogs();
-}, []);
+    fetchChangelogs();
+  }, []);
 
 
 
