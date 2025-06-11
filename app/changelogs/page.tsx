@@ -1,6 +1,5 @@
 // src/app/changelogs/page.tsx
 
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -33,7 +32,7 @@ import {
   Badge,
 } from "@heroui/react";
 import { Calendar, Tag, User, Plus, Edit, Trash2, Eye, EyeOff, Upload, X } from "lucide-react";
-import { fetchChangelogs as apiFetchChangelogs } from './api'; // Adjust the path as needed
+import { fetchChangelogs as apiFetchChangelogs } from './api'; // Pastikan path yang benar
 
 interface Changelog {
   id: string;
@@ -41,7 +40,7 @@ interface Changelog {
   title: string;
   description: string;
   date: string;
-  type: "major" | "minor" | "patch" | "hotfix";
+  type: "major" | "minor" | "patch"hotfix";
   changes: {
     type: "added" | "changed" | "deprecated" | "removed" | "fixed" | "security";
     description: string;
@@ -55,24 +54,7 @@ interface Changelog {
 interface ApiResponse {
   status: boolean;
   count: number;
-  data: ChangelogEntry[];
-}
-
-interface ChangelogEntry {
-  id: string;
-  version: string;
-  title: string;
-  description: string;
-  date: string;
-  type: "major" | "minor" | "patch" | "hotfix";
-  author: string;
-  badges?: string[];
-  image?: string | null;
-  published: boolean;
-  changes: {
-    type: "added" | "changed" | "deprecated" | "removed" | "fixed" | "security";
-    description: string;
-  }[];
+  data: Changelog[];
 }
 
 const CHANGE_TYPES = {
@@ -144,25 +126,25 @@ useEffect(() => {
         setChangelogs(
           data.data.map((item) => ({
             ...item,
-            badges: item.badges === "[]" ? [] : JSON.parse(item.badges),
-            image: item.image === null ? "" : item.image,
-            published: item.published,
-            changes: item.changes.map((change) => ({
-              type: change.type,
-              description: change.description,
-            })),
+             badges: item.badges === "[]" ? [] : JSON.parse(item.badges),
+             image: item.image === null ? "" : item.image,
+             published: item.published,
+             changes: item.changes.map((change) => ({
+                type: change.type,
+                description: change.description,
+              })),
           }))
         );
         setFilteredChangelogs(
           data.data.map((item) => ({
             ...item,
-            badges: item.badges === "[]" ? [] : JSON.parse(item.badges),
-            image: item.image === null ? "" : item.image,
-            published: item.published,
-            changes: item.changes.map((change) => ({
-              type: change.type,
-              description: change.description,
-            })),
+             badges: item.badges === "[]" ? [] : JSON.parse(item.badges),
+             image: item.image === null ? "" : item.image,
+             published: item.published,
+             changes: item.changes.map((change) => ({
+                type: change.type,
+                description: change.description,
+              })),
           }))
         );
       } else {
@@ -178,29 +160,26 @@ useEffect(() => {
   fetchChangelogs();
 }, []);
 
-
-
-
   // Filter changelogs
   useEffect(() => {
     let filtered = changelogs.filter((log) => {
       if (!showUnpublished && !log.published && !isAdmin) return false;
 
-      const matchesSearch = searchTerm === "" ||
-        log.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.version.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.description.toLowerCase().includes(searchTerm.toLowerCase());
+     const matchesSearch = searchTerm === "" ||
+      log.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.version.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesType = filterType === "all" || log.type === filterType;
+     const matchesType = filterType === "all" || log.type === filterType;
 
-      return matchesSearch && matchesType;
-    });
+     return matchesSearch && matchesType;
+   });
 
-    // Sort by date (newest first)
-    filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+   // Sort by date (newest first)
+   filtered.sort(((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
 
-    setFilteredChangelogs(filtered);
-  }, [changelogs, searchTerm, filterType, showUnpublished, isAdmin]);
+   setFilteredChangelogs(filtered);
+ }, [changelogs, searchTerm, filterType, showUnpublished, isAdmin]);
 
 // Handle form submission
 const handleSubmit = async () => {
@@ -224,7 +203,7 @@ const handleSubmit = async () => {
   }
 
   try {
-    const response = await axios.post('https://v2.jkt48connect.my.id/api/database/create-changelog', formDataToSend, {
+    const response = await axios.post(`https://v2.jkt48connect.my.id/api/database/create-changelog`, formDataToSend, {
       headers: {
         'Content-Type': 'multipart/form-data',
         'username': process.env.REACT_APP_USERNAME,
@@ -300,37 +279,37 @@ const handleSubmit = async () => {
   };
 
   const confirmDelete = async () => {
-  try {
-    const response = await axios.delete(`https://v2.jkt48connect.my.id/api/database/changelog/${deleteTarget}`, {
-      headers: {
-        'username': process.env.REACT_APP_USERNAME,
-        'password': process.env.REACT_APP_PASSWORD,
-        'apikey': process.env.REACT_APP_APIKEY
+    try {
+      const response = await axios.delete(`https://v2.jkt48connect.my.id/api/database/changelog/${deleteTarget}`, {
+        headers: {
+          'username': process.env.REACT_APP_USERNAME,
+          'password': process.env.REACT_APP_PASSWORD,
+          'apikey': process.env.REACT_APP_APIKEY
+        }
+      });
+      if (response.status === 200) {
+        alert("Changelog deleted successfully");
+        fetchChangelogs();
+      } else {
+        alert("Failed to delete changelog");
       }
-    });
-    if (response.status === 200) {
-      alert("Changelog deleted successfully");
-      fetchChangelogs();
-    } else {
-      alert("Failed to delete changelog");
+    } catch (error) {
+      console.error("Error deleting changelog:", error);
+      alert("Error deleting changelog");
     }
-  } catch (error) {
-    console.error("Error deleting changelog:", error);
-    alert("Error deleting changelog");
-  }
-  onDeleteOpenChange();
-  setDeleteTarget("");
-};
+    onDeleteOpenChange();
+    setDeleteTarget("");
+  };
 
   // Add change to form
   const addChange = () => {
-    if (!newChange.description.trim()) return;
+     if (!newChange.description.trim()) return;
 
-    setFormData((prev) => ({
-      ...prev,
-      changes: [...(prev.changes || []), newChange],
-    }));
-    setNewChange({ type: "added", description: "" });
+     setFormData((prev) => ({
+       ...prev,
+        changes: [...(prev.changes || []), newChange],
+      }));
+     setNewChange({ type: "added", description: "" });
   };
 
   // Remove change from form
@@ -343,13 +322,13 @@ const handleSubmit = async () => {
 
   // Add badge to form
   const addBadge = () => {
-    if (!newBadge.trim()) return;
+     if (!newBadge.trim()) return;
 
-    setFormData((prev) => ({
-      ...prev,
-      badges: [...(prev.badges || []), newBadge.trim()],
-    }));
-    setNewBadge("");
+     setFormData((prev) => ({
+       ...prev,
+        badges: [...(prev.badges || []), newBadge.trim()],
+      }));
+     setNewBadge("");
   };
 
   // Remove badge from form
@@ -362,29 +341,27 @@ const handleSubmit = async () => {
 
   // Toggle published status
   const togglePublished = async (id: string) => {
-  const togglePublished = async (id: string) => {
-  try {
-    const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}`, {
-      published: !changelogs.find((log) => log.id === id)?.published,
-    }, {
-      headers: {
-        'username': process.env.REACT_APP_USERNAME,
-        'password': process.env.REACT_APP_PASSWORD,
-        'apikey': process.env.REACT_APP_APIKEY
+    try {
+      const response = await axios.put(`https://v2.jkt48connect.my.id/api/database/changelog/${id}`, {
+        published: !changelogs.find((log) => log.id === id)?.published,
+      }, {
+        headers: {
+          'username': process.env.REACT_APP_USERNAME,
+          'password': process.env.REACT_APP_PASSWORD,
+          'apikey': process.env.REACT_APP_APIKEY
+        }
+      });
+      if (response.status === 200) {
+        alert("Published status updated successfully");
+        fetchChangelogs();
+      } else {
+        alert("Failed to update published status");
       }
-    });
-    if (response.status === 200) {
-      alert("Published status updated successfully");
-      fetchChangelogs();
-    } else {
-      alert("Failed to update published status");
+    } catch (error) {
+      console.error("Error toggling published status:", error);
+      alert("Error toggling published status");
     }
-  } catch (error) {
-    console.error("Error toggling published status:", error);
-    alert("Error toggling published status");
-  }
-};
-
+  };
 
   // Handle image upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
