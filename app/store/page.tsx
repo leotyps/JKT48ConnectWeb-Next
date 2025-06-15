@@ -1,18 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { Card, CardBody, CardHeader, Input, Select, SelectItem, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Progress } from "@heroui/react";
-import axios from "axios";
+import { Card, CardBody, CardHeader, Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip, Progress, Tabs, Tab, Breadcrumbs, BreadcrumbItem, Image } from "@heroui/react";
+// Using fetch instead of axios
 
-interface APIKey {
-  key: string;
-  owner: string;
-  email: string;
-  type: string;
-  limit: number;
-  active: boolean;
-  createdAt: string;
-  expireAt: string;
+interface BoostPlan {
+  name: string;
+  type: 'limit' | 'expiry';
+  value: number;
+  price: number;
+  description: string;
+  color: "primary" | "secondary" | "success" | "warning" | "danger";
 }
 
 interface PaymentData {
@@ -20,83 +18,136 @@ interface PaymentData {
   amount: number;
   fee: number;
   total: number;
+  planInfo: BoostPlan;
+  apiKey: string;
+  customValue?: number;
 }
 
-interface AddLimitPlan {
-  name: string;
-  additionalLimit: number;
-  price: number;
+interface BoostResult {
+  key: string;
+  owner: string;
+  email: string;
+  type: string;
+  previousLimit?: number;
+  additionalLimit?: number;
+  newLimit?: string;
+  previousExpireAt?: string;
+  additionalDays?: number;
+  newExpireAt?: string;
+  active: boolean;
+  createdAt: string;
+  expireAt?: string;
 }
 
-interface AddExpiryPlan {
-  name: string;
-  additionalDays: number;
-  price: number;
-}
+const BOOST_PLANS: Record<string, BoostPlan> = {
+  // Limit Plans
+  small_limit: {
+    name: 'Small Boost',
+    type: 'limit',
+    value: 1000,
+    price: 2000,
+    description: 'Add 1,000 API calls',
+    color: 'primary'
+  },
+  medium_limit: {
+    name: 'Medium Boost',
+    type: 'limit',
+    value: 2500,
+    price: 5000,
+    description: 'Add 2,500 API calls',
+    color: 'secondary'
+  },
+  large_limit: {
+    name: 'Large Boost',
+    type: 'limit',
+    value: 5000,
+    price: 8000,
+    description: 'Add 5,000 API calls',
+    color: 'success'
+  },
+  // Expiry Plans
+  week_extend: {
+    name: '1 Week',
+    type: 'expiry',
+    value: 7,
+    price: 1000,
+    description: 'Extend 7 days',
+    color: 'primary'
+  },
+  month_extend: {
+    name: '1 Month',
+    type: 'expiry',
+    value: 30,
+    price: 2350,
+    description: 'Extend 30 days',
+    color: 'secondary'
+  },
+  quarter_extend: {
+    name: '3 Months',
+    type: 'expiry',
+    value: 90,
+    price: 6000,
+    description: 'Extend 90 days',
+    color: 'success'
+  }
+};
 
-const ADD_LIMIT_PLANS: AddLimitPlan[] = [
-  { name: 'Small Boost', additionalLimit: 1000, price: 2000 },
-  { name: 'Medium Boost', additionalLimit: 2500, price: 5000 },
-  { name: 'Large Boost', additionalLimit: 5000, price: 8000 }
-];
-
-const ADD_EXPIRY_PLANS: AddExpiryPlan[] = [
-  { name: '1 Month', additionalDays: 30, price: 2350 },
-  { name: '3 Months', additionalDays: 90, price: 6500 },
-  { name: '6 Months', additionalDays: 180, price: 12000 }
-];
-
-export default function JKT48APIStore() {
-  const [apiKey, setApiKey] = useState<string>('');
-  const [action, setAction] = useState<'addLimit' | 'addExpiry'>('addLimit');
-  const [selectedPlan, setSelectedPlan] = useState<string | number>('custom');
-  const [customQuantity, setCustomQuantity] = useState<number>(1);
+export default function JKT48APIBoost() {
+  const [activeTab, setActiveTab] = useState('limit');
+  const [selectedPlan, setSelectedPlan] = useState('');
+  const [apiKey, setApiKey] = useState('');
+  const [customValue, setCustomValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'pending' | 'checking' | 'success' | 'failed'>('idle');
-  const [apiKeyResult, setApiKeyResult] = useState<APIKey | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState(600); // 10 minutes in seconds
+  const [boostResult, setBoostResult] = useState<BoostResult | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState(600);
   
-  // Modal states
-  const { isOpen: isPaymentOpen, onOpen: onPaymentOpen, onOpenChange: onPaymentOpenChange } = useDisclosure();
-  const { isOpen: isSuccessOpen, onOpen: onSuccessOpen, onOpenChange: onSuccessOpenChange } = useDisclosure();
+  const {isOpen: isPaymentOpen, onOpen: onPaymentOpen, onOpenChange: onPaymentOpenChange} = useDisclosure();
+  const {isOpen: isSuccessOpen, onOpen: onSuccessOpen, onOpenChange: onSuccessOpenChange} = useDisclosure();
 
-  // Calculate fee (1-5% random)
-  const calculateFee = (amount: number) => {
-    const feePercentage = Math.random() * (0.05 - 0.01) + 0.01;
-    return Math.ceil(amount * feePercentage);
-  };
+  const calculateCustomPrice = (value: number) => value * 20;
+  const calculateFee = (amount: number) => Math.ceil(amount * (Math.random() * 0.04 + 0.01));
 
-  // Handle form submission
   const handlePurchase = async () => {
-    if (!apiKey || (selectedPlan === 'custom' && (isNaN(customQuantity) || customQuantity <= 0))) {
+    if (!apiKey || (!selectedPlan && !customValue)) {
       alert('Please fill in all required fields');
       return;
     }
 
     setLoading(true);
-
     try {
-      let amount;
-      let quantity;
+      let planInfo: BoostPlan;
+      let finalValue: number;
 
-      if (selectedPlan !== 'custom') {
-        quantity = action === 'addLimit' ? ADD_LIMIT_PLANS.find(plan => plan.name === selectedPlan)?.additionalLimit || 0 :
-                   ADD_EXPIRY_PLANS.find(plan => plan.name === selectedPlan)?.additionalDays || 0;
-        amount = action === 'addLimit' ? ADD_LIMIT_PLANS.find(plan => plan.name === selectedPlan)?.price || 0 :
-                  ADD_EXPIRY_PLANS.find(plan => plan.name === selectedPlan)?.price || 0;
+      if (selectedPlan) {
+        planInfo = BOOST_PLANS[selectedPlan];
+        finalValue = planInfo.value;
       } else {
-        quantity = customQuantity;
-        amount = quantity * 20; // Custom price per unit
+        const value = parseInt(customValue);
+        if (isNaN(value) || value <= 0) {
+          alert('Please enter a valid number');
+          return;
+        }
+        planInfo = {
+          name: `Custom ${activeTab === 'limit' ? 'Limit' : 'Extension'}`,
+          type: activeTab as 'limit' | 'expiry',
+          value,
+          price: calculateCustomPrice(value),
+          description: `${activeTab === 'limit' ? 'Add ' + value + ' API calls' : 'Extend ' + value + ' days'}`,
+          color: 'warning'
+        };
+        finalValue = value;
       }
 
+      const amount = planInfo.price;
       const fee = calculateFee(amount);
       const total = amount + fee;
 
-      // Generate QRIS payment
       const qrisUrl = `https://api.jkt48connect.my.id/api/orkut/createpayment?amount=${total}&qris=00020101021126670016COM.NOBUBANK.WWW01189360050300000879140214149391352933240303UMI51440014ID.CO.QRIS.WWW0215ID20233077025890303UMI5204541153033605802ID5919VALZSTORE%20OK14535636006SERANG61054211162070703A016304DCD2&api_key=JKTCONNECT`;
       
-      const response = await axios.get(qrisUrl);
+      const response = await fetch(qrisUrl);
+      const data = await response.json();
       
       if (!response.data.qrImageUrl) {
         throw new Error('Failed to generate QR code');
@@ -106,11 +157,14 @@ export default function JKT48APIStore() {
         qrImageUrl: response.data.qrImageUrl,
         amount,
         fee,
-        total
+        total,
+        planInfo,
+        apiKey,
+        customValue: selectedPlan ? undefined : finalValue
       });
 
       setPaymentStatus('pending');
-      setTimeRemaining(600); // Reset timer
+      setTimeRemaining(600);
       onPaymentOpen();
 
     } catch (error) {
@@ -121,69 +175,52 @@ export default function JKT48APIStore() {
     }
   };
 
-  // Timer effect
+  // Timer and verification effects (simplified)
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    
     if (paymentStatus === 'pending' && timeRemaining > 0) {
       interval = setInterval(() => {
-        setTimeRemaining(prev => {
-          if (prev <= 1) {
-            setPaymentStatus('failed');
-            return 0;
-          }
-          return prev - 1;
-        });
+        setTimeRemaining(prev => prev <= 1 ? 0 : prev - 1);
       }, 1000);
     }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [paymentStatus, timeRemaining]);
 
-  // Payment verification effect
   useEffect(() => {
     let verificationInterval: NodeJS.Timeout;
-
     if (paymentStatus === 'pending' && paymentData) {
       verificationInterval = setInterval(async () => {
         try {
-          const merchant = 'OK1453563';
-          const keyorkut = '584312217038625421453563OKCT6AF928C85E124621785168CD18A9B693';
-          const statusUrl = `https://api.jkt48connect.my.id/api/orkut/cekstatus?merchant=${merchant}&keyorkut=${keyorkut}&amount=${paymentData.total}&api_key=JKTCONNECT`;
-          
+          const statusUrl = `https://api.jkt48connect.my.id/api/orkut/cekstatus?merchant=OK1453563&keyorkut=584312217038625421453563OKCT6AF928C85E124621785168CD18A9B693&amount=${paymentData.total}&api_key=JKTCONNECT`;
           const response = await axios.get(statusUrl);
           
-          if (response.data.status === 'success' && Array.isArray(response.data.data) && response.data.data.length > 0) {
+          if (response.data.status === 'success' && response.data.data?.length > 0) {
             setPaymentStatus('checking');
             
-            // Update API Key Limit or Expiry
             try {
               const jkt48Api = require('@jkt48/core');
-              
               let result;
-              if (action === 'addLimit') {
-                result = await jkt48Api.admin.addLimit(apiKey, selectedPlan === 'custom' ? customQuantity * 1000 : quantity);
-              } else if (action === 'addExpiry') {
-                result = await jkt48Api.admin.addExpiry(apiKey, selectedPlan === 'custom' ? customQuantity : quantity);
+
+              if (paymentData.planInfo.type === 'limit') {
+                const limitValue = paymentData.customValue || paymentData.planInfo.value;
+                result = await jkt48Api.admin.addLimit(paymentData.apiKey, limitValue);
+              } else {
+                const daysValue = paymentData.customValue || paymentData.planInfo.value;
+                result = await jkt48Api.admin.addExpiry(paymentData.apiKey, daysValue);
               }
 
-              if (result && result.status === true && result.data) {
-                setApiKeyResult(result.data);
+              if (result?.status === true && result.data) {
+                setBoostResult(result.data);
                 setPaymentStatus('success');
-                onPaymentOpenChange(); // Close payment modal
-                onSuccessOpen(); // Open success modal
+                onPaymentOpenChange();
+                onSuccessOpen();
               } else {
-                throw new Error(result?.message || 'Invalid response from server - no data returned');
+                throw new Error(result?.message || 'Failed to process boost');
               }
-              
             } catch (apiError) {
-              console.error('API Key update error:', apiError);
+              console.error('API boost error:', apiError);
               setPaymentStatus('failed');
-              
-              const errorMessage = apiError instanceof Error ? apiError.message : 'Unknown error occurred';
-              alert(`Payment successful but failed to update API Key: ${errorMessage}\n\nPlease contact support with this information.`);
+              alert(`Payment successful but failed to process boost: ${apiError instanceof Error ? apiError.message : 'Unknown error'}`);
             }
           }
         } catch (error) {
@@ -191,318 +228,346 @@ export default function JKT48APIStore() {
         }
       }, 5000);
     }
+    return () => clearInterval(verificationInterval);
+  }, [paymentStatus, paymentData, onPaymentOpenChange, onSuccessOpen]);
 
-    return () => {
-      if (verificationInterval) clearInterval(verificationInterval);
-    };
-  }, [paymentStatus, paymentData, action, apiKey, selectedPlan, customQuantity, quantity, onPaymentOpenChange, onSuccessOpen]);
-
-  // Format time remaining
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  // Reset form
   const resetForm = () => {
+    setSelectedPlan('');
     setApiKey('');
-    setAction('addLimit');
-    setSelectedPlan('custom');
-    setCustomQuantity(1);
+    setCustomValue('');
     setPaymentData(null);
     setPaymentStatus('idle');
-    setApiKeyResult(null);
+    setBoostResult(null);
     setTimeRemaining(600);
   };
 
+  const filteredPlans = Object.entries(BOOST_PLANS).filter(([_, plan]) => plan.type === activeTab);
+
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <div className="w-full max-w-6xl">
-        {/* Header */}
+      <div className="w-full max-w-4xl">
+        <Breadcrumbs className="mb-6">
+          <BreadcrumbItem href="/">Home</BreadcrumbItem>
+          <BreadcrumbItem>API Boost</BreadcrumbItem>
+        </Breadcrumbs>
+
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">JKT48Connect API Store</h1>
+          <h1 className="text-4xl font-bold mb-4">JKT48 API Boost & Extend</h1>
           <p className="text-lg text-default-600">
-            Manage your API key limits and expiry.
+            Boost your API limits or extend your API key expiry
           </p>
         </div>
 
-        {/* Purchase Form */}
-        <Card className="mb-8">
+        <Card className="mb-6">
           <CardHeader>
-            <h3 className="text-xl font-bold">Purchase Information</h3>
+            <Input
+              isRequired
+              label="API Key"
+              placeholder="Enter your API key"
+              value={apiKey}
+              onValueChange={setApiKey}
+              className="max-w-md"
+            />
           </CardHeader>
           <CardBody>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                isRequired
-                label="API Key"
-                placeholder="Enter your API Key"
-                value={apiKey}
-                onValueChange={(value) => setApiKey(value)}
-              />
-              <Select
-                isRequired
-                label="Action"
-                value={action}
-                onValueChange={(value) => setAction(value as 'addLimit' | 'addExpiry')}
-              >
-                <SelectItem value="addLimit">Add Limit</SelectItem>
-                <SelectItem value="addExpiry">Add Expiry</SelectItem>
-              </Select>
-              <Select
-                isRequired
-                label="Plan"
-                value={selectedPlan}
-                onValueChange={(value) => setSelectedPlan(value)}
-              >
-                <SelectItem value="custom">Custom</SelectItem>
-                {action === 'addLimit' ? ADD_LIMIT_PLANS.map(plan => (
-                  <SelectItem key={plan.name} value={plan.name}>{plan.name} (+{plan.additionalLimit} limit)</SelectItem>
-                )) : ADD_EXPIRY_PLANS.map(plan => (
-                  <SelectItem key={plan.name} value={plan.name}>{plan.name} (+{plan.additionalDays} days)</SelectItem>
-                ))}
-              </Select>
-              {selectedPlan === 'custom' && (
-                <Input
-                  isRequired
-                  type="number"
-                  label="Custom Quantity"
-                  placeholder="Enter quantity"
-                  value={customQuantity}
-                  onValueChange={(value) => setCustomQuantity(Number(value))}
-                  description={action === 'addLimit' ? 'Quantity is in thousands of API calls' : 'Quantity is in days'}
-                />
-              )}
-            </div>
-            
-            <div className="mt-6 flex justify-center">
+            <Tabs 
+              selectedKey={activeTab} 
+              onSelectionChange={(key) => {
+                setActiveTab(key as string);
+                setSelectedPlan('');
+                setCustomValue('');
+              }}
+              className="mb-6"
+            >
+              <Tab key="limit" title="Boost Limits">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  {filteredPlans.map(([key, plan]) => (
+                    <Card 
+                      key={key}
+                      isPressable
+                      isHoverable
+                      className={`cursor-pointer transition-all ${selectedPlan === key ? 'ring-2 ring-primary' : ''}`}
+                      onPress={() => {
+                        setSelectedPlan(key);
+                        setCustomValue('');
+                      }}
+                    >
+                      <CardBody className="text-center">
+                        <Chip color={plan.color} className="mb-2">{plan.name}</Chip>
+                        <p className="font-bold text-lg">Rp {plan.price.toLocaleString()}</p>
+                        <p className="text-sm text-default-600">{plan.description}</p>
+                      </CardBody>
+                    </Card>
+                  ))}
+                </div>
+                
+                <div className="text-center">
+                  <p className="text-sm text-default-600 mb-2">Or set custom amount:</p>
+                  <Input
+                    type="number"
+                    label="Custom Limit Amount"
+                    placeholder="Enter number of API calls"
+                    value={customValue}
+                    onValueChange={(value) => {
+                      setCustomValue(value);
+                      setSelectedPlan('');
+                    }}
+                    className="max-w-xs mx-auto"
+                    endContent={
+                      customValue && (
+                        <span className="text-xs text-default-500">
+                          Rp {calculateCustomPrice(parseInt(customValue) || 0).toLocaleString()}
+                        </span>
+                      )
+                    }
+                  />
+                  <p className="text-xs text-default-400 mt-1">Rate: Rp 20 per API call</p>
+                </div>
+              </Tab>
+
+              <Tab key="expiry" title="Extend Expiry">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  {filteredPlans.map(([key, plan]) => (
+                    <Card 
+                      key={key}
+                      isPressable
+                      isHoverable
+                      className={`cursor-pointer transition-all ${selectedPlan === key ? 'ring-2 ring-primary' : ''}`}
+                      onPress={() => {
+                        setSelectedPlan(key);
+                        setCustomValue('');
+                      }}
+                    >
+                      <CardBody className="text-center">
+                        <Chip color={plan.color} className="mb-2">{plan.name}</Chip>
+                        <p className="font-bold text-lg">Rp {plan.price.toLocaleString()}</p>
+                        <p className="text-sm text-default-600">{plan.description}</p>
+                      </CardBody>
+                    </Card>
+                  ))}
+                </div>
+                
+                <div className="text-center">
+                  <p className="text-sm text-default-600 mb-2">Or set custom days:</p>
+                  <Input
+                    type="number"
+                    label="Custom Days"
+                    placeholder="Enter number of days"
+                    value={customValue}
+                    onValueChange={(value) => {
+                      setCustomValue(value);
+                      setSelectedPlan('');
+                    }}
+                    className="max-w-xs mx-auto"
+                    endContent={
+                      customValue && (
+                        <span className="text-xs text-default-500">
+                          Rp {calculateCustomPrice(parseInt(customValue) || 0).toLocaleString()}
+                        </span>
+                      )
+                    }
+                  />
+                  <p className="text-xs text-default-400 mt-1">Rate: Rp 20 per day</p>
+                </div>
+              </Tab>
+            </Tabs>
+
+            <div className="text-center">
               <Button
                 color="primary"
                 size="lg"
                 isLoading={loading}
                 onPress={handlePurchase}
-                isDisabled={!apiKey || (selectedPlan === 'custom' && (isNaN(customQuantity) || customQuantity <= 0))}
+                isDisabled={!apiKey || (!selectedPlan && !customValue)}
               >
-                Purchase - Rp {(selectedPlan === 'custom' ? customQuantity * 20 : (action === 'addLimit' ? ADD_LIMIT_PLANS.find(plan => plan.name === selectedPlan)?.price || 0 : ADD_EXPIRY_PLANS.find(plan => plan.name === selectedPlan)?.price || 0)).toLocaleString()}
+                {selectedPlan ? 
+                  `Purchase ${BOOST_PLANS[selectedPlan]?.name} - Rp ${BOOST_PLANS[selectedPlan]?.price.toLocaleString()}` :
+                  customValue ? 
+                    `Purchase Custom - Rp ${calculateCustomPrice(parseInt(customValue) || 0).toLocaleString()}` :
+                    'Select a plan or enter custom value'
+                }
               </Button>
             </div>
           </CardBody>
         </Card>
+      </div>
 
-        {/* Payment Modal */}
-        <Modal 
-          isOpen={isPaymentOpen} 
-          onOpenChange={onPaymentOpenChange}
-          size="2xl"
-          isDismissable={false}
-          hideCloseButton
-        >
-          <ModalContent>
-            <ModalHeader>
-              <div className="flex flex-col">
-                <h3 className="text-lg font-bold">Complete Payment</h3>
-                <p className="text-sm text-default-500">
-                  Time remaining: {formatTime(timeRemaining)}
-                </p>
-              </div>
-            </ModalHeader>
-            <ModalBody>
-              {paymentData && (
-                <div className="space-y-4">
-                  {/* Payment Info */}
-                  <Card>
-                    <CardBody>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="text-default-500">Action</p>
-                          <p className="font-semibold">{action === 'addLimit' ? 'Add Limit' : 'Add Expiry'}</p>
-                        </div>
-                        <div>
-                          <p className="text-default-500">Quantity</p>
-                          <p className="font-semibold">{selectedPlan === 'custom' ? customQuantity : quantity}</p>
-                        </div>
-                        <div>
-                          <p className="text-default-500">Amount</p>
-                          <p className="font-semibold">Rp {paymentData.amount.toLocaleString()}</p>
-                        </div>
-                        <div>
-                          <p className="text-default-500">Fee</p>
-                          <p className="font-semibold">Rp {paymentData.fee.toLocaleString()}</p>
-                        </div>
-                        <div className="col-span-2">
-                          <p className="text-default-500">Total</p>
-                          <p className="font-bold text-lg">Rp {paymentData.total.toLocaleString()}</p>
-                        </div>
+      {/* Payment Modal */}
+      <Modal isOpen={isPaymentOpen} onOpenChange={onPaymentOpenChange} size="xl" isDismissable={false}>
+        <ModalContent>
+          <ModalHeader>
+            <div className="flex flex-col">
+              <h3 className="text-lg font-bold">Complete Payment</h3>
+              <p className="text-sm text-default-500">Time remaining: {formatTime(timeRemaining)}</p>
+            </div>
+          </ModalHeader>
+          <ModalBody>
+            {paymentData && (
+              <div className="space-y-4">
+                <Card>
+                  <CardBody>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-default-500">Plan</p>
+                        <p className="font-semibold">{paymentData.planInfo.name}</p>
                       </div>
-                    </CardBody>
-                  </Card>
-
-                  {/* QR Code */}
-                  <div className="text-center">
-                    <p className="mb-4">Scan QR code below to complete payment</p>
-                    <Image
-                      src={paymentData.qrImageUrl}
-                      alt="Payment QR Code"
-                      width={250}
-                      height={250}
-                      className="mx-auto"
-                    />
-                  </div>
-
-                  {/* Status */}
-                  <div className="text-center">
-                    {paymentStatus === 'pending' && (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                        <span className="text-sm">Waiting for payment...</span>
+                      <div>
+                        <p className="text-default-500">API Key</p>
+                        <p className="font-semibold text-xs break-all">{paymentData.apiKey}</p>
                       </div>
-                    )}
-                    {paymentStatus === 'checking' && (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-success"></div>
-                        <span className="text-sm">Updating API Key...</span>
+                      <div>
+                        <p className="text-default-500">Amount</p>
+                        <p className="font-semibold">Rp {paymentData.amount.toLocaleString()}</p>
                       </div>
-                    )}
-                    {paymentStatus === 'failed' && (
-                      <p className="text-danger">Payment timeout or failed</p>
-                    )}
-                  </div>
+                      <div>
+                        <p className="text-default-500">Fee</p>
+                        <p className="font-semibold">Rp {paymentData.fee.toLocaleString()}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-default-500">Total</p>
+                        <p className="font-bold text-lg">Rp {paymentData.total.toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </CardBody>
+                </Card>
 
-                  {/* Progress */}
-                  <Progress 
-                    value={(600 - timeRemaining) / 600 * 100} 
-                    color="primary"
-                    size="sm"
+                <div className="text-center">
+                  <p className="mb-4">Scan QR code to complete payment</p>
+                  <Image
+                    src={paymentData.qrImageUrl}
+                    alt="Payment QR Code"
+                    width={200}
+                    height={200}
+                    className="mx-auto"
                   />
                 </div>
-              )}
-            </ModalBody>
-            <ModalFooter>
-              <Button 
-                color="danger" 
-                variant="light" 
-                onPress={() => {
-                  setPaymentStatus('idle');
-                  onPaymentOpenChange();
-                }}
-              >
-                Cancel
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
 
-        {/* Success Modal */}
-        <Modal 
-          isOpen={isSuccessOpen} 
-          onOpenChange={onSuccessOpenChange}
-          size="full"
-          scrollBehavior="inside"
-          classNames={{
-            base: "sm:max-w-3xl sm:mx-4",
-            body: "p-4",
-            header: "p-4 pb-2",
-            footer: "p-4 pt-2"
-          }}
-        >
-          <ModalContent>
-            <ModalHeader>
-              <div className="text-center w-full">
-                <h3 className="text-lg sm:text-xl font-bold text-success">🎉 Update Successful!</h3>
+                <div className="text-center">
+                  {paymentStatus === 'pending' && (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                      <span className="text-sm">Waiting for payment...</span>
+                    </div>
+                  )}
+                  {paymentStatus === 'checking' && (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-success"></div>
+                      <span className="text-sm">Processing boost...</span>
+                    </div>
+                  )}
+                </div>
+
+                <Progress value={(600 - timeRemaining) / 600 * 100} color="primary" size="sm" />
               </div>
-            </ModalHeader>
-            <ModalBody>
-              {apiKeyResult && (
-                <div className="space-y-4">
-                  {/* API Key Details Card */}
-                  <Card>
-                    <CardBody className="p-3 sm:p-4">
-                      <h4 className="font-semibold mb-3 text-sm sm:text-base">API Key Details</h4>
-                      <div className="space-y-3">
-                        {/* API Key - Full width on mobile */}
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" variant="light" onPress={() => {
+              setPaymentStatus('idle');
+              onPaymentOpenChange();
+            }}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Success Modal */}
+      <Modal isOpen={isSuccessOpen} onOpenChange={onSuccessOpenChange} size="2xl">
+        <ModalContent>
+          <ModalHeader>
+            <h3 className="text-xl font-bold text-success">🎉 Boost Applied Successfully!</h3>
+          </ModalHeader>
+          <ModalBody>
+            {boostResult && (
+              <div className="space-y-4">
+                <Card>
+                  <CardBody>
+                    <h4 className="font-semibold mb-3">Updated API Key Details</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <p className="text-default-500 text-xs sm:text-sm mb-1">API Key</p>
-                          <div className="bg-default-100 p-2 rounded text-xs break-all">
-                            <code className="select-all">{apiKeyResult.key}</code>
-                          </div>
-                          <p className="text-xs text-default-400 mt-1">Tap to select all</p>
+                          <p className="text-default-500">Owner</p>
+                          <p className="font-semibold">{boostResult.owner}</p>
                         </div>
-                        
-                        {/* Two columns on larger screens, single column on mobile */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
-                          <div>
-                            <p className="text-default-500">Owner</p>
-                            <p className="font-semibold break-words">{apiKeyResult.owner}</p>
-                          </div>
-                          <div>
-                            <p className="text-default-500">Email</p>
-                            <p className="font-semibold break-words">{apiKeyResult.email}</p>
-                          </div>
-                          <div>
-                            <p className="text-default-500">Type</p>
-                            <p className="font-semibold capitalize">{apiKeyResult.type}</p>
-                          </div>
-                          <div>
-                            <p className="text-default-500">Limit</p>
-                            <p className="font-semibold">{apiKeyResult.limit.toLocaleString()} requests</p>
-                          </div>
-                          <div>
-                            <p className="text-default-500">Status</p>
-                            <Chip color="success" size="sm" className="text-xs">
-                              {apiKeyResult.active ? 'Active' : 'Inactive'}
-                            </Chip>
-                          </div>
-                          <div>
-                            <p className="text-default-500">Created</p>
-                            <p className="font-semibold text-xs sm:text-sm">
-                              {new Date(apiKeyResult.createdAt).toLocaleDateString()}
-                            </p>
-                            <p className="text-xs text-default-400">
-                              {new Date(apiKeyResult.createdAt).toLocaleTimeString()}
-                            </p>
-                          </div>
+                        <div>
+                          <p className="text-default-500">Email</p>
+                          <p className="font-semibold">{boostResult.email}</p>
                         </div>
-                        
-                        {/* Expiry - Full width */}
-                        <div className="border-t pt-3">
-                          <p className="text-default-500 text-xs sm:text-sm">Expires</p>
-                          <p className="font-semibold text-sm sm:text-base">
-                            {new Date(apiKeyResult.expireAt).toLocaleDateString()}
-                          </p>
-                          <p className="text-xs text-default-400">
-                            {new Date(apiKeyResult.expireAt).toLocaleTimeString()}
-                          </p>
+                        <div>
+                          <p className="text-default-500">Package Type</p>
+                          <p className="font-semibold">{boostResult.type}</p>
+                        </div>
+                        <div>
+                          <p className="text-default-500">Status</p>
+                          <Chip color="success" size="sm">Active</Chip>
                         </div>
                       </div>
-                    </CardBody>
-                  </Card>
-                </div>
-              )}
-            </ModalBody>
-            <ModalFooter className="flex flex-col sm:flex-row gap-2">
-              <Button 
-                color="primary" 
-                className="w-full sm:w-auto order-2 sm:order-1"
-                onPress={() => {
-                  onSuccessOpenChange();
-                  resetForm();
-                }}
-              >
-                Update Another API Key
-              </Button>
-              <Button 
-                color="success" 
-                variant="light" 
-                className="w-full sm:w-auto order-1 sm:order-2"
-                onPress={onSuccessOpenChange}
-              >
-                Close
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      </div>
+
+                      {boostResult.newLimit && (
+                        <div className="border-t pt-3">
+                          <h5 className="font-semibold mb-2">Limit Update</h5>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-default-500">Previous Limit</p>
+                              <p className="font-semibold">{boostResult.previousLimit?.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-default-500">Added Limit</p>
+                              <p className="font-semibold text-success">+{boostResult.additionalLimit?.toLocaleString()}</p>
+                            </div>
+                          </div>
+                          <div className="mt-2">
+                            <p className="text-default-500">New Total Limit</p>
+                            <p className="font-bold text-lg">{parseInt(boostResult.newLimit).toLocaleString()}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {boostResult.newExpireAt && (
+                        <div className="border-t pt-3">
+                          <h5 className="font-semibold mb-2">Expiry Extension</h5>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-default-500">Previous Expiry</p>
+                              <p className="font-semibold">{new Date(boostResult.previousExpireAt!).toLocaleDateString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-default-500">Added Days</p>
+                              <p className="font-semibold text-success">+{boostResult.additionalDays} days</p>
+                            </div>
+                          </div>
+                          <div className="mt-2">
+                            <p className="text-default-500">New Expiry Date</p>
+                            <p className="font-bold text-lg">{new Date(boostResult.newExpireAt).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardBody>
+                </Card>
+              </div>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button color="primary" onPress={() => {
+              onSuccessOpenChange();
+              resetForm();
+            }}>
+              Boost Another API Key
+            </Button>
+            <Button color="success" variant="light" onPress={onSuccessOpenChange}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </section>
   );
 }
