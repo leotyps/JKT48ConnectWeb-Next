@@ -392,7 +392,7 @@ export default function JKT48APIBoost() {
                   `Purchase ${BOOST_PLANS[selectedPlan]?.name} - Rp ${BOOST_PLANS[selectedPlan]?.price.toLocaleString()}` :
                   customValue ? 
                     `Purchase Custom - Rp ${calculateCustomPrice(parseInt(customValue) || 0).toLocaleString()}` :
-                    'Select a plan or enter custom value'
+                    'Select a plan or enter value'
                 }
               </Button>
             </div>
