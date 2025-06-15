@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardBody, CardHeader, Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip, Progress, Tabs, Tab, Breadcrumbs, BreadcrumbItem, Image } from "@heroui/react";
-// Using fetch instead of axios
 
 interface BoostPlan {
   name: string;
@@ -149,12 +148,12 @@ export default function JKT48APIBoost() {
       const response = await fetch(qrisUrl);
       const data = await response.json();
       
-      if (!response.data.qrImageUrl) {
+      if (!data.qrImageUrl) {
         throw new Error('Failed to generate QR code');
       }
 
       setPaymentData({
-        qrImageUrl: response.data.qrImageUrl,
+        qrImageUrl: data.qrImageUrl,
         amount,
         fee,
         total,
@@ -192,12 +191,15 @@ export default function JKT48APIBoost() {
       verificationInterval = setInterval(async () => {
         try {
           const statusUrl = `https://api.jkt48connect.my.id/api/orkut/cekstatus?merchant=OK1453563&keyorkut=584312217038625421453563OKCT6AF928C85E124621785168CD18A9B693&amount=${paymentData.total}&api_key=JKTCONNECT`;
-          const response = await axios.get(statusUrl);
+          const response = await fetch(statusUrl);
+          const data = await response.json(); // Parse the JSON response
           
-          if (response.data.status === 'success' && response.data.data?.length > 0) {
+          if (data.status === 'success' && data.data?.length > 0) {
             setPaymentStatus('checking');
             
             try {
+              // Note: This require() call won't work in browser environment
+              // You'll need to replace this with actual API calls or move to server-side
               const jkt48Api = require('@jkt48/core');
               let result;
 
