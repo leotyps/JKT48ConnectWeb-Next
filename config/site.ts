@@ -40,6 +40,10 @@ export const siteConfig = {
       label: "Check Apikey",
       href: "/check",
     },
+    {
+      label: "Store",
+      href: "/store",
+    },
   ],
   navMenuItems: [
     {
@@ -73,6 +77,10 @@ export const siteConfig = {
     {
       label: "Check Apikey",
       href: "/check",
+    },
+    {
+      label: "Store",
+      href: "/store",
     },
   ],
   links: {
