@@ -54,13 +54,29 @@ export default function JKT48ConnectDonation() {
       const total = amount + fee;
       const finalDonorName = isAnonymous ? 'Anonymous Supporter' : donorName.trim();
 
-      const qrisUrl = `https://api.jkt48connect.my.id/api/orkut/createpayment?amount=${total}&qris=00020101021126670016COM.NOBUBANK.WWW01189360050300000879140214149391352933240303UMI51440014ID.CO.QRIS.WWW0215ID20233077025890303UMI5204541153033605802ID5919VALZSTORE%20OK14535636006SERANG61054211162070703A016304DCD2&api_key=JKTCONNECT`;
+      // Updated QRIS URL with proper encoding
+      const qrisCode = encodeURIComponent("00020101021126670016COM.NOBUBANK.WWW01189360050300000879140214149391352933240303UMI51440014ID.CO.QRIS.WWW0215ID20233077025890303UMI5204541153033605802ID5919VALZSTORE OK14535636006SERANG61054211162070703A016304DCD2");
+      const qrisUrl = `https://api.jkt48connect.my.id/api/orkut/createpayment?amount=${total}&qris=${qrisCode}&api_key=JKTCONNECT`;
       
-      const response = await fetch(qrisUrl);
+      console.log('Generating payment with URL:', qrisUrl);
+      
+      const response = await fetch(qrisUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
+      console.log('Payment response:', data);
       
-      if (!data.qrImageUrl) {
-        throw new Error('Failed to generate QR code');
+      if (!data || !data.qrImageUrl) {
+        throw new Error(data?.message || 'No QR code received from server');
       }
 
       setPaymentData({
@@ -78,7 +94,8 @@ export default function JKT48ConnectDonation() {
 
     } catch (error) {
       console.error('Payment generation error:', error);
-      alert('Failed to generate payment. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Failed to generate payment: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
