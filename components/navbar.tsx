@@ -216,13 +216,13 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarMenu className="flex flex-col h-full">
-       {/* Menu search */}
-        <div className="px-4 pb-2 flex-shrink-0">
+        {/* Header search */}
+        <div className="px-4 py-2 flex-shrink-0">
           {menuSearchInput}
         </div>
-         
+        
         <div className="border-t border-divider my-2 flex-shrink-0"></div>
-
+        
         {/* Scrollable menu items */}
         <div className="flex-1 overflow-y-auto px-4">
           <div className="flex flex-col gap-1 pb-4">
