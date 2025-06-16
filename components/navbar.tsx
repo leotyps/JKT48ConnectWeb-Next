@@ -1,3 +1,4 @@
+
 "use client"
 
 import {
@@ -16,7 +17,7 @@ import { Input } from "@heroui/input";
 import { link as linkStyles } from "@heroui/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
@@ -45,22 +46,10 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const handleMenuItemClick = () => {
     setIsMenuOpen(false);
   };
-
-  // Filter menu items based on search query
-  const filteredMenuItems = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return siteConfig.navMenuItems;
-    }
-    
-    return siteConfig.navMenuItems.filter(item =>
-      item.label.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery]);
 
   const searchInput = (
     <Input
@@ -80,23 +69,6 @@ export const Navbar = () => {
         <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
       }
       type="search"
-    />
-  );
-
-  const mobileSearchInput = (
-    <Input
-      aria-label="Search menu items"
-      classNames={{
-        inputWrapper: "bg-default-100",
-        input: "text-sm",
-      }}
-      placeholder="Search menu items..."
-      startContent={
-        <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
-      }
-      type="search"
-      value={searchQuery}
-      onChange={(e) => setSearchQuery(e.target.value)}
     />
   );
 
@@ -171,58 +143,44 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarMenu>
-        {/* Search Input for Mobile Menu */}
         <div className="px-4 py-2">
-          {mobileSearchInput}
+          {searchInput}
         </div>
         
         <div className="border-t border-divider my-2"></div>
         
-        {/* Scrollable Menu Items Container */}
-        <div className="px-4 flex-1 min-h-0">
-          <div className="h-full overflow-y-auto">
-            <div className="flex flex-col gap-1">
-              {filteredMenuItems.length > 0 ? (
-                filteredMenuItems.map((item, index) => (
-                  <NavbarMenuItem key={`${item.label}-${index}`}>
-                    <NextLink
-                      className={clsx(
-                        "w-full px-3 py-2.5 rounded-lg text-foreground",
-                        "hover:bg-default-100 hover:text-primary",
-                        "transition-all duration-200 ease-in-out",
-                        "font-medium text-base",
-                        "flex items-center justify-between group"
-                      )}
-                      href={item.href}
-                      onClick={handleMenuItemClick}
-                    >
-                      <span>{item.label}</span>
-                      <svg 
-                        className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </NextLink>
-                  </NavbarMenuItem>
-                ))
-              ) : (
-                <div className="px-3 py-8 text-center text-default-500">
-                  <p>No menu items found</p>
-                  <p className="text-sm mt-1">Try adjusting your search</p>
-                </div>
-              )}
-            </div>
-          </div>
+        <div className="px-4 flex flex-col gap-1">
+          {siteConfig.navMenuItems.map((item, index) => (
+            <NavbarMenuItem key={`${item}-${index}`}>
+              <NextLink
+                className={clsx(
+                  "w-full px-3 py-2.5 rounded-lg text-foreground",
+                  "hover:bg-default-100 hover:text-primary",
+                  "transition-all duration-200 ease-in-out",
+                  "font-medium text-base",
+                  "flex items-center justify-between group"
+                )}
+                href={item.href}
+                onClick={handleMenuItemClick}
+              >
+                <span>{item.label}</span>
+                <svg 
+                  className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </NextLink>
+            </NavbarMenuItem>
+          ))}
         </div>
 
         <div className="border-t border-divider my-4"></div>
         
-        {/* Footer Section */}
         <div className="px-4 pb-4">
-          <div className="flex gap-4 justify-center mb-4">
+          <div className="flex gap-4 justify-center">
             <Link 
               isExternal 
               aria-label="WhatsApp" 
@@ -249,16 +207,18 @@ export const Navbar = () => {
             </Link>
           </div>
           
-          <Button
-            isExternal
-            as={Link}
-            className="w-full text-sm font-normal text-default-600 bg-default-100 hover:bg-default-200"
-            href={siteConfig.links.sponsor}
-            startContent={<HeartFilledIcon className="text-danger" />}
-            variant="flat"
-          >
-            Sponsor
-          </Button>
+          <div className="mt-4">
+            <Button
+              isExternal
+              as={Link}
+              className="w-full text-sm font-normal text-default-600 bg-default-100 hover:bg-default-200"
+              href={siteConfig.links.sponsor}
+              startContent={<HeartFilledIcon className="text-danger" />}
+              variant="flat"
+            >
+              Sponsor
+            </Button>
+          </div>
         </div>
       </NavbarMenu>
     </HeroUINavbar>
