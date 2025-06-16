@@ -1,4 +1,3 @@
-
 "use client"
 
 import {
@@ -17,7 +16,7 @@ import { Input } from "@heroui/input";
 import { link as linkStyles } from "@heroui/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
@@ -44,12 +43,55 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+// Clear search icon component
+const ClearIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+    <line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg>
+);
+
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [menuSearchQuery, setMenuSearchQuery] = useState("");
 
   const handleMenuItemClick = () => {
     setIsMenuOpen(false);
+    setMenuSearchQuery(""); // Clear search when menu closes
   };
+
+  const handleMenuToggle = (isOpen: boolean) => {
+    setIsMenuOpen(isOpen);
+    if (!isOpen) {
+      setMenuSearchQuery(""); // Clear search when menu closes
+    }
+  };
+
+  const clearMenuSearch = () => {
+    setMenuSearchQuery("");
+  };
+
+  // Filter menu items based on search query
+  const filteredMenuItems = useMemo(() => {
+    if (!menuSearchQuery.trim()) {
+      return siteConfig.navMenuItems;
+    }
+    
+    return siteConfig.navMenuItems.filter(item =>
+      item.label.toLowerCase().includes(menuSearchQuery.toLowerCase()) ||
+      item.href.toLowerCase().includes(menuSearchQuery.toLowerCase())
+    );
+  }, [menuSearchQuery]);
 
   const searchInput = (
     <Input
@@ -72,12 +114,43 @@ export const Navbar = () => {
     />
   );
 
+  // Menu search input
+  const menuSearchInput = (
+    <Input
+      aria-label="Search menu items"
+      classNames={{
+        inputWrapper: "bg-default-100",
+        input: "text-sm",
+      }}
+      endContent={
+        menuSearchQuery && (
+          <Button
+            isIconOnly
+            size="sm"
+            variant="light"
+            onPress={clearMenuSearch}
+            className="min-w-unit-6 w-6 h-6"
+          >
+            <ClearIcon className="text-default-400" />
+          </Button>
+        )
+      }
+      placeholder="Search menu..."
+      startContent={
+        <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+      }
+      type="search"
+      value={menuSearchQuery}
+      onValueChange={setMenuSearchQuery}
+    />
+  );
+
   return (
     <HeroUINavbar 
       maxWidth="xl" 
       position="sticky"
       isMenuOpen={isMenuOpen}
-      onMenuOpenChange={setIsMenuOpen}
+      onMenuOpenChange={handleMenuToggle}
     >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
@@ -142,72 +215,88 @@ export const Navbar = () => {
         <NavbarMenuToggle />
       </NavbarContent>
 
-      <NavbarMenu>
-        <div className="px-4 py-2">
+      <NavbarMenu className="flex flex-col h-full">
+        {/* Header search */}
+        <div className="px-4 py-2 flex-shrink-0">
           {searchInput}
         </div>
         
-        <div className="border-t border-divider my-2"></div>
+        <div className="border-t border-divider my-2 flex-shrink-0"></div>
         
-        <div className="px-4 flex flex-col gap-1">
-          {siteConfig.navMenuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item}-${index}`}>
-              <NextLink
-                className={clsx(
-                  "w-full px-3 py-2.5 rounded-lg text-foreground",
-                  "hover:bg-default-100 hover:text-primary",
-                  "transition-all duration-200 ease-in-out",
-                  "font-medium text-base",
-                  "flex items-center justify-between group"
-                )}
-                href={item.href}
-                onClick={handleMenuItemClick}
-              >
-                <span>{item.label}</span>
-                <svg 
-                  className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </NextLink>
-            </NavbarMenuItem>
-          ))}
+        {/* Menu search */}
+        <div className="px-4 pb-2 flex-shrink-0">
+          {menuSearchInput}
+        </div>
+        
+        {/* Scrollable menu items */}
+        <div className="flex-1 overflow-y-auto px-4">
+          <div className="flex flex-col gap-1 pb-4">
+            {filteredMenuItems.length > 0 ? (
+              filteredMenuItems.map((item, index) => (
+                <NavbarMenuItem key={`${item.label}-${index}`}>
+                  <NextLink
+                    className={clsx(
+                      "w-full px-3 py-2.5 rounded-lg text-foreground",
+                      "hover:bg-default-100 hover:text-primary",
+                      "transition-all duration-200 ease-in-out",
+                      "font-medium text-base",
+                      "flex items-center justify-between group"
+                    )}
+                    href={item.href}
+                    onClick={handleMenuItemClick}
+                  >
+                    <span>{item.label}</span>
+                    <svg 
+                      className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </NextLink>
+                </NavbarMenuItem>
+              ))
+            ) : (
+              <div className="px-3 py-6 text-center text-default-400">
+                <SearchIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No menu items found</p>
+                <p className="text-xs mt-1">Try a different search term</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="border-t border-divider my-4"></div>
-        
-        <div className="px-4 pb-4">
-          <div className="flex gap-4 justify-center">
-            <Link 
-              isExternal 
-              aria-label="WhatsApp" 
-              href={siteConfig.links.twitter}
-              className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
-            >
-              <WhatsAppIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
-            </Link>
-            <Link 
-              isExternal 
-              aria-label="Discord" 
-              href={siteConfig.links.discord}
-              className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
-            >
-              <DiscordIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
-            </Link>
-            <Link 
-              isExternal 
-              aria-label="Github" 
-              href={siteConfig.links.github}
-              className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
-            >
-              <GithubIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
-            </Link>
-          </div>
-          
-          <div className="mt-4">
+        {/* Footer section */}
+        <div className="border-t border-divider flex-shrink-0">
+          <div className="px-4 py-4">
+            <div className="flex gap-4 justify-center mb-4">
+              <Link 
+                isExternal 
+                aria-label="WhatsApp" 
+                href={siteConfig.links.twitter}
+                className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
+              >
+                <WhatsAppIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
+              </Link>
+              <Link 
+                isExternal 
+                aria-label="Discord" 
+                href={siteConfig.links.discord}
+                className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
+              >
+                <DiscordIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
+              </Link>
+              <Link 
+                isExternal 
+                aria-label="Github" 
+                href={siteConfig.links.github}
+                className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
+              >
+                <GithubIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
+              </Link>
+            </div>
+            
             <Button
               isExternal
               as={Link}
