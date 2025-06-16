@@ -43,55 +43,24 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// Clear search icon component
-const ClearIcon = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-);
-
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [menuSearchQuery, setMenuSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleMenuItemClick = () => {
     setIsMenuOpen(false);
-    setMenuSearchQuery(""); // Clear search when menu closes
-  };
-
-  const handleMenuToggle = (isOpen: boolean) => {
-    setIsMenuOpen(isOpen);
-    if (!isOpen) {
-      setMenuSearchQuery(""); // Clear search when menu closes
-    }
-  };
-
-  const clearMenuSearch = () => {
-    setMenuSearchQuery("");
   };
 
   // Filter menu items based on search query
   const filteredMenuItems = useMemo(() => {
-    if (!menuSearchQuery.trim()) {
+    if (!searchQuery.trim()) {
       return siteConfig.navMenuItems;
     }
     
     return siteConfig.navMenuItems.filter(item =>
-      item.label.toLowerCase().includes(menuSearchQuery.toLowerCase()) ||
-      item.href.toLowerCase().includes(menuSearchQuery.toLowerCase())
+      item.label.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [menuSearchQuery]);
+  }, [searchQuery]);
 
   const searchInput = (
     <Input
@@ -114,34 +83,20 @@ export const Navbar = () => {
     />
   );
 
-  // Menu search input
-  const menuSearchInput = (
+  const mobileSearchInput = (
     <Input
       aria-label="Search menu items"
       classNames={{
         inputWrapper: "bg-default-100",
         input: "text-sm",
       }}
-      endContent={
-        menuSearchQuery && (
-          <Button
-            isIconOnly
-            size="sm"
-            variant="light"
-            onPress={clearMenuSearch}
-            className="min-w-unit-6 w-6 h-6"
-          >
-            <ClearIcon className="text-default-400" />
-          </Button>
-        )
-      }
-      placeholder="Search menu..."
+      placeholder="Search menu items..."
       startContent={
         <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
       }
       type="search"
-      value={menuSearchQuery}
-      onValueChange={setMenuSearchQuery}
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
     />
   );
 
@@ -150,7 +105,7 @@ export const Navbar = () => {
       maxWidth="xl" 
       position="sticky"
       isMenuOpen={isMenuOpen}
-      onMenuOpenChange={handleMenuToggle}
+      onMenuOpenChange={setIsMenuOpen}
     >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
@@ -215,99 +170,95 @@ export const Navbar = () => {
         <NavbarMenuToggle />
       </NavbarContent>
 
-      <NavbarMenu className="flex flex-col h-full">
-        {/* Header search */}
-        <div className="px-4 py-2 flex-shrink-0">
-          {searchInput}
+      <NavbarMenu className="pt-6">
+        {/* Search Input for Mobile Menu */}
+        <div className="px-4 pb-2">
+          {mobileSearchInput}
         </div>
         
-        <div className="border-t border-divider my-2 flex-shrink-0"></div>
+        <div className="border-t border-divider my-2"></div>
         
-        {/* Menu search */}
-        <div className="px-4 pb-2 flex-shrink-0">
-          {menuSearchInput}
-        </div>
-        
-        {/* Scrollable menu items */}
-        <div className="flex-1 overflow-y-auto px-4">
-          <div className="flex flex-col gap-1 pb-4">
-            {filteredMenuItems.length > 0 ? (
-              filteredMenuItems.map((item, index) => (
-                <NavbarMenuItem key={`${item.label}-${index}`}>
-                  <NextLink
-                    className={clsx(
-                      "w-full px-3 py-2.5 rounded-lg text-foreground",
-                      "hover:bg-default-100 hover:text-primary",
-                      "transition-all duration-200 ease-in-out",
-                      "font-medium text-base",
-                      "flex items-center justify-between group"
-                    )}
-                    href={item.href}
-                    onClick={handleMenuItemClick}
-                  >
-                    <span>{item.label}</span>
-                    <svg 
-                      className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor"
+        {/* Scrollable Menu Items Container */}
+        <div className="flex-1 overflow-hidden">
+          <div className="px-4 h-full overflow-y-auto scrollbar-hide">
+            <div className="flex flex-col gap-1 pb-4">
+              {filteredMenuItems.length > 0 ? (
+                filteredMenuItems.map((item, index) => (
+                  <NavbarMenuItem key={`${item.label}-${index}`}>
+                    <NextLink
+                      className={clsx(
+                        "w-full px-3 py-2.5 rounded-lg text-foreground",
+                        "hover:bg-default-100 hover:text-primary",
+                        "transition-all duration-200 ease-in-out",
+                        "font-medium text-base",
+                        "flex items-center justify-between group"
+                      )}
+                      href={item.href}
+                      onClick={handleMenuItemClick}
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </NextLink>
-                </NavbarMenuItem>
-              ))
-            ) : (
-              <div className="px-3 py-6 text-center text-default-400">
-                <SearchIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No menu items found</p>
-                <p className="text-xs mt-1">Try a different search term</p>
-              </div>
-            )}
+                      <span>{item.label}</span>
+                      <svg 
+                        className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </NextLink>
+                  </NavbarMenuItem>
+                ))
+              ) : (
+                <div className="px-3 py-8 text-center text-default-500">
+                  <p>No menu items found</p>
+                  <p className="text-sm mt-1">Try adjusting your search</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Footer section */}
-        <div className="border-t border-divider flex-shrink-0">
-          <div className="px-4 py-4">
-            <div className="flex gap-4 justify-center mb-4">
-              <Link 
-                isExternal 
-                aria-label="WhatsApp" 
-                href={siteConfig.links.twitter}
-                className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
-              >
-                <WhatsAppIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
-              </Link>
-              <Link 
-                isExternal 
-                aria-label="Discord" 
-                href={siteConfig.links.discord}
-                className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
-              >
-                <DiscordIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
-              </Link>
-              <Link 
-                isExternal 
-                aria-label="Github" 
-                href={siteConfig.links.github}
-                className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
-              >
-                <GithubIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
-              </Link>
-            </div>
-            
-            <Button
-              isExternal
-              as={Link}
-              className="w-full text-sm font-normal text-default-600 bg-default-100 hover:bg-default-200"
-              href={siteConfig.links.sponsor}
-              startContent={<HeartFilledIcon className="text-danger" />}
-              variant="flat"
+        <div className="border-t border-divider"></div>
+        
+        {/* Footer Section */}
+        <div className="px-4 py-4 bg-default-50/50">
+          <div className="flex gap-4 justify-center mb-4">
+            <Link 
+              isExternal 
+              aria-label="WhatsApp" 
+              href={siteConfig.links.twitter}
+              className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
             >
-              Sponsor
-            </Button>
+              <WhatsAppIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
+            </Link>
+            <Link 
+              isExternal 
+              aria-label="Discord" 
+              href={siteConfig.links.discord}
+              className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
+            >
+              <DiscordIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
+            </Link>
+            <Link 
+              isExternal 
+              aria-label="Github" 
+              href={siteConfig.links.github}
+              className="p-2 rounded-full hover:bg-default-100 transition-colors duration-200"
+            >
+              <GithubIcon className="text-default-500 hover:text-primary transition-colors duration-200" />
+            </Link>
           </div>
+          
+          <Button
+            isExternal
+            as={Link}
+            className="w-full text-sm font-normal text-default-600 bg-default-100 hover:bg-default-200"
+            href={siteConfig.links.sponsor}
+            startContent={<HeartFilledIcon className="text-danger" />}
+            variant="flat"
+          >
+            Sponsor
+          </Button>
         </div>
       </NavbarMenu>
     </HeroUINavbar>
